@@ -80,3 +80,33 @@ class AuthTests(TestCase):
         self.client.post(reverse("logout"))
         response = self.client.get(reverse("home"))
         self.assertContains(response, "Connecter")
+
+
+class SignupTests(TestCase):
+    def test_signup_page_returns_200(self):
+        response = self.client.get(reverse("signup"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Inscription")
+
+    def test_signup_creates_account_and_logs_in(self):
+        response = self.client.post(
+            reverse("signup"),
+            {"username": "nouvo", "password1": "ModpasFò2026!", "password2": "ModpasFò2026!"},
+            follow=True,
+        )
+        self.assertTrue(User.objects.filter(username="nouvo").exists())
+        self.assertTrue(response.context["user"].is_authenticated)
+        self.assertContains(response, "compte a été créé")
+
+    def test_signup_weak_password_rejected(self):
+        self.client.post(
+            reverse("signup"),
+            {"username": "fob", "password1": "123", "password2": "123"},
+        )
+        self.assertFalse(User.objects.filter(username="fob").exists())
+
+    def test_authenticated_user_redirected_from_signup(self):
+        User.objects.create_user("user1", password="pass12345")
+        self.client.login(username="user1", password="pass12345")
+        response = self.client.get(reverse("signup"))
+        self.assertRedirects(response, reverse("home"))
