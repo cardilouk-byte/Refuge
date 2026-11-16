@@ -24,10 +24,10 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-urlpatterns += [
-    re_path(r"^media/(?P<path>.*)$", static_serve, {"document_root": settings.MEDIA_ROOT}),
-]
+else:
+    urlpatterns += [
+        re_path(r"^media/(?P<path>.*)$", static_serve, {"document_root": settings.MEDIA_ROOT}),
+    ]
 
 admin.site.site_header = "LNFCL — Panneau de contrôle"
 admin.site.site_title = "LNFCL"
