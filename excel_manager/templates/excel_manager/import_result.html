@@ -1,0 +1,44 @@
+{% extends "core/portal_base.html" %}
+
+{% block title %}Résultat d'import — Excel Center{% endblock %}
+
+{% block content %}
+<h1 class="page-title mb-4"><i class="bi bi-clipboard-check me-2"></i>Résultat de l'import ({{ kind }})</h1>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <div class="card stat-card h-100"><div class="card-body text-center">
+      <div class="text-muted">Créés</div>
+      <div class="display-6 fw-bold text-success">{{ result.created }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card h-100"><div class="card-body text-center">
+      <div class="text-muted">Mis à jour</div>
+      <div class="display-6 fw-bold text-primary">{{ result.updated|default:0 }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card h-100"><div class="card-body text-center">
+      <div class="text-muted">Erreurs</div>
+      <div class="display-6 fw-bold text-danger">{{ result.errors|length }}</div>
+    </div></div>
+  </div>
+</div>
+
+{% if result.errors %}
+<div class="card mt-3"><div class="card-body">
+  <h5 class="card-title text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Rapport d'erreurs</h5>
+  <table class="table table-sm">
+    <thead><tr><th>Ligne</th><th>Erreur</th></tr></thead>
+    <tbody>
+    {% for item in result.errors %}
+    <tr><td>{{ item.line }}</td><td>{{ item.error }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+{% endif %}
+
+<a href="{% url 'excel_manager:index' %}" class="btn btn-primary mt-3"><i class="bi bi-arrow-left me-1"></i>Retour à Excel Center</a>
+{% endblock %}

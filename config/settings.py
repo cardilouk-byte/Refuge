@@ -43,6 +43,10 @@ INSTALLED_APPS = [
     "communication",
     "dashboard",
     "portals",
+    "backups",
+    "document_editor",
+    "excel_manager",
+    "media_library",
 ]
 
 MIDDLEWARE = [

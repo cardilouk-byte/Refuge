@@ -8,6 +8,10 @@ urlpatterns = [
     path("comptes/", include("accounts.urls")),
     path("", include("dashboard.urls")),
     path("", include("portals.urls")),
+    path("", include("backups.urls")),
+    path("", include("document_editor.urls")),
+    path("", include("excel_manager.urls")),
+    path("", include("media_library.urls")),
     path("", include("core.urls")),
 ]
 

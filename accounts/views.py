@@ -31,6 +31,28 @@ def dashboard_required(view):
     return wrapped
 
 
+def staff_required(view):
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        if request.user.is_staff or request.user.is_school_staff:
+            return view(request, *args, **kwargs)
+        raise PermissionDenied
+    return wrapped
+
+
+def superadmin_required(view):
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        if request.user.is_superuser or request.user.role == "SUPERADMIN":
+            return view(request, *args, **kwargs)
+        raise PermissionDenied
+    return wrapped
+
+
 @login_required
 def role_home(request):
     return redirect(request.user.dashboard_url)
