@@ -135,7 +135,7 @@
     <div class="row g-4 mt-4">
       {% for program in programs %}
       <div class="col-md-6 col-lg-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}00">
-        <div class="program-card h-100">
+        <div class="program-card h-100" data-bs-toggle="modal" data-bs-target="#programModal{{ program.pk }}" style="cursor: pointer;">
           {% if program.image %}
             <img src="{{ program.image.url }}" alt="{{ program.name }}" class="program-img">
           {% else %}
@@ -145,6 +145,27 @@
             <span class="badge bg-primary-subtle text-primary mb-2">{{ program.level }}</span>
             <h3 class="program-title">{{ program.name }}</h3>
             <p class="program-description">{{ program.description|truncatewords:25 }}</p>
+            <span class="text-primary fw-semibold small"><i class="bi bi-plus-circle"></i> Gade plis detay →</span>
+          </div>
+        </div>
+        <div class="modal fade" id="programModal{{ program.pk }}" tabindex="-1" aria-labelledby="programModalLabel{{ program.pk }}" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="programModalLabel{{ program.pk }}">{{ program.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fèmen"></button>
+              </div>
+              <div class="modal-body">
+                {% if program.image %}
+                  <img src="{{ program.image.url }}" alt="{{ program.name }}" class="img-fluid rounded-3 mb-3 w-100">
+                {% endif %}
+                <span class="badge bg-primary mb-2">{{ program.level }}</span>
+                <div>{{ program.description|linebreaks }}</div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fèmen</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -213,7 +234,7 @@
     <div class="row g-4 mt-4">
       {% for member in team %}
       <div class="col-6 col-md-4 col-lg-3" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}0">
-        <div class="team-card text-center h-100">
+        <div class="team-card text-center h-100" data-bs-toggle="modal" data-bs-target="#teamModal{{ member.pk }}" style="cursor: pointer;">
           {% if member.photo %}
             <img src="{{ member.photo.url }}" alt="{{ member.name }}" class="team-photo">
           {% else %}
@@ -222,6 +243,30 @@
           <h3 class="team-name">{{ member.name }}</h3>
           <p class="team-position">{{ member.position }}</p>
           {% if member.subjects %}<p class="team-subjects">{{ member.subjects }}</p>{% endif %}
+        </div>
+        <div class="modal fade" id="teamModal{{ member.pk }}" tabindex="-1" aria-labelledby="teamModalLabel{{ member.pk }}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="teamModalLabel{{ member.pk }}">{{ member.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fèmen"></button>
+              </div>
+              <div class="modal-body text-center">
+                {% if member.photo %}
+                  <img src="{{ member.photo.url }}" alt="{{ member.name }}" class="rounded-circle mb-3" style="width: 140px; height: 140px; object-fit: cover;">
+                {% else %}
+                  <div class="team-photo team-photo-placeholder mx-auto mb-3"><i class="bi bi-person-fill"></i></div>
+                {% endif %}
+                <p class="text-primary fw-semibold mb-1">{{ member.position }}</p>
+                {% if member.subjects %}<p class="text-muted mb-1"><i class="bi bi-book"></i> {{ member.subjects }}</p>{% endif %}
+                {% if member.email %}<p class="mb-1"><i class="bi bi-envelope"></i> <a href="mailto:{{ member.email }}">{{ member.email }}</a></p>{% endif %}
+                {% if member.bio %}<div class="text-start mt-3 border-top pt-3">{{ member.bio|linebreaks }}</div>{% endif %}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fèmen</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       {% endfor %}
@@ -260,6 +305,10 @@
         {% if site_settings.google_maps_url %}
         <div class="map-wrapper rounded-4 overflow-hidden shadow-sm mt-3">
           <iframe src="{{ site_settings.google_maps_url }}" width="100%" height="280" style="border:0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Localisation"></iframe>
+        </div>
+        {% elif site_settings.address %}
+        <div class="map-wrapper rounded-4 overflow-hidden shadow-sm mt-3">
+          <iframe src="https://www.google.com/maps?q={{ site_settings.address|urlencode }}&output=embed" width="100%" height="280" style="border:0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Localisation"></iframe>
         </div>
         {% endif %}
       </div>

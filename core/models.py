@@ -346,6 +346,8 @@ class TeamMember(CompressedImagesMixin, models.Model):
     photo = models.ImageField("Photo", upload_to="equipe/", blank=True, null=True, validators=[validate_image_size])
     position = models.CharField("Position", max_length=150)
     subjects = models.CharField("Matières", max_length=255, blank=True)
+    email = models.EmailField("Email", blank=True)
+    bio = models.TextField("Biographie", blank=True)
     order = models.PositiveIntegerField("Ordre", default=0)
 
     class Meta:

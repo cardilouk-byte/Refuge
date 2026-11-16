@@ -213,3 +213,50 @@ class MediaServingTest(TestCase):
         from core.models import HeroSlide
         slide = HeroSlide(title="Video mov", video=_mp4("klip.mov"))
         slide.full_clean(exclude=["image"])
+
+
+class DetailModalTest(TestCase):
+    def setUp(self):
+        SiteSettings.load()
+
+    def test_team_modal_renders_with_details(self):
+        from core.models import TeamMember
+        TeamMember.objects.create(
+            name="Jean Pierre", position="Pwofesè Matematik",
+            subjects="Aljèb, Jeyometri", email="jean@lnfcl.edu.ht",
+            bio="Yon pwofesè ki gen 10 ane eksperyans.",
+        )
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("teamModal1", home)
+        self.assertIn("jean@lnfcl.edu.ht", home)
+        self.assertIn("10 ane eksperyans", home)
+        self.assertIn('data-bs-toggle="modal"', home)
+
+    def test_program_modal_renders_with_details(self):
+        from core.models import Program
+        Program.objects.create(
+            name="Syans Eksperimantal", level="Secondaire",
+            description="Pwogram syans konplè ak laboratwa.",
+        )
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("programModal1", home)
+        self.assertIn("Pwogram syans konplè ak laboratwa.", home)
+        self.assertIn("Gade plis detay", home)
+
+    def test_map_embed_from_address(self):
+        settings_obj = SiteSettings.load()
+        settings_obj.address = "Limonade, Cap-Haïtien, Haïti"
+        settings_obj.google_maps_url = ""
+        settings_obj.save()
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("https://www.google.com/maps?q=", home)
+        self.assertIn("output=embed", home)
+
+    def test_map_prefers_google_maps_url(self):
+        settings_obj = SiteSettings.load()
+        settings_obj.address = "Limonade, Haïti"
+        settings_obj.google_maps_url = "https://maps.google.com/embed?pb=test"
+        settings_obj.save()
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("https://maps.google.com/embed?pb=test", home)
+        self.assertNotIn("https://www.google.com/maps?q=", home)

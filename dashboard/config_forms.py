@@ -85,11 +85,13 @@ class NewsEventForm(forms.ModelForm):
 class TeamMemberForm(forms.ModelForm):
     class Meta:
         model = TeamMember
-        fields = ["name", "photo", "position", "subjects", "order"]
+        fields = ["name", "photo", "position", "subjects", "email", "bio", "order"]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "position": forms.TextInput(attrs={"class": "form-control"}),
             "subjects": forms.TextInput(attrs={"class": "form-control"}),
+            "email": forms.EmailInput(attrs={"class": "form-control"}),
+            "bio": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
             "order": forms.NumberInput(attrs={"class": "form-control"}),
         }
 
