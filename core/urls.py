@@ -12,4 +12,5 @@ urlpatterns = [
         name="login",
     ),
     path("deconnexion/", auth_views.LogoutView.as_view(), name="logout"),
+    path("inscription/", views.signup, name="signup"),
 ]
