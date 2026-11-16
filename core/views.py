@@ -1,16 +1,16 @@
 from django.contrib import messages
 from django.contrib.auth import login
-from django.contrib.auth.forms import UserCreationForm
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render
 
 from django.conf import settings
 
-from .forms import ContactForm
+from .forms import ContactForm, SignUpForm
 from .models import (
     About, GalleryImage, HeroSlide, MenuItem, NewsEvent, Program, Result,
     Service, TeamMember,
 )
+from accounts.models import User
 
 
 def home(request):
@@ -66,14 +66,16 @@ def signup(request):
         return redirect("home")
 
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.role = User.Role.PARENT
+            user.save()
             login(request, user)
             messages.success(request, "Bienvenue ! Votre compte a été créé avec succès.")
             return redirect("home")
         messages.error(request, "Veuillez corriger les erreurs du formulaire.")
     else:
-        form = UserCreationForm()
+        form = SignUpForm()
 
     return render(request, "core/signup.html", {"form": form})

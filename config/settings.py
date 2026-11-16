@@ -1,5 +1,6 @@
 """
-Configuration Django pour le site LNFCL (Lycée National François Cappoix de Limonade).
+Configuration Django pour LNFCL — SIGES (Système Intégré de Gestion Éducative et Scolaire).
+Site vitrine + administration scolaire.
 """
 import os
 from pathlib import Path
@@ -32,6 +33,16 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "core",
+    "accounts",
+    "academics",
+    "teachers",
+    "students",
+    "grades",
+    "attendance",
+    "finance",
+    "communication",
+    "dashboard",
+    "portals",
 ]
 
 MIDDLEWARE = [
@@ -64,12 +75,28 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# PostgreSQL via variables d'environnement (production).
+# Sans configuration, on retombe sur SQLite (développement).
+if get_env("DB_ENGINE") == "postgres":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": get_env("DB_NAME", "lnfcl"),
+            "USER": get_env("DB_USER", "lnfcl"),
+            "PASSWORD": get_env("DB_PASSWORD", ""),
+            "HOST": get_env("DB_HOST", "localhost"),
+            "PORT": get_env("DB_PORT", "5432"),
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+AUTH_USER_MODEL = "accounts.User"
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -93,7 +120,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "home"
+LOGIN_REDIRECT_URL = "accounts:role_home"
 LOGOUT_REDIRECT_URL = "home"
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024

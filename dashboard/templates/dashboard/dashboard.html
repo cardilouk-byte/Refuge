@@ -1,0 +1,148 @@
+{% extends "core/portal_base.html" %}
+
+{% block title %}Tableau de bord — LNFCL{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="page-title mb-0"><i class="bi bi-speedometer2 me-2"></i>Tableau de bord</h1>
+    <p class="text-muted mb-0">
+      {% if year %}Année scolaire {{ year.label }}{% endif %}
+      {% if period %} — {{ period.name }}{% endif %}
+    </p>
+  </div>
+  {% if user.is_staff %}<a href="/admin/" class="btn btn-primary"><i class="bi bi-gear me-1"></i>Administration</a>{% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body d-flex align-items-center">
+      <i class="bi bi-people-fill icon text-primary me-3"></i>
+      <div><div class="fs-3 fw-bold">{{ stats.students }}</div><div class="text-muted">Élèves actifs</div></div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body d-flex align-items-center">
+      <i class="bi bi-person-video3 icon text-success me-3"></i>
+      <div><div class="fs-3 fw-bold">{{ stats.teachers }}</div><div class="text-muted">Professeurs</div></div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body d-flex align-items-center">
+      <i class="bi bi-door-open icon text-warning me-3"></i>
+      <div><div class="fs-3 fw-bold">{{ stats.classrooms }}</div><div class="text-muted">Classes</div></div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body d-flex align-items-center">
+      <i class="bi bi-journal-bookmark icon text-info me-3"></i>
+      <div><div class="fs-3 fw-bold">{{ stats.subjects }}</div><div class="text-muted">Matières</div></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-4">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-cash-coin me-2 text-success"></i>Finances</h5>
+      <p class="mb-1">Total facturé : <strong>{{ finance.invoices_total }} HTG</strong></p>
+      <p class="mb-1">Total encaissé : <strong class="text-success">{{ finance.payments_total }} HTG</strong></p>
+      <p class="mb-1">Reste à payer : <strong class="text-danger">{{ finance.balance }} HTG</strong></p>
+      <p class="mb-0">Factures non soldées : <strong>{{ finance.unpaid_count }}</strong></p>
+    </div></div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-calendar-check me-2 text-primary"></i>Assiduité</h5>
+      {% if attendance_rate is not None %}
+      <div class="display-6 fw-bold text-primary">{{ attendance_rate }}%</div>
+      <p class="text-muted">Taux de présence global</p>
+      {% else %}
+      <p class="text-muted mb-0">Aucun appel enregistré pour le moment.</p>
+      {% endif %}
+      <hr>
+      <p class="mb-1"><span class="badge bg-success me-1">Présents</span> {{ attendance_map.PRESENT|default:0 }}</p>
+      <p class="mb-1"><span class="badge bg-danger me-1">Absents</span> {{ attendance_map.ABSENT|default:0 }}</p>
+      <p class="mb-0"><span class="badge bg-warning text-dark me-1">Retards</span> {{ attendance_map.RETARD|default:0 }}</p>
+    </div></div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-graph-up me-2 text-info"></i>Moyennes par matière</h5>
+      {% if chart_labels %}
+      <canvas id="subjectChart" height="220"></canvas>
+      {% else %}
+      <p class="text-muted mb-0">Aucune note saisie pour cette période.</p>
+      {% endif %}
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-person-plus me-2"></i>Dernières inscriptions</h5>
+      {% if recent_students %}
+      <table class="table table-sm align-middle">
+        <thead><tr><th>Élève</th><th>Classe</th><th>Date</th></tr></thead>
+        <tbody>
+        {% for student in recent_students %}
+        <tr>
+          <td>{{ student.full_name }}</td>
+          <td>{{ student.classroom.name|default:"—" }}</td>
+          <td>{{ student.enrolled_at|date:"d/m/Y" }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}<p class="text-muted mb-0">Aucun élève enregistré.</p>{% endif %}
+    </div></div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-pencil-square me-2"></i>Dernières notes saisies</h5>
+      {% if recent_grades %}
+      <table class="table table-sm align-middle">
+        <thead><tr><th>Élève</th><th>Matière</th><th>Type</th><th>Note</th></tr></thead>
+        <tbody>
+        {% for grade in recent_grades %}
+        <tr>
+          <td>{{ grade.student.full_name }}</td>
+          <td>{{ grade.class_subject.subject.name }}</td>
+          <td>{{ grade.get_kind_display }}</td>
+          <td><strong>{{ grade.score }}/20</strong></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}<p class="text-muted mb-0">Aucune note saisie.</p>{% endif %}
+    </div></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if chart_labels %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{{ chart_labels|json_script:"chartLabels" }}
+{{ chart_values|json_script:"chartValues" }}
+<script>
+  new Chart(document.getElementById('subjectChart'), {
+    type: 'bar',
+    data: {
+      labels: JSON.parse(document.getElementById('chartLabels').textContent),
+      datasets: [{
+        label: 'Moyenne /20',
+        data: JSON.parse(document.getElementById('chartValues').textContent),
+        backgroundColor: 'rgba(13,110,253,.7)',
+        borderRadius: 6
+      }]
+    },
+    options: {
+      scales: { y: { beginAtZero: true, max: 20 } },
+      plugins: { legend: { display: false } }
+    }
+  });
+</script>
+{% endif %}
+{% endblock %}
