@@ -3,7 +3,7 @@ from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from accounts.views import staff_required
+from accounts.views import teaching_staff_required as staff_required
 
 from .models import MediaFile
 from .services import IMAGE_FORMATS, compress_image, image_dimensions

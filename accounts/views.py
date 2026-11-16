@@ -42,6 +42,17 @@ def staff_required(view):
     return wrapped
 
 
+def teaching_staff_required(view):
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect_to_login(request.get_full_path())
+        if request.user.is_staff or request.user.is_teaching_staff:
+            return view(request, *args, **kwargs)
+        raise PermissionDenied
+    return wrapped
+
+
 def superadmin_required(view):
     @wraps(view)
     def wrapped(request, *args, **kwargs):

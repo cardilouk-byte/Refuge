@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
-from accounts.views import staff_required
+from accounts.views import teaching_staff_required as staff_required
 from academics.models import ClassRoom, Period
 
 from . import exports, imports

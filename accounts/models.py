@@ -25,6 +25,10 @@ class User(AbstractUser):
         return self.role in (self.Role.SUPERADMIN, self.Role.DIRECTION)
 
     @property
+    def is_teaching_staff(self):
+        return self.is_school_staff or self.role == self.Role.ENSEIGNANT
+
+    @property
     def dashboard_url(self):
         return {
             self.Role.SUPERADMIN: reverse("dashboard:home"),

@@ -67,12 +67,14 @@
 
   <div class="container-fluid">
     <div class="row">
-      {% if user.is_staff or user.is_school_staff %}
+      {% if user.is_staff or user.is_teaching_staff %}
       <nav class="col-lg-2 d-none d-lg-block py-4 border-end bg-white min-vh-100">
         <ul class="nav flex-column gap-1">
           <li class="nav-item"><span class="text-muted small fw-bold px-3">PRODUCTIVITÉ</span></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'dashboard' and 'configuration' not in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:home' %}"><i class="bi bi-speedometer2 me-2"></i>Tableau de bord</a></li>
+          {% if user.is_school_staff %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'backups' %}active fw-bold{% endif %}" href="{% url 'backups:index' %}"><i class="bi bi-cloud-arrow-up me-2"></i>Backup Center</a></li>
+          {% endif %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'departments' %}active fw-bold{% endif %}" href="{% url 'departments:tree' %}"><i class="bi bi-diagram-3 me-2"></i>Organigramme</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'preregistration' %}active fw-bold{% endif %}" href="{% url 'preregistration:admin_list' %}"><i class="bi bi-inbox me-2"></i>Pré-inscriptions</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'document_editor' %}active fw-bold{% endif %}" href="{% url 'document_editor:index' %}"><i class="bi bi-file-earmark-word me-2"></i>Word Center</a></li>
