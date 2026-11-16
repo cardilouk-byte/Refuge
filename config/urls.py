@@ -3,8 +3,12 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from config.settings import get_env
+
+ADMIN_URL = get_env("ADMIN_URL", "kontwol/").strip("/") + "/"
+
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path(ADMIN_URL, admin.site.urls),
     path("comptes/", include("accounts.urls")),
     path("", include("dashboard.urls")),
     path("", include("portals.urls")),
@@ -18,6 +22,6 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-admin.site.site_header = "LNFCL - Administration"
-admin.site.site_title = "LNFCL Admin"
-admin.site.index_title = "Gestion du contenu du site"
+admin.site.site_header = "LNFCL — Panneau de contrôle"
+admin.site.site_title = "LNFCL"
+admin.site.index_title = "Gestion du contenu et de l'école"

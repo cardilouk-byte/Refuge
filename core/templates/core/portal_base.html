@@ -43,7 +43,7 @@
         </ul>
         <ul class="navbar-nav ms-auto">
           {% if user.is_staff %}
-          <li class="nav-item"><a class="nav-link" href="/admin/"><i class="bi bi-gear me-1"></i>Admin</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url "admin:index" %}"><i class="bi bi-gear me-1"></i>Admin</a></li>
           {% endif %}
           <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="bi bi-globe me-1"></i>Site web</a></li>
           <li class="nav-item dropdown">
@@ -73,7 +73,7 @@
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'media_library' %}active fw-bold{% endif %}" href="{% url 'media_library:index' %}"><i class="bi bi-images me-2"></i>Media Center</a></li>
           {% if user.is_staff %}
           <li class="nav-item"><hr class="dropdown-divider"></li>
-          <li class="nav-item"><a class="nav-link" href="/admin/"><i class="bi bi-gear me-2"></i>Administration</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url "admin:index" %}"><i class="bi bi-gear me-2"></i>Administration</a></li>
           {% endif %}
         </ul>
       </nav>

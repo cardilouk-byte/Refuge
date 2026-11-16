@@ -1,0 +1,18 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | LNFCL{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}">LNFCL — Panneau de contrôle</a></div>
+{% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}
+{% endblock %}
+
+{% block welcome-msg %}
+<span>Bonjou, <strong>{{ user.get_short_name|default:user.get_username }}</strong>.</span>
+{% endblock %}
+
+{% block userlinks %}
+{{ block.super }}
+{% endblock %}
+
+{% block footer %}<div id="footer"></div>{% endblock %}
