@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     "attendance",
     "finance",
     "communication",
+    "departments",
+    "preregistration",
     "dashboard",
     "portals",
     "backups",

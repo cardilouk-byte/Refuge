@@ -23,6 +23,7 @@
         </ul>
         <div class="d-lg-none mt-3 d-flex flex-wrap gap-2">
           <a href="{% url 'results' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Résultats</a>
+        <a href="{% url 'preregistration:start' %}" class="btn btn-outline-success btn-sm rounded-pill px-3">Pré-inscription</a>
           {% if user.is_authenticated %}
             {% if user.is_staff %}
               <a href="{% url "admin:index" %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Admin</a>
@@ -37,6 +38,7 @@
 
       <div class="header-actions d-none d-lg-flex align-items-center gap-2">
         <a href="{% url 'results' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Résultats</a>
+        <a href="{% url 'preregistration:start' %}" class="btn btn-outline-success btn-sm rounded-pill px-3">Pré-inscription</a>
         {% if user.is_authenticated %}
           {% if user.is_staff %}
             <a href="{% url "admin:index" %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Admin</a>

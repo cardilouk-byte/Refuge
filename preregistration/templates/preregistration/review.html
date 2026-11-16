@@ -1,0 +1,50 @@
+{% extends "core/base.html" %}
+
+{% block title %}Rezime pré-inscription — {{ site_settings.name }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container" style="max-width: 860px;">
+    <h1 class="section-title text-center">Etap 4 — Rezime</h1>
+    <div class="section-underline mx-auto mb-4"></div>
+    <p class="text-center text-muted mb-4">Verifye enfòmasyon yo anvan ou soumèt. Si gen yon erè, klike sou "Modifye".</p>
+
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5 text-primary">👤 Elèv</h2>
+        <ul class="list-unstyled mb-4">
+          <li><strong>Non konplè:</strong> {{ pre.full_name }}</li>
+          <li><strong>Sèks:</strong> {{ pre.get_gender_display }}</li>
+          <li><strong>Dat nesans:</strong> {{ pre.birth_date|date:"d/m/Y" }}</li>
+          {% if pre.birth_place %}<li><strong>Kote nesans:</strong> {{ pre.birth_place }}</li>{% endif %}
+          {% if pre.address %}<li><strong>Adrès:</strong> {{ pre.address }}</li>{% endif %}
+        </ul>
+
+        <h2 class="h5 text-primary">👪 Paran / Responsab</h2>
+        <ul class="list-unstyled mb-4">
+          <li><strong>Non:</strong> {{ pre.parent_name }} ({{ pre.get_parent_relation_display }})</li>
+          <li><strong>Telefòn:</strong> {{ pre.parent_phone }}</li>
+          {% if pre.parent_email %}<li><strong>Imèl:</strong> {{ pre.parent_email }}</li>{% endif %}
+          {% if pre.parent_profession %}<li><strong>Pwofesyon:</strong> {{ pre.parent_profession }}</li>{% endif %}
+        </ul>
+
+        <h2 class="h5 text-primary">🏫 Eskolè</h2>
+        <ul class="list-unstyled">
+          {% if pre.desired_level %}<li><strong>Nivo vle:</strong> {{ pre.desired_level }}</li>{% endif %}
+          {% if pre.previous_school %}<li><strong>Lekòl anvan:</strong> {{ pre.previous_school }}</li>{% endif %}
+          {% if pre.last_class %}<li><strong>Dènye klas:</strong> {{ pre.last_class }}</li>{% endif %}
+          {% if pre.birth_certificate %}<li><strong>Akt nesans:</strong> <i class="bi bi-check-circle text-success"></i> voye</li>{% endif %}
+          {% if pre.report_card %}<li><strong>Bilten:</strong> <i class="bi bi-check-circle text-success"></i> voye</li>{% endif %}
+          {% if pre.notes %}<li><strong>Nòt:</strong> {{ pre.notes }}</li>{% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <form method="post" class="d-flex justify-content-between">
+      {% csrf_token %}
+      <a href="{% url 'preregistration:step' num=1 %}" class="btn btn-outline-secondary">← Modifye</a>
+      <button type="submit" class="btn btn-success btn-lg px-5"><i class="bi bi-send me-2"></i>Soumèt pré-inscription an</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

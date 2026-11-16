@@ -11,6 +11,8 @@ urlpatterns = [
     path(ADMIN_URL, admin.site.urls),
     path("comptes/", include("accounts.urls")),
     path("", include("dashboard.urls")),
+    path("", include("departments.urls")),
+    path("", include("preregistration.urls")),
     path("", include("portals.urls")),
     path("", include("backups.urls")),
     path("", include("document_editor.urls")),
