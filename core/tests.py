@@ -85,7 +85,8 @@ class AuthTests(TestCase):
 
 
     def test_logout_with_post(self):
-        self.client.force_login(self.user)
+        user = User.objects.create_user("logoutuser", password="pass12345")
+        self.client.force_login(user)
         response = self.client.post("/deconnexion/")
         self.assertEqual(response.status_code, 302)
         self.assertNotIn("_auth_user_id", self.client.session)
