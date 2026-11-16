@@ -48,13 +48,13 @@ function initHeroSlider() {
   document.getElementById("heroNext")?.addEventListener("click", next);
   document.getElementById("heroPrev")?.addEventListener("click", prev);
 
-  restart();
+  if (window.HERO_AUTOPLAY !== false) restart();
 }
 
 /* ===== AOS (animations au scroll) ===== */
 function initAOS() {
   if (window.AOS) {
-    AOS.init({ duration: 800, once: true, offset: 80 });
+    AOS.init({ duration: window.AOS_DURATION || 800, once: true, offset: 80 });
   }
 }
 

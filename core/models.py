@@ -13,6 +13,19 @@ def validate_pdf_size(pdf):
         raise ValidationError("Le fichier PDF ne doit pas dépasser 10 Mo.")
 
 
+FONT_CHOICES = [
+    ("Lobster", "Lobster (kursif)"),
+    ("Poppins", "Poppins"),
+    ("Montserrat", "Montserrat"),
+    ("Playfair Display", "Playfair Display"),
+    ("Dancing Script", "Dancing Script (kursif)"),
+    ("Oswald", "Oswald"),
+    ("Roboto", "Roboto"),
+    ("Open Sans", "Open Sans"),
+    ("Merriweather", "Merriweather"),
+]
+
+
 class SiteSettings(models.Model):
     name = models.CharField("Nom complet de l'école", max_length=200)
     short_name = models.CharField("Nom court", max_length=20, default="LNFCL")
@@ -30,12 +43,63 @@ class SiteSettings(models.Model):
     instagram_url = models.URLField("Instagram", blank=True)
     google_maps_url = models.URLField("Lien Google Maps", blank=True)
     primary_color = models.CharField("Couleur principale", max_length=7, default="#0d6efd")
+    header_bg_color = models.CharField("Couleur de fond du header", max_length=7, default="#ffffff")
+    header_text_color = models.CharField("Couleur du texte du header", max_length=7, default="#1f2937")
+    footer_bg_color = models.CharField("Couleur de fond du footer", max_length=7, default="#1f2937")
+    footer_text_color = models.CharField("Couleur du texte du footer", max_length=7, default="#ffffff")
+    title_font = models.CharField("Police des titres", max_length=50, choices=FONT_CHOICES, default="Lobster")
+    body_font = models.CharField("Police du texte", max_length=50, choices=FONT_CHOICES, default="Poppins")
+    marquee_enabled = models.BooleanField("Barre de texte défilant activée", default=False)
+    marquee_text = models.CharField("Texte défilant", max_length=300, blank=True)
+    marquee_speed = models.PositiveIntegerField("Vitesse du texte défilant (secondes)", default=20, help_text="Durée d'un cycle complet")
+    aos_duration = models.PositiveIntegerField("Durée des animations (ms)", default=800)
+    show_hero = models.BooleanField("Afficher le hero (slider)", default=True)
+    show_about = models.BooleanField("Afficher la section À Propos", default=True)
+    show_services = models.BooleanField("Afficher la section Services", default=True)
+    show_programs = models.BooleanField("Afficher la section Programmes", default=True)
+    show_gallery = models.BooleanField("Afficher la section Galerie", default=True)
+    show_news = models.BooleanField("Afficher la section Nouvelles", default=True)
+    show_team = models.BooleanField("Afficher la section Équipe", default=True)
+    show_contact = models.BooleanField("Afficher la section Contact", default=True)
     copyright_text = models.CharField("Copyright", max_length=200, blank=True)
     hero_overlay_opacity = models.PositiveIntegerField(
         "Opacité de la couche bleue du hero (%)", default=55, help_text="0 à 90"
     )
     slider_interval = models.PositiveIntegerField(
         "Vitesse du slider (secondes)", default=6
+    )
+    SLIDER_EFFECTS = [
+        ("fade", "Fondu (fade)"),
+        ("slide", "Glisad (slide)"),
+        ("zoom", "Zoom"),
+        ("flip", "Flip 3D"),
+    ]
+    slider_effect = models.CharField(
+        "Effet de transition du slider", max_length=20,
+        choices=SLIDER_EFFECTS, default="fade",
+    )
+    slider_autoplay = models.BooleanField("Défilement automatique du slider", default=True)
+    SECTION_ANIMATIONS = [
+        ("fade-up", "Monte (fade-up)"),
+        ("fade-down", "Desann (fade-down)"),
+        ("fade-left", "Soti adwat (fade-left)"),
+        ("fade-right", "Soti agoch (fade-right)"),
+        ("zoom-in", "Zoom anndan (zoom-in)"),
+        ("flip-left", "Flip agoch"),
+        ("flip-up", "Flip anlè"),
+    ]
+    section_animation = models.CharField(
+        "Animation des sections", max_length=20,
+        choices=SECTION_ANIMATIONS, default="fade-up",
+    )
+    HERO_POSITIONS = [
+        ("left", "Agòch"),
+        ("center", "Nan mitan"),
+        ("right", "Adwat"),
+    ]
+    hero_text_position = models.CharField(
+        "Position du texte du hero", max_length=10,
+        choices=HERO_POSITIONS, default="left",
     )
     seo_title = models.CharField("Titre SEO", max_length=200, blank=True)
     seo_description = models.TextField("Description SEO", blank=True)
@@ -79,7 +143,12 @@ class MenuItem(models.Model):
 class HeroSlide(models.Model):
     title = models.CharField("Titre", max_length=200)
     subtitle = models.CharField("Sous-titre / devise", max_length=200, blank=True)
-    image = models.ImageField("Image de fond", upload_to="hero/", validators=[validate_image_size])
+    image = models.ImageField("Image de fond", upload_to="hero/", blank=True, null=True, validators=[validate_image_size])
+    video = models.FileField(
+        "Vidéo de fond", upload_to="hero/", blank=True, null=True,
+        validators=[FileExtensionValidator(["mp4", "webm", "ogg"])],
+        help_text="Si une vidéo est fournie, elle remplace l'image de fond.",
+    )
     button_text = models.CharField("Texte du bouton", max_length=100, default="Lire Plus")
     button_url = models.CharField("Lien du bouton", max_length=255, default="/#apropos")
     order = models.PositiveIntegerField("Ordre", default=0)
@@ -160,7 +229,12 @@ class Program(models.Model):
 class GalleryImage(models.Model):
     title = models.CharField("Titre", max_length=150, blank=True)
     category = models.CharField("Catégorie", max_length=100, default="Général")
-    image = models.ImageField("Image", upload_to="galerie/", validators=[validate_image_size])
+    image = models.ImageField("Image", upload_to="galerie/", blank=True, null=True, validators=[validate_image_size])
+    video = models.FileField(
+        "Vidéo (fichier)", upload_to="galerie/", blank=True, null=True,
+        validators=[FileExtensionValidator(["mp4", "webm", "ogg"])],
+    )
+    video_url = models.URLField("Vidéo (lien YouTube)", blank=True, help_text="Ex: https://www.youtube.com/watch?v=...")
     date = models.DateField("Date", auto_now_add=True)
     order = models.PositiveIntegerField("Ordre", default=0)
 
@@ -171,6 +245,16 @@ class GalleryImage(models.Model):
 
     def __str__(self):
         return self.title or f"Image #{self.pk}"
+
+    @property
+    def video_embed_url(self):
+        url = self.video_url
+        if "youtube.com/watch" in url and "v=" in url:
+            video_id = url.split("watch?v=")[1].split("&")[0]
+            return f"https://www.youtube.com/embed/{video_id}"
+        if "youtu.be/" in url:
+            return url.replace("youtu.be/", "www.youtube.com/embed/")
+        return url
 
 
 class Result(models.Model):

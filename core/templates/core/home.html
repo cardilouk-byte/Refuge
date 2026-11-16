@@ -4,12 +4,16 @@
 
 {% block content %}
 {# ===== HERO / SLIDER ===== #}
+{% if site_settings.show_hero %}
 <section class="hero" id="accueil">
-  <div class="hero-slides">
+  <div class="hero-slides effect-{{ site_settings.slider_effect|default:'fade' }}">
     {% for slide in slides %}
-    <div class="hero-slide{% if forloop.first %} active{% endif %}" {% if slide.image %}style="background-image:url('{{ slide.image.url }}')"{% endif %}>
+    <div class="hero-slide{% if forloop.first %} active{% endif %}" {% if slide.image and not slide.video %}style="background-image:url('{{ slide.image.url }}')"{% endif %}>
+      {% if slide.video %}
+        <video class="hero-video" src="{{ slide.video.url }}" autoplay muted loop playsinline></video>
+      {% endif %}
       <div class="hero-overlay" style="background-color: rgba(13, 110, 253, {% widthratio site_settings.hero_overlay_opacity 100 1 %})"></div>
-      <div class="container hero-content">
+      <div class="container hero-content hero-text-{{ site_settings.hero_text_position|default:'left' }}">
         <h1 class="hero-title">{{ slide.title }}</h1>
         {% if slide.subtitle %}<p class="hero-subtitle">&laquo; {{ slide.subtitle }} &raquo;</p>{% endif %}
         <a href="{{ slide.button_url }}" class="btn btn-primary btn-lg rounded-pill px-4 mt-3">{{ slide.button_text }}</a>
@@ -18,7 +22,7 @@
     {% empty %}
     <div class="hero-slide active">
       <div class="hero-overlay" style="background-color: rgba(13, 110, 253, 0.55)"></div>
-      <div class="container hero-content">
+      <div class="container hero-content hero-text-{{ site_settings.hero_text_position|default:'left' }}">
         <h1 class="hero-title">{{ site_settings.name }}</h1>
         <p class="hero-subtitle">&laquo; {{ site_settings.motto }} &raquo;</p>
       </div>
@@ -32,8 +36,10 @@
   <div class="hero-dots" id="heroDots"></div>
   {% endif %}
 </section>
+{% endif %}
 
 {# ===== À PROPOS ===== #}
+{% if site_settings.show_about %}
 <section class="section" id="apropos">
   <div class="container">
     <div class="row align-items-center g-5">
@@ -97,15 +103,17 @@
     </div>
   </div>
 </section>
+{% endif %}
 
 {# ===== SERVICES ===== #}
+{% if site_settings.show_services %}
 <section class="section section-alt" id="services">
   <div class="container">
-    <h2 class="section-title text-center" data-aos="fade-up">Nos Services</h2>
-    <div class="section-underline mx-auto" data-aos="fade-up"></div>
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Nos Services</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
     <div class="row g-4 mt-4">
       {% for service in services %}
-      <div class="col-md-6 col-lg-4" data-aos="fade-up">
+      <div class="col-md-6 col-lg-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">
         <div class="service-card h-100">
           <div class="service-icon"><i class="bi {{ service.icon }}"></i></div>
           <h3 class="service-title">{{ service.title }}</h3>
@@ -116,15 +124,17 @@
     </div>
   </div>
 </section>
+{% endif %}
 
 {# ===== PROGRAMMES ===== #}
+{% if site_settings.show_programs %}
 <section class="section" id="programmes">
   <div class="container">
-    <h2 class="section-title text-center" data-aos="fade-up">Nos Programmes</h2>
-    <div class="section-underline mx-auto" data-aos="fade-up"></div>
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Nos Programmes</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
     <div class="row g-4 mt-4">
       {% for program in programs %}
-      <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}00">
+      <div class="col-md-6 col-lg-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}00">
         <div class="program-card h-100">
           {% if program.image %}
             <img src="{{ program.image.url }}" alt="{{ program.name }}" class="program-img">
@@ -142,16 +152,24 @@
     </div>
   </div>
 </section>
+{% endif %}
 
 {# ===== GALERIE ===== #}
+{% if site_settings.show_gallery %}
 <section class="section section-alt" id="galerie">
   <div class="container">
-    <h2 class="section-title text-center" data-aos="fade-up">Galerie</h2>
-    <div class="section-underline mx-auto" data-aos="fade-up"></div>
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Galerie</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
     <div class="gallery-grid mt-4">
       {% for image in gallery %}
       <figure class="gallery-item" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0 }}0">
-        <img src="{{ image.image.url }}" alt="{{ image.title|default:'Photo' }}" class="gallery-img" data-lightbox>
+        {% if image.video %}
+          <video src="{{ image.video.url }}" class="gallery-img" controls preload="metadata"></video>
+        {% elif image.video_embed_url %}
+          <div class="ratio ratio-4x3"><iframe src="{{ image.video_embed_url }}" title="{{ image.title|default:'Vidéo' }}" allowfullscreen></iframe></div>
+        {% elif image.image %}
+          <img src="{{ image.image.url }}" alt="{{ image.title|default:'Photo' }}" class="gallery-img" data-lightbox>
+        {% endif %}
         {% if image.title %}<figcaption class="gallery-caption">{{ image.title }}</figcaption>{% endif %}
       </figure>
       {% empty %}
@@ -160,16 +178,17 @@
     </div>
   </div>
 </section>
+{% endif %}
 
 {# ===== NOUVELLES / ÉVÉNEMENTS ===== #}
-{% if news %}
+{% if site_settings.show_news and news %}
 <section class="section" id="nouveles">
   <div class="container">
-    <h2 class="section-title text-center" data-aos="fade-up">Nouvelles & Événements</h2>
-    <div class="section-underline mx-auto" data-aos="fade-up"></div>
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Nouvelles & Événements</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
     <div class="row g-4 mt-4">
       {% for item in news %}
-      <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}00">
+      <div class="col-md-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}00">
         <div class="news-card h-100">
           {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}" class="news-img">{% endif %}
           <div class="news-body">
@@ -186,14 +205,14 @@
 {% endif %}
 
 {# ===== ÉQUIPE ===== #}
-{% if team %}
+{% if site_settings.show_team and team %}
 <section class="section section-alt" id="equipe">
   <div class="container">
-    <h2 class="section-title text-center" data-aos="fade-up">Notre Équipe</h2>
-    <div class="section-underline mx-auto" data-aos="fade-up"></div>
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Notre Équipe</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
     <div class="row g-4 mt-4">
       {% for member in team %}
-      <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}0">
+      <div class="col-6 col-md-4 col-lg-3" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}0">
         <div class="team-card text-center h-100">
           {% if member.photo %}
             <img src="{{ member.photo.url }}" alt="{{ member.name }}" class="team-photo">
@@ -212,10 +231,11 @@
 {% endif %}
 
 {# ===== CONTACT ===== #}
+{% if site_settings.show_contact %}
 <section class="section" id="contact">
   <div class="container">
-    <h2 class="section-title text-center" data-aos="fade-up">Contact</h2>
-    <div class="section-underline mx-auto" data-aos="fade-up"></div>
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Contact</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
     <div class="row g-5 mt-4">
       <div class="col-lg-6" data-aos="fade-right">
         <form method="post" action="{% url 'home' %}#contact" novalidate>
@@ -246,6 +266,7 @@
     </div>
   </div>
 </section>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
