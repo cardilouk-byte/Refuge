@@ -21,13 +21,29 @@
             <li class="nav-item"><a class="nav-link" href="{{ item.url }}">{{ item.label }}</a></li>
           {% endfor %}
         </ul>
+        <div class="d-lg-none mt-3 d-flex flex-wrap gap-2">
+          <a href="{% url 'results' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Résultats</a>
+          {% if user.is_authenticated %}
+            {% if user.is_staff %}
+              <a href="/admin/" class="btn btn-outline-primary btn-sm rounded-pill px-3">Admin</a>
+            {% endif %}
+            <a href="{% url 'logout' %}" class="btn btn-primary btn-sm rounded-pill px-3">Déconnexion</a>
+          {% else %}
+            <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Inscription</a>
+            <a href="{% url 'login' %}" class="btn btn-primary btn-sm rounded-pill px-3">Connecter</a>
+          {% endif %}
+        </div>
       </div>
 
       <div class="header-actions d-none d-lg-flex align-items-center gap-2">
         <a href="{% url 'results' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Résultats</a>
         {% if user.is_authenticated %}
+          {% if user.is_staff %}
+            <a href="/admin/" class="btn btn-outline-primary btn-sm rounded-pill px-3">Admin</a>
+          {% endif %}
           <a href="{% url 'logout' %}" class="btn btn-primary btn-sm rounded-pill px-3">Déconnexion</a>
         {% else %}
+          <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Inscription</a>
           <a href="{% url 'login' %}" class="btn btn-primary btn-sm rounded-pill px-3">Connecter</a>
         {% endif %}
       </div>
