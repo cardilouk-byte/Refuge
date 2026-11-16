@@ -1,4 +1,5 @@
 from django import forms
+from django.db import models
 
 from core.models import (
     About, GalleryImage, HeroSlide, MenuItem, NewsEvent, Program, Result,
@@ -13,7 +14,33 @@ def _styled(fields):
     return widgets
 
 
-class MenuItemForm(forms.ModelForm):
+class DefaultsOptionalMixin:
+    default_fields = ()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        model_fields = {f.name: f for f in self._meta.model._meta.fields}
+        for name in self.default_fields:
+            if name in self.fields:
+                self.fields[name].required = False
+        for name, field in self.fields.items():
+            model_field = model_fields.get(name)
+            if isinstance(model_field, models.BooleanField) and model_field.default is True:
+                field.initial = True
+
+    def clean(self):
+        cleaned = super().clean()
+        model_fields = {f.name: f for f in self._meta.model._meta.fields}
+        for name in self.default_fields:
+            if name in cleaned and cleaned[name] in (None, ""):
+                default = getattr(model_fields.get(name), "default", None)
+                if default is not None and not callable(default):
+                    cleaned[name] = default
+        return cleaned
+
+
+class MenuItemForm(DefaultsOptionalMixin, forms.ModelForm):
+    default_fields = ("order",)
     class Meta:
         model = MenuItem
         fields = ["label", "url", "order", "is_visible"]
@@ -24,7 +51,8 @@ class MenuItemForm(forms.ModelForm):
         }
 
 
-class HeroSlideForm(forms.ModelForm):
+class HeroSlideForm(DefaultsOptionalMixin, forms.ModelForm):
+    default_fields = ("order", "button_text", "button_url")
     class Meta:
         model = HeroSlide
         fields = ["title", "subtitle", "image", "video", "button_text", "button_url", "order", "is_active"]
@@ -37,7 +65,8 @@ class HeroSlideForm(forms.ModelForm):
         }
 
 
-class ServiceForm(forms.ModelForm):
+class ServiceForm(DefaultsOptionalMixin, forms.ModelForm):
+    default_fields = ("order", "icon")
     class Meta:
         model = Service
         fields = ["title", "description", "icon", "order"]
@@ -49,7 +78,8 @@ class ServiceForm(forms.ModelForm):
         }
 
 
-class ProgramForm(forms.ModelForm):
+class ProgramForm(DefaultsOptionalMixin, forms.ModelForm):
+    default_fields = ("order", "level")
     class Meta:
         model = Program
         fields = ["name", "description", "image", "level", "order"]
@@ -60,7 +90,8 @@ class ProgramForm(forms.ModelForm):
         }
 
 
-class GalleryImageForm(forms.ModelForm):
+class GalleryImageForm(DefaultsOptionalMixin, forms.ModelForm):
+    default_fields = ("order", "category")
     class Meta:
         model = GalleryImage
         fields = ["title", "category", "image", "video", "video_url", "order"]
@@ -72,7 +103,8 @@ class GalleryImageForm(forms.ModelForm):
         }
 
 
-class NewsEventForm(forms.ModelForm):
+class NewsEventForm(DefaultsOptionalMixin, forms.ModelForm):
+    default_fields = ()
     class Meta:
         model = NewsEvent
         fields = ["title", "image", "body", "is_published"]
@@ -82,7 +114,8 @@ class NewsEventForm(forms.ModelForm):
         }
 
 
-class TeamMemberForm(forms.ModelForm):
+class TeamMemberForm(DefaultsOptionalMixin, forms.ModelForm):
+    default_fields = ("order",)
     class Meta:
         model = TeamMember
         fields = ["name", "photo", "position", "subjects", "email", "bio", "order"]
@@ -96,7 +129,8 @@ class TeamMemberForm(forms.ModelForm):
         }
 
 
-class ResultForm(forms.ModelForm):
+class ResultForm(DefaultsOptionalMixin, forms.ModelForm):
+    default_fields = ()
     class Meta:
         model = Result
         fields = ["title", "school_year", "pdf_file", "is_public"]

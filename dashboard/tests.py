@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from PIL import Image
 
-from core.models import HeroSlide, SiteSettings
+from core.models import GalleryImage, HeroSlide, SiteSettings
 
 User = get_user_model()
 
@@ -260,3 +260,41 @@ class DetailModalTest(TestCase):
         home = self.client.get("/", HTTP_HOST="localhost").content.decode()
         self.assertIn("https://maps.google.com/embed?pb=test", home)
         self.assertNotIn("https://www.google.com/maps?q=", home)
+
+
+class OptionalFieldsTest(TestCase):
+    def setUp(self):
+        SiteSettings.load()
+        User.objects.create_superuser("admin", "admin@lnfcl.edu.ht", "AdminLNFCL2026!")
+        self.client.login(username="admin", password="AdminLNFCL2026!")
+
+    def test_gallery_saves_without_optional_fields(self):
+        response = self.client.post(
+            "/configuration/galri/nouveau/",
+            {"title": "Foto San Orè", "image": _png("foto.png")},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        item = GalleryImage.objects.get(title="Foto San Orè")
+        self.assertEqual(item.order, 0)
+        self.assertEqual(item.category, "Général")
+
+    def test_gallery_image_appears_on_home(self):
+        self.client.post(
+            "/configuration/galri/nouveau/",
+            {"title": "Foto Vitrine", "image": _png("foto.png")},
+            follow=True,
+        )
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("galerie/foto", home)
+
+    def test_slide_saves_active_with_default_button(self):
+        self.client.post("/configuration/slides/nouveau/", {"title": "Slide Fasil", "is_active": "on"}, follow=True)
+        slide = HeroSlide.objects.get(title="Slide Fasil")
+        self.assertTrue(slide.is_active)
+        self.assertEqual(slide.button_text, "Lire Plus")
+        self.assertEqual(slide.button_url, "/#apropos")
+
+    def test_active_checkbox_checked_by_default(self):
+        response = self.client.get("/configuration/slides/nouveau/")
+        self.assertIn("checked", response.content.decode())
