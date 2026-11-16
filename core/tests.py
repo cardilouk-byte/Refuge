@@ -84,6 +84,12 @@ class AuthTests(TestCase):
         self.assertContains(response, "Connecter")
 
 
+    def test_logout_with_post(self):
+        self.client.force_login(self.user)
+        response = self.client.post("/deconnexion/")
+        self.assertEqual(response.status_code, 302)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
 class SignupTests(TestCase):
     def test_signup_page_returns_200(self):
         response = self.client.get(reverse("signup"))

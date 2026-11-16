@@ -28,7 +28,7 @@
             {% if user.is_staff %}
               <a href="{% url "admin:index" %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Admin</a>
             {% endif %}
-            <a href="{% url 'logout' %}" class="btn btn-primary btn-sm rounded-pill px-3">Déconnexion</a>
+            <form method="post" action="{% url 'logout' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Déconnexion</button></form>
           {% else %}
             <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Inscription</a>
             <a href="{% url 'login' %}" class="btn btn-primary btn-sm rounded-pill px-3">Connecter</a>
@@ -43,7 +43,7 @@
           {% if user.is_staff %}
             <a href="{% url "admin:index" %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Admin</a>
           {% endif %}
-          <a href="{% url 'logout' %}" class="btn btn-primary btn-sm rounded-pill px-3">Déconnexion</a>
+          <form method="post" action="{% url 'logout' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Déconnexion</button></form>
         {% else %}
           <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Inscription</a>
           <a href="{% url 'login' %}" class="btn btn-primary btn-sm rounded-pill px-3">Connecter</a>
