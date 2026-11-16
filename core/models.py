@@ -1,11 +1,54 @@
+from io import BytesIO
+
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
 
 
 def validate_image_size(image):
-    if image.size > 5 * 1024 * 1024:
-        raise ValidationError("L'image ne doit pas dépasser 5 Mo.")
+    if image.size > 15 * 1024 * 1024:
+        raise ValidationError("L'image ne doit pas dépasser 15 Mo.")
+
+
+def validate_video_size(video):
+    if video.size > 150 * 1024 * 1024:
+        raise ValidationError("La vidéo ne doit pas dépasser 150 Mo.")
+
+
+def compress_image_file(field_file, max_size=1600, quality=82):
+    from PIL import Image
+    from django.core.files.base import ContentFile
+
+    raw = getattr(field_file, "file", field_file)
+    try:
+        img = Image.open(raw)
+        img.load()
+    except Exception:
+        return field_file
+    if img.mode in ("RGBA", "P", "LA"):
+        return field_file
+    if max(img.size) <= max_size:
+        return field_file
+    img.thumbnail((max_size, max_size))
+    buffer = BytesIO()
+    img.save(buffer, format="JPEG", quality=quality, optimize=True)
+    base_name = field_file.name.rsplit(".", 1)[0]
+    new_file = ContentFile(buffer.getvalue(), name=f"{base_name}.jpg")
+    return new_file
+
+
+class CompressedImagesMixin(models.Model):
+    IMAGE_FIELDS = []
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        for name in self.IMAGE_FIELDS:
+            field_file = getattr(self, name, None)
+            if field_file and not getattr(field_file, "_committed", True):
+                setattr(self, name, compress_image_file(field_file))
+        super().save(*args, **kwargs)
 
 
 def validate_pdf_size(pdf):
@@ -140,14 +183,15 @@ class MenuItem(models.Model):
         return self.label
 
 
-class HeroSlide(models.Model):
+class HeroSlide(CompressedImagesMixin, models.Model):
+    IMAGE_FIELDS = ["image"]
     title = models.CharField("Titre", max_length=200)
     subtitle = models.CharField("Sous-titre / devise", max_length=200, blank=True)
     image = models.ImageField("Image de fond", upload_to="hero/", blank=True, null=True, validators=[validate_image_size])
     video = models.FileField(
         "Vidéo de fond", upload_to="hero/", blank=True, null=True,
-        validators=[FileExtensionValidator(["mp4", "webm", "ogg"])],
-        help_text="Si une vidéo est fournie, elle remplace l'image de fond.",
+        validators=[FileExtensionValidator(["mp4", "webm", "ogg", "mov", "m4v"]), validate_video_size],
+        help_text="Si une vidéo est fournie, elle remplace l'image de fond. Format pi bon: MP4.",
     )
     button_text = models.CharField("Texte du bouton", max_length=100, default="Lire Plus")
     button_url = models.CharField("Lien du bouton", max_length=255, default="/#apropos")
@@ -163,7 +207,8 @@ class HeroSlide(models.Model):
         return self.title
 
 
-class About(models.Model):
+class About(CompressedImagesMixin, models.Model):
+    IMAGE_FIELDS = ["image", "director_photo"]
     title = models.CharField("Titre", max_length=200, default="À Propos de nous")
     text = models.TextField("Texte de présentation")
     image = models.ImageField("Image", upload_to="about/", blank=True, null=True, validators=[validate_image_size])
@@ -204,7 +249,8 @@ class Service(models.Model):
         return self.title
 
 
-class Program(models.Model):
+class Program(CompressedImagesMixin, models.Model):
+    IMAGE_FIELDS = ["image"]
     LEVELS = [
         ("Fondamental", "Fondamental"),
         ("Secondaire", "Secondaire"),
@@ -226,13 +272,14 @@ class Program(models.Model):
         return self.name
 
 
-class GalleryImage(models.Model):
+class GalleryImage(CompressedImagesMixin, models.Model):
+    IMAGE_FIELDS = ["image"]
     title = models.CharField("Titre", max_length=150, blank=True)
     category = models.CharField("Catégorie", max_length=100, default="Général")
     image = models.ImageField("Image", upload_to="galerie/", blank=True, null=True, validators=[validate_image_size])
     video = models.FileField(
         "Vidéo (fichier)", upload_to="galerie/", blank=True, null=True,
-        validators=[FileExtensionValidator(["mp4", "webm", "ogg"])],
+        validators=[FileExtensionValidator(["mp4", "webm", "ogg", "mov", "m4v"]), validate_video_size],
     )
     video_url = models.URLField("Vidéo (lien YouTube)", blank=True, help_text="Ex: https://www.youtube.com/watch?v=...")
     date = models.DateField("Date", auto_now_add=True)
@@ -276,7 +323,8 @@ class Result(models.Model):
         return f"{self.title} ({self.school_year})"
 
 
-class NewsEvent(models.Model):
+class NewsEvent(CompressedImagesMixin, models.Model):
+    IMAGE_FIELDS = ["image"]
     title = models.CharField("Titre", max_length=200)
     image = models.ImageField("Image", upload_to="nouveles/", blank=True, null=True, validators=[validate_image_size])
     body = models.TextField("Texte")
@@ -292,7 +340,8 @@ class NewsEvent(models.Model):
         return self.title
 
 
-class TeamMember(models.Model):
+class TeamMember(CompressedImagesMixin, models.Model):
+    IMAGE_FIELDS = ["photo"]
     name = models.CharField("Nom", max_length=150)
     photo = models.ImageField("Photo", upload_to="equipe/", blank=True, null=True, validators=[validate_image_size])
     position = models.CharField("Position", max_length=150)

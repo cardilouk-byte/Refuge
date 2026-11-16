@@ -3,7 +3,7 @@ from io import BytesIO
 from django.contrib.auth import get_user_model
 from django import forms
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from PIL import Image
 
 from core.models import HeroSlide, SiteSettings
@@ -186,3 +186,30 @@ class AnimationSettingsTest(TestCase):
         self.client.post("/configuration/parametres/", self._payload(show_hero=""))
         home = self.client.get("/", HTTP_HOST="localhost").content.decode()
         self.assertNotIn('id="accueil"', home)
+
+
+class MediaServingTest(TestCase):
+    def test_media_served_even_when_debug_false(self):
+        from core.models import GalleryImage
+        with override_settings(DEBUG=False):
+            item = GalleryImage.objects.create(title="Foto", image=_png("foto.png"))
+            response = self.client.get(item.image.url)
+            self.assertEqual(response.status_code, 200)
+
+    def test_large_image_compressed_on_save(self):
+        from io import BytesIO
+        from PIL import Image
+        from core.models import GalleryImage
+        from django.core.files.uploadedfile import SimpleUploadedFile as S
+        buffer = BytesIO()
+        Image.new("RGB", (3000, 2000), "red").save(buffer, format="JPEG", quality=95)
+        big = S("gwo.jpg", buffer.getvalue(), content_type="image/jpeg")
+        item = GalleryImage.objects.create(title="Gwo foto", image=big)
+        img = Image.open(item.image)
+        self.assertLessEqual(max(img.size), 1600)
+
+    def test_mov_video_accepted(self):
+        from django.core.exceptions import ValidationError
+        from core.models import HeroSlide
+        slide = HeroSlide(title="Video mov", video=_mp4("klip.mov"))
+        slide.full_clean(exclude=["image"])

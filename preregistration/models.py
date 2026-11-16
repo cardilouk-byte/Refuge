@@ -4,8 +4,11 @@ from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from django.db import models
 
+from core.models import CompressedImagesMixin
 
-class PreRegistration(models.Model):
+
+class PreRegistration(CompressedImagesMixin, models.Model):
+    IMAGE_FIELDS = ["photo"]
     STEPS = [
         ("BROUILLON", "Boullon"),
         ("SOUMET", "Soumèt"),
