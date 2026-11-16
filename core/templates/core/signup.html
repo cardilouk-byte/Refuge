@@ -1,0 +1,52 @@
+{% extends "core/base.html" %}
+
+{% block title %}Inscription - {{ site_settings.short_name }}{% endblock %}
+
+{% block content %}
+<section class="login-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-5">
+        <div class="login-card shadow rounded-4" data-aos="fade-up">
+          <div class="text-center mb-4">
+            <span class="login-icon"><i class="bi bi-person-plus-fill"></i></span>
+            <h1 class="login-title">Inscription</h1>
+            <p class="text-muted mb-0">Kreye yon kont pou w ka wè tout rezilta yo.</p>
+          </div>
+          {% if form.errors %}
+          <div class="alert alert-danger py-2">
+            {% for field, errors in form.errors.items %}
+              {% for error in errors %}<div>{{ error }}</div>{% endfor %}
+            {% endfor %}
+          </div>
+          {% endif %}
+          <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="id_username" class="form-label">Nom d'utilisateur</label>
+              <input type="text" name="username" id="id_username" class="form-control" autofocus required>
+              <div class="form-text">Lèt, chif ak karaktè @/./+/-/- sèlman.</div>
+            </div>
+            <div class="mb-3">
+              <label for="id_password1" class="form-label">Mot de passe</label>
+              <input type="password" name="password1" id="id_password1" class="form-control" required>
+            </div>
+            <div class="mb-4">
+              <label for="id_password2" class="form-label">Confirmer le mot de passe</label>
+              <input type="password" name="password2" id="id_password2" class="form-control" required>
+              <div class="form-text">Omwen 8 karaktè, pa twò senp, pa sèlman chif.</div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 rounded-pill">Kreye kont mwen</button>
+          </form>
+          <p class="text-center mt-3 mb-0">
+            Ou gen yon kont deja? <a href="{% url 'login' %}" class="login-back">Konekte</a>
+          </p>
+          <p class="text-center mb-0">
+            <a href="{% url 'home' %}" class="login-back"><i class="bi bi-arrow-left me-1"></i>Retour à l'accueil</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
