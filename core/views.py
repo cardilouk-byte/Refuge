@@ -1,4 +1,6 @@
 from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
 from django.core.mail import send_mail
 from django.shortcuts import redirect, render
 
@@ -57,3 +59,21 @@ def results(request):
     else:
         results_qs = Result.objects.filter(is_public=True)
     return render(request, "core/results.html", {"results": results_qs})
+
+
+def signup(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Bienvenue ! Votre compte a été créé avec succès.")
+            return redirect("home")
+        messages.error(request, "Veuillez corriger les erreurs du formulaire.")
+    else:
+        form = UserCreationForm()
+
+    return render(request, "core/signup.html", {"form": form})
