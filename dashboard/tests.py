@@ -318,3 +318,94 @@ class HeroOverlayTest(TestCase):
         block = home[home.find("San Imaj") - 800:home.find("San Imaj")]
         self.assertNotIn("background-image", block)
         self.assertIn("hero-overlay", block)
+
+
+class ApparenceAvanceTest(TestCase):
+    def setUp(self):
+        SiteSettings.load()
+        User.objects.create_superuser("admin", "admin@lnfcl.edu.ht", "AdminLNFCL2026!")
+        self.client.login(username="admin", password="AdminLNFCL2026!")
+
+    def _payload(self, **overrides):
+        from dashboard.config_forms import SiteSettingsForm
+        form = SiteSettingsForm(instance=SiteSettings.load())
+        data = {}
+        for name, field in form.fields.items():
+            if getattr(field, "edited_fields", None):
+                continue
+            initial = form.get_initial_for_field(field, name)
+            if isinstance(field, forms.BooleanField):
+                if initial:
+                    data[name] = "on"
+            elif initial is not None and str(initial) != "":
+                data[name] = str(initial)
+            elif isinstance(field, forms.IntegerField):
+                data[name] = "0"
+        if not data.get("name"):
+            data["name"] = "LNFCL"
+        data.update(overrides)
+        return data
+
+    def test_degrade_header(self):
+        self.client.post(
+            "/configuration/parametres/",
+            self._payload(degrade_actif="on", degrade_debut="#0f2a63", degrade_fin="#0ea5e9", degrade_angle=135),
+        )
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("linear-gradient(135deg, #0f2a63, #0ea5e9)", home)
+
+    def test_hero_animation_flottant(self):
+        self.client.post("/configuration/parametres/", self._payload(hero_animation="flottant"))
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("hero-anim-flottant", home)
+        self.assertIn("hero-forme-flottante", home)
+
+    def test_hero_animation_aucune(self):
+        self.client.post("/configuration/parametres/", self._payload(hero_animation="aucune"))
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertNotIn("hero-anim-", home)
+
+    def test_style_coins_carres(self):
+        self.client.post("/configuration/parametres/", self._payload(style_coins="carres"))
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("coins-carres", home)
+
+    def test_animations_desactivees(self):
+        self.client.post("/configuration/parametres/", self._payload(activer_animations=""))
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("no-anim", home)
+
+
+class MaintenanceModeTest(TestCase):
+    def setUp(self):
+        SiteSettings.load()
+        User.objects.create_superuser("admin", "admin@lnfcl.edu.ht", "AdminLNFCL2026!")
+
+    def _couper_site(self):
+        settings_obj = SiteSettings.load()
+        settings_obj.site_actif = False
+        settings_obj.message_maintenance = "Nap fè reparasyon!"
+        settings_obj.save()
+
+    def test_anonymous_sees_maintenance(self):
+        self._couper_site()
+        response = self.client.get("/", HTTP_HOST="localhost")
+        self.assertEqual(response.status_code, 503)
+        self.assertIn("Nap fè reparasyon!", response.content.decode())
+
+    def test_superuser_still_sees_site(self):
+        self._couper_site()
+        self.client.login(username="admin", password="AdminLNFCL2026!")
+        response = self.client.get("/", HTTP_HOST="localhost")
+        self.assertEqual(response.status_code, 200)
+
+    def test_connexion_stays_open(self):
+        self._couper_site()
+        response = self.client.get("/connexion/", HTTP_HOST="localhost")
+        self.assertEqual(response.status_code, 200)
+
+    def test_preinscription_stays_open(self):
+        self._couper_site()
+        response = self.client.get("/preinscription/", HTTP_HOST="localhost")
+        self.assertIn(response.status_code, (200, 302))
+        self.assertNotEqual(response.status_code, 503)

@@ -588,3 +588,104 @@ h1, h2, h3 { color: var(--dark); }
 /* ===== Position du texte hero ===== */
 .hero-content.hero-text-center { text-align: center; margin-inline: auto; }
 .hero-content.hero-text-right { text-align: right; margin-left: auto; margin-right: 0; }
+
+/* ===== Animations du hero (inspirées du Gestionnaire Éducatif) ===== */
+.hero { position: relative; overflow: hidden; }
+.hero.hero-anim-degrade-anime {
+  background: linear-gradient(135deg, var(--primary), #0ea5e9);
+  background-size: 200% 200%;
+  animation: degradeAnimeMouvement 12s ease-in-out infinite;
+}
+@keyframes degradeAnimeMouvement {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.hero.hero-anim-zoom-lent .hero-slide.active { animation: zoomLent 18s ease-in-out infinite alternate; }
+@keyframes zoomLent {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.12); }
+}
+.hero-forme-flottante {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  z-index: 1;
+  pointer-events: none;
+}
+.hero-forme-flottante-1 {
+  width: 180px; height: 180px; top: -60px; left: -40px;
+  animation: flotter1 14s ease-in-out infinite;
+}
+.hero-forme-flottante-2 {
+  width: 120px; height: 120px; bottom: -30px; right: 8%;
+  animation: flotter2 10s ease-in-out infinite;
+}
+@keyframes flotter1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(40px, 30px); }
+}
+@keyframes flotter2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-30px, -25px); }
+}
+.hero-particule {
+  position: absolute;
+  bottom: -10px;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  z-index: 1;
+  pointer-events: none;
+  animation: particuleMontee 9s linear infinite;
+}
+@keyframes particuleMontee {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-110vh); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero.hero-anim-degrade-anime,
+  .hero.hero-anim-zoom-lent .hero-slide.active,
+  .hero-forme-flottante,
+  .hero-particule {
+    animation: none;
+  }
+}
+
+/* ===== Style des coins (Configuration) ===== */
+body.coins-tres_arrondis .btn,
+body.coins-tres_arrondis .card,
+body.coins-tres_arrondis .program-card,
+body.coins-tres_arrondis .team-card,
+body.coins-tres_arrondis .service-card { border-radius: 1.75rem; }
+body.coins-carres .btn,
+body.coins-carres .card,
+body.coins-carres .program-card,
+body.coins-carres .team-card,
+body.coins-carres .service-card { border-radius: 0; }
+
+/* ===== Animations désactivées (Configuration) ===== */
+body.no-anim *,
+body.no-anim *::before,
+body.no-anim *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* ===== Logos du pied de page ===== */
+.footer-logos {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.footer-logos img {
+  height: 52px;
+  width: auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  object-fit: contain;
+}

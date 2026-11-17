@@ -53,6 +53,7 @@ function initHeroSlider() {
 
 /* ===== AOS (animations au scroll) ===== */
 function initAOS() {
+  if (window.ACTIVER_ANIMATIONS === false) return;
   if (window.AOS) {
     AOS.init({ duration: window.AOS_DURATION || 800, once: true, offset: 80 });
   }

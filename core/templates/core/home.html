@@ -5,7 +5,20 @@
 {% block content %}
 {# ===== HERO / SLIDER ===== #}
 {% if site_settings.show_hero %}
-<section class="hero" id="accueil">
+<section class="hero{% if site_settings.activer_animations and site_settings.hero_animation != 'aucune' %} hero-anim-{{ site_settings.hero_animation }}{% endif %}" id="accueil">
+  {% if site_settings.activer_animations and site_settings.hero_animation == 'flottant' %}
+  <div class="hero-forme-flottante hero-forme-flottante-1"></div>
+  <div class="hero-forme-flottante hero-forme-flottante-2"></div>
+  {% endif %}
+  {% if site_settings.activer_animations and site_settings.hero_animation == 'particules' %}
+  <div class="hero-particule" style="left: 8%; animation-delay: 0s;"></div>
+  <div class="hero-particule" style="left: 22%; animation-delay: 2s;"></div>
+  <div class="hero-particule" style="left: 38%; animation-delay: 4s;"></div>
+  <div class="hero-particule" style="left: 55%; animation-delay: 1s;"></div>
+  <div class="hero-particule" style="left: 70%; animation-delay: 5s;"></div>
+  <div class="hero-particule" style="left: 85%; animation-delay: 3s;"></div>
+  <div class="hero-particule" style="left: 93%; animation-delay: 6s;"></div>
+  {% endif %}
   <div class="hero-slides effect-{{ site_settings.slider_effect|default:'fade' }}">
     {% for slide in slides %}
     <div class="hero-slide{% if forloop.first %} active{% endif %}" {% if slide.image and not slide.video %}style="background-image:url('{{ slide.image.url }}')"{% endif %}>

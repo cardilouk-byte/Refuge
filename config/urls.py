@@ -4,9 +4,7 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.static import serve as static_serve
 
-from config.settings import get_env
-
-ADMIN_URL = get_env("ADMIN_URL", "kontwol/").strip("/") + "/"
+from config.settings import ADMIN_URL
 
 urlpatterns = [
     path(ADMIN_URL, admin.site.urls),

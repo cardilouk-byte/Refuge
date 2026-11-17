@@ -150,6 +150,81 @@ class SiteSettings(models.Model):
         "Favicon", upload_to="site/", blank=True, null=True,
         validators=[validate_image_size, FileExtensionValidator(["png", "jpg", "jpeg", "ico", "webp"])],
     )
+    site_actif = models.BooleanField(
+        "Site actif", default=True,
+        help_text="Si décoché, seuls les administrateurs voient le site ; tout le monde voit la page de maintenance.",
+    )
+    message_maintenance = models.TextField(
+        "Message de maintenance", blank=True,
+        default="Sit la gen reparasyon kounye a. Tanpri tounen pi pita. Mèsi!",
+    )
+    DEGRADE_PRESETS = {
+        "ocean": ("#0f2a63", "#0ea5e9"),
+        "coucher_soleil": ("#f97316", "#db2777"),
+        "foret": ("#14532d", "#22c55e"),
+        "violet_royal": ("#4c1d95", "#7c3aed"),
+        "rose_dore": ("#be123c", "#f59e0b"),
+        "nuit": ("#0f172a", "#1e3a8a"),
+    }
+    DEGRADE_STYLES = [
+        ("personnalise", "Pèrsonalizé (koulè mwen yo)"),
+        ("ocean", "Ble oseyan"),
+        ("coucher_soleil", "Kouche solèy"),
+        ("foret", "Fòè"),
+        ("violet_royal", "Vwayèt woyal"),
+        ("rose_dore", "Woz dore"),
+        ("nuit", "Nwi etwalè"),
+    ]
+    degrade_actif = models.BooleanField(
+        "Utiliser un dégradé pour l'en-tête", default=False,
+        help_text="Si coché, l'en-tête utilise un dégradé de deux couleurs au lieu d'une couleur unie.",
+    )
+    degrade_style = models.CharField(
+        "Style de dégradé", max_length=20,
+        choices=DEGRADE_STYLES, default="personnalise",
+    )
+    degrade_debut = models.CharField("Dégradé — couleur de départ", max_length=7, default="#0f2a63")
+    degrade_fin = models.CharField("Dégradé — couleur de fin", max_length=7, default="#0ea5e9")
+    degrade_angle = models.PositiveSmallIntegerField(
+        "Dégradé — angle (°)", default=135,
+        help_text="0° = du bas vers le haut, 90° = de gauche à droite, 135° = diagonale.",
+    )
+    HERO_ANIMATIONS = [
+        ("aucune", "Okenn"),
+        ("degrade_anime", "Dégradé animé (mouvement lent)"),
+        ("flottant", "Fòm flottantes"),
+        ("particules", "Patikil"),
+        ("zoom_lent", "Zoom lent (effet Ken Burns)"),
+    ]
+    hero_animation = models.CharField(
+        "Animation du bandeau d'accueil", max_length=20,
+        choices=HERO_ANIMATIONS, default="aucune",
+    )
+    STYLE_COINS = [
+        ("arrondis", "Awondi (modèn)"),
+        ("tres_arrondis", "Trè awondi (dous)"),
+        ("carres", "Karè (sòb)"),
+    ]
+    style_coins = models.CharField(
+        "Style des coins (boutons, cartes)", max_length=20,
+        choices=STYLE_COINS, default="arrondis",
+    )
+    activer_animations = models.BooleanField(
+        "Activer les animations", default=True,
+        help_text="Active les animations d'apparition, de survol et de transition sur tout le site.",
+    )
+    footer_logo_1 = models.ImageField(
+        "Logo du pied de page (1)", upload_to="site/footer/", blank=True, null=True,
+        validators=[validate_image_size],
+    )
+    footer_logo_2 = models.ImageField(
+        "Logo du pied de page (2)", upload_to="site/footer/", blank=True, null=True,
+        validators=[validate_image_size],
+    )
+    footer_logo_3 = models.ImageField(
+        "Logo du pied de page (3)", upload_to="site/footer/", blank=True, null=True,
+        validators=[validate_image_size],
+    )
 
     class Meta:
         verbose_name = "Paramètres du site"
