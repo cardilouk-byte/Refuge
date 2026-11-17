@@ -12,7 +12,9 @@
       {% if slide.video %}
         <video class="hero-video" src="{{ slide.video.url }}" autoplay muted loop playsinline></video>
       {% endif %}
-      <div class="hero-overlay" style="background-color: rgba(13, 110, 253, {% widthratio site_settings.hero_overlay_opacity 100 1 %})"></div>
+      {% if not slide.image and not slide.video %}
+        <div class="hero-overlay" style="background-color: rgba(13, 110, 253, {% widthratio site_settings.hero_overlay_opacity 100 1 %})"></div>
+      {% endif %}
       <div class="container hero-content hero-text-{{ site_settings.hero_text_position|default:'left' }}">
         <h1 class="hero-title">{{ slide.title }}</h1>
         {% if slide.subtitle %}<p class="hero-subtitle">&laquo; {{ slide.subtitle }} &raquo;</p>{% endif %}

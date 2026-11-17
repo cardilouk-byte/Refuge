@@ -298,3 +298,23 @@ class OptionalFieldsTest(TestCase):
     def test_active_checkbox_checked_by_default(self):
         response = self.client.get("/configuration/slides/nouveau/")
         self.assertIn("checked", response.content.decode())
+
+
+class HeroOverlayTest(TestCase):
+    def setUp(self):
+        SiteSettings.load()
+
+    def test_no_overlay_when_slide_has_image(self):
+        slide = HeroSlide(title="Ak Imaj", order=99)
+        slide.image.save("overlay-test.jpg", _png("overlay-test.jpg"), save=True)
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        block = home[home.find("Ak Imaj") - 800:home.find("Ak Imaj")]
+        self.assertIn("background-image", block)
+        self.assertNotIn("hero-overlay", block)
+
+    def test_overlay_kept_when_slide_has_no_image(self):
+        HeroSlide.objects.create(title="San Imaj", order=99)
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        block = home[home.find("San Imaj") - 800:home.find("San Imaj")]
+        self.assertNotIn("background-image", block)
+        self.assertIn("hero-overlay", block)
