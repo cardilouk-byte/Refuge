@@ -1,0 +1,30 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Devoirs{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0"><i class="bi bi-journal-check"></i> Devoirs</h1>
+  {% if can_manage %}<a href="{% url 'homework:create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nouvo devoir</a>{% endif %}
+</div>
+{% for devoir in devoirs %}
+<div class="card mb-3 shadow-sm">
+  <div class="card-body">
+    <div class="d-flex justify-content-between">
+      <h5 class="mb-1">{{ devoir.title }}</h5>
+      <span class="badge bg-secondary">{{ devoir.classroom }}</span>
+    </div>
+    {% if devoir.subject %}<p class="text-muted mb-1"><i class="bi bi-book"></i> {{ devoir.subject }}</p>{% endif %}
+    <p class="mb-2">{{ devoir.description|linebreaksbr }}</p>
+    <small class="text-muted"><i class="bi bi-calendar-event"></i> Remise: <strong>{{ devoir.due_date }}</strong></small>
+    {% if devoir.fichier %}<a href="{{ devoir.fichier.url }}" class="ms-3 small"><i class="bi bi-download"></i> Fichier joint</a>{% endif %}
+    {% if can_manage %}
+    <div class="mt-2">
+      <a href="{% url 'homework:update' devoir.pk %}" class="btn btn-sm btn-outline-primary">Modifye</a>
+      <a href="{% url 'homework:delete' devoir.pk %}" class="btn btn-sm btn-outline-danger">Efase</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% empty %}
+<p class="text-muted">Pa gen devoir pou lemoman nan.</p>
+{% endfor %}
+{% endblock %}

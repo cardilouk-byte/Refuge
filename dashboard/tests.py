@@ -409,3 +409,57 @@ class MaintenanceModeTest(TestCase):
         response = self.client.get("/preinscription/", HTTP_HOST="localhost")
         self.assertIn(response.status_code, (200, 302))
         self.assertNotEqual(response.status_code, 503)
+
+
+class BadgeTest(TestCase):
+    def setUp(self):
+        SiteSettings.load()
+        User.objects.create_superuser("admin", "admin@lnfcl.edu.ht", "AdminLNFCL2026!")
+        self.student_user = User.objects.create_user("eleve1", password="Eleve2026!", role="ELEVE")
+        from students.models import Student
+        self.student = Student.objects.create(matricule="ELV-00099", first_name="Jean", last_name="Pierre", user=self.student_user)
+
+    def test_student_badge_shows_qr(self):
+        self.client.login(username="eleve1", password="Eleve2026!")
+        response = self.client.get("/badge/")
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertIn("<svg", content)
+        self.assertIn("ELV-00099", content)
+
+    def test_badge_verify_valid_and_invalid(self):
+        response = self.client.get("/badge/verifie/ELV-00099/", HTTP_HOST="localhost")
+        self.assertIn("Badge valid", response.content.decode())
+        response = self.client.get("/badge/verifie/PA-BON/", HTTP_HOST="localhost")
+        self.assertIn("Badge pa valid", response.content.decode())
+
+    def test_badge_requires_login(self):
+        self.assertEqual(self.client.get("/badge/").status_code, 302)
+
+
+class SiteThemesTest(TestCase):
+    def setUp(self):
+        SiteSettings.load()
+        User.objects.create_superuser("admin", "admin@lnfcl.edu.ht", "AdminLNFCL2026!")
+        self.client.login(username="admin", password="AdminLNFCL2026!")
+
+    def test_themes_gallery_shows_20(self):
+        response = self.client.get("/configuration/model-sit/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ble Oseyan")
+
+    def test_apply_theme_changes_site(self):
+        response = self.client.post("/configuration/model-sit/nwi-etwale/aplike/", follow=True)
+        self.assertEqual(response.status_code, 200)
+        settings_obj = SiteSettings.load()
+        self.assertEqual(settings_obj.primary_color, "#3b82f6")
+        self.assertTrue(settings_obj.degrade_actif)
+        self.assertEqual(settings_obj.title_font, "Oswald")
+        home = self.client.get("/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("linear-gradient(160deg, #0f172a, #1e3a8a)", home)
+
+    def test_themes_superadmin_only(self):
+        User.objects.create_user("direction", password="Direction2026!", role="DIRECTION", is_staff=True)
+        self.client.login(username="direction", password="Direction2026!")
+        response = self.client.get("/configuration/model-sit/")
+        self.assertEqual(response.status_code, 403)

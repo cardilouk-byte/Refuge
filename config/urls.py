@@ -17,6 +17,10 @@ urlpatterns = [
     path("", include("document_editor.urls")),
     path("", include("excel_manager.urls")),
     path("", include("media_library.urls")),
+    path("devoirs/", include("homework.urls")),
+    path("examens/", include("exams.urls")),
+    path("bibliotheque/", include("library.urls")),
+    path("", include("students.urls")),
     path("", include("core.urls")),
 ]
 

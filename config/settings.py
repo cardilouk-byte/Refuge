@@ -50,6 +50,9 @@ INSTALLED_APPS = [
     "document_editor",
     "excel_manager",
     "media_library",
+    "homework",
+    "exams",
+    "library",
 ]
 
 MIDDLEWARE = [

@@ -124,3 +124,46 @@ def config_delete(request, section, pk):
         messages.success(request, "Eleman an efase.")
         return redirect("dashboard:config_list", section=section)
     return render(request, "dashboard/config/object_confirm_delete.html", {"section": section, "cfg": cfg, "obj": obj})
+
+
+@superadmin_required
+def config_themes(request):
+    from core.models import SiteSettings
+
+    from .themes import SITE_THEMES
+
+    settings_obj = SiteSettings.load()
+    return render(
+        request,
+        "dashboard/config/themes.html",
+        {"themes": SITE_THEMES, "active_theme": getattr(settings_obj, "active_theme_key", "")},
+    )
+
+
+@superadmin_required
+def config_theme_apply(request, key):
+    from django.contrib import messages
+
+    from core.models import SiteSettings
+
+    from .themes import get_theme
+
+    if request.method == "POST":
+        theme = get_theme(key)
+        if theme:
+            settings_obj = SiteSettings.load()
+            settings_obj.primary_color = theme["primary"]
+            settings_obj.header_bg_color = theme["header_bg"]
+            settings_obj.header_text_color = theme["header_text"]
+            settings_obj.footer_bg_color = theme["footer_bg"]
+            settings_obj.footer_text_color = theme["footer_text"]
+            settings_obj.degrade_actif = theme["degrade"]
+            settings_obj.degrade_debut = theme["debut"]
+            settings_obj.degrade_fin = theme["fin"]
+            settings_obj.degrade_angle = theme["angle"]
+            settings_obj.title_font = theme["title_font"]
+            settings_obj.body_font = theme["body_font"]
+            settings_obj.save()
+            messages.success(request, f"Modèl « {theme['label']} » aplike!")
+        return redirect("dashboard:config_themes")
+    return redirect("dashboard:config_themes")
