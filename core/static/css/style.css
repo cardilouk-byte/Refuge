@@ -689,3 +689,45 @@ body.no-anim *::after {
   padding: 6px 10px;
   object-fit: contain;
 }
+
+/* ===== Paj nèf (enpsire hw.com) ===== */
+.calendar-card { background: var(--white, #fff); border-radius: 16px; box-shadow: 0 6px 24px rgba(0,0,0,.06); overflow: hidden; }
+.calendar-table { border-collapse: collapse; }
+.calendar-table th { background: var(--primary); color: #fff; padding: .6rem .4rem; font-size: .8rem; text-transform: uppercase; letter-spacing: .4px; text-align: center; }
+.calendar-table td { vertical-align: top; border: 1px solid #eef1f6; height: 92px; padding: .35rem; width: 14.28%; }
+.cal-day { font-size: .8rem; font-weight: 600; color: #6b7280; }
+.cal-today { background: color-mix(in srgb, var(--primary) 8%, #fff); }
+.cal-today .cal-day::after { content: ""; display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); margin-top: 2px; }
+.cal-outside { background: #fafbfd; }
+.cal-event { display: block; font-size: .66rem; border-radius: 6px; background: var(--primary); color: #fff; padding: 2px 4px; margin-top: 3px; text-decoration: none; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.cal-event:hover { filter: brightness(1.1); color: #fff; }
+.calendar-month { font-family: var(--font-title); font-size: 1.6rem; margin: 0; }
+.event-item { display: flex; gap: .9rem; align-items: flex-start; background: var(--white, #fff); border-radius: 14px; padding: 1rem; box-shadow: 0 4px 16px rgba(0,0,0,.05); }
+.event-date-badge { flex-shrink: 0; width: 54px; text-align: center; background: var(--primary); color: #fff; border-radius: 12px; padding: .45rem 0; font-weight: 700; font-size: 1.15rem; line-height: 1.05; }
+.event-date-badge small { display: block; font-size: .62rem; font-weight: 500; text-transform: uppercase; }
+.life-card { background: var(--white, #fff); border-radius: 16px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,.07); transition: transform .25s, box-shadow .25s; }
+.life-card:hover { transform: translateY(-5px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
+.life-card-img { width: 100%; height: 160px; object-fit: cover; background: linear-gradient(135deg, var(--primary), #0ea5e9); color: #fff; font-size: 2.4rem; }
+.faq-item { border: none; border-radius: 12px !important; overflow: hidden; margin-bottom: .75rem; box-shadow: 0 3px 12px rgba(0,0,0,.05); }
+.faq-item .accordion-button { font-weight: 600; }
+.faq-item .accordion-button:not(.collapsed) { background: color-mix(in srgb, var(--primary) 8%, #fff); color: var(--primary); box-shadow: none; }
+.apply-intro { border: none; border-radius: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.07); }
+.apply-step { display: flex; gap: 1rem; background: var(--white, #fff); border-radius: 14px; padding: 1.2rem; box-shadow: 0 4px 16px rgba(0,0,0,.05); }
+.apply-step-num { flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 700; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; }
+.apply-cta { border-radius: 18px; background: color-mix(in srgb, var(--primary) 6%, #fff); }
+.dept-card { border: none; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,.05); }
+.inspire-band { background: #0f1e3d; padding: 4.5rem 0; }
+.inspire-line { font-family: var(--font-title); color: #fff; font-size: clamp(1.4rem, 3.4vw, 2.4rem); margin: .35rem 0; }
+.inspire-tag { color: #7dd3fc; font-weight: 700; letter-spacing: 1px; margin: 1rem 0 0; font-size: 1.05rem; }
+.testimonial-card { max-width: 640px; background: var(--white, #fff); border-radius: 20px; padding: 2.4rem 2.2rem 2rem; box-shadow: 0 8px 30px rgba(0,0,0,.08); }
+.testimonial-photo { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem; box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 25%, #fff); }
+.testimonial-photo-initial { display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; background: var(--primary); color: #fff; font-family: var(--font-title); font-size: 2rem; }
+.testimonial-quote { font-size: 1.1rem; line-height: 1.65; margin-bottom: 1rem; }
+.testimonial-name { font-weight: 600; margin: 0; }
+.testimonial-indicators { position: static; margin-top: 1.4rem; }
+.testimonial-indicators [data-bs-target] { background: var(--primary); border-radius: 50%; width: 9px; height: 9px; opacity: .3; }
+.testimonial-indicators .active { opacity: 1; }
+.dropdown-menu { border: none; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.14); }
+.dropdown-item { padding: .5rem 1.1rem; font-size: .92rem; }
+.dropdown-item:hover { background: color-mix(in srgb, var(--primary) 10%, #fff); color: var(--primary); }
+@media (prefers-reduced-motion: reduce) { .life-card, .cal-event { transition: none; } }

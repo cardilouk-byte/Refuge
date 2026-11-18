@@ -104,6 +104,8 @@ class SiteSettings(models.Model):
     show_news = models.BooleanField("Afficher la section Nouvelles", default=True)
     show_team = models.BooleanField("Afficher la section Équipe", default=True)
     show_contact = models.BooleanField("Afficher la section Contact", default=True)
+    show_school_life = models.BooleanField("Afficher la section Vie scolaire (klib / espò)", default=True)
+    show_testimonials = models.BooleanField("Afficher la section Témoignages", default=True)
     copyright_text = models.CharField("Copyright", max_length=200, blank=True)
     hero_overlay_opacity = models.PositiveIntegerField(
         "Opacité de la couche bleue du hero (%)", default=55, help_text="0 à 90"
@@ -144,6 +146,12 @@ class SiteSettings(models.Model):
         "Position du texte du hero", max_length=10,
         choices=HERO_POSITIONS, default="left",
     )
+    hashtag = models.CharField("Hashtag (marque sociale)", max_length=60, blank=True, default="#LNFCLOuvè")
+    inspire_texts = models.TextField(
+        "Déclarations d'inspiration (une phrase par ligne)", blank=True,
+        help_text="Ex: La pou w kifikou\nLa pou w dekouvri pasyon w",
+    )
+    admission_intro = models.TextField("Tèks entwodiksyon paj enskripsyon", blank=True)
     seo_title = models.CharField("Titre SEO", max_length=200, blank=True)
     seo_description = models.TextField("Description SEO", blank=True)
     favicon = models.ImageField(
@@ -246,6 +254,11 @@ class SiteSettings(models.Model):
 class MenuItem(models.Model):
     label = models.CharField("Libellé", max_length=100)
     url = models.CharField("Lien", max_length=255, help_text="Ex: /#apropos ou /resultats/")
+    parent = models.ForeignKey(
+        "self", verbose_name="Meni paran (sous-men)", on_delete=models.CASCADE,
+        null=True, blank=True, related_name="children",
+        limit_choices_to={"parent__isnull": True},
+    )
     order = models.PositiveIntegerField("Ordre", default=0)
     is_visible = models.BooleanField("Affiché", default=True)
 
@@ -297,6 +310,7 @@ class About(CompressedImagesMixin, models.Model):
     mission = models.TextField("Mission", blank=True)
     vision = models.TextField("Vision", blank=True)
     values = models.TextField("Valeurs", blank=True)
+    history = models.TextField("Istwa lekòl la", blank=True)
 
     class Meta:
         verbose_name = "À Propos"
@@ -432,6 +446,83 @@ class TeamMember(CompressedImagesMixin, models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Testimonial(CompressedImagesMixin, models.Model):
+    IMAGE_FIELDS = ["photo"]
+    name = models.CharField("Nom", max_length=120)
+    class_name = models.CharField("Klas / Pozisyon", max_length=100, blank=True)
+    quote = models.TextField("Témoignage")
+    photo = models.ImageField("Photo", upload_to="temwayaj/", blank=True, null=True, validators=[validate_image_size])
+    is_published = models.BooleanField("Publié", default=True)
+    order = models.PositiveIntegerField("Ordre", default=0)
+
+    class Meta:
+        verbose_name = "Témoignage"
+        verbose_name_plural = "Témoignages"
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.name
+
+
+class Club(CompressedImagesMixin, models.Model):
+    IMAGE_FIELDS = ["image"]
+    CATEGORIES = [
+        ("KLUB", "Klib"),
+        ("ESPO", "Espò"),
+        ("AKTIVITE", "Aktivite"),
+        ("ATIZANAL", "Atizana"),
+        ("LOT", "Lòt"),
+    ]
+    name = models.CharField("Nom", max_length=150)
+    category = models.CharField("Catégorie", max_length=20, choices=CATEGORIES, default="KLUB")
+    description = models.TextField("Description")
+    supervisor = models.CharField("Pwofesè responsab", max_length=150, blank=True)
+    schedule = models.CharField("Joun / lè", max_length=150, blank=True)
+    image = models.ImageField("Image", upload_to="klib/", blank=True, null=True, validators=[validate_image_size])
+    is_active = models.BooleanField("Actif", default=True)
+    order = models.PositiveIntegerField("Ordre", default=0)
+
+    class Meta:
+        verbose_name = "Klib / Aktivite"
+        verbose_name_plural = "Klib & Aktivite"
+        ordering = ["order", "name"]
+
+    def __str__(self):
+        return self.name
+
+
+class SchoolEvent(models.Model):
+    title = models.CharField("Titre", max_length=200)
+    description = models.TextField("Description", blank=True)
+    location = models.CharField("Lieu", max_length=200, blank=True)
+    date = models.DateField("Date")
+    end_date = models.DateField("Date de fin (facultatif)", null=True, blank=True)
+    is_published = models.BooleanField("Publié", default=True)
+
+    class Meta:
+        verbose_name = "Événement (calendrier)"
+        verbose_name_plural = "Événements (calendrier)"
+        ordering = ["date"]
+
+    def __str__(self):
+        return "{} ({})".format(self.title, self.date)
+
+
+class FAQ(models.Model):
+    question = models.CharField("Question", max_length=250)
+    answer = models.TextField("Réponse")
+    is_published = models.BooleanField("Publié", default=True)
+    order = models.PositiveIntegerField("Ordre", default=0)
+
+    class Meta:
+        verbose_name = "FAQ"
+        verbose_name_plural = "FAQ"
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return self.question
 
 
 class ContactMessage(models.Model):

@@ -191,6 +191,32 @@
 {% endif %}
 
 {# ===== GALERIE ===== #}
+{% if site_settings.show_school_life %}
+<section class="section" id="lavi-lekol">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Lavi Lekòl la</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
+    <div class="row g-4 mt-2">
+      {% for club in clubs %}
+      <div class="col-md-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}00">
+        <a href="{% url 'school_life' %}" class="life-card h-100 text-decoration-none text-reset d-block">
+          {% if club.image %}<img src="{{ club.image.url }}" alt="{{ club.name }}" class="life-card-img">{% else %}<div class="life-card-img d-flex align-items-center justify-content-center"><i class="bi bi-trophy"></i></div>{% endif %}
+          <div class="p-3">
+            <h5 class="mb-1">{{ club.name }}</h5>
+            <p class="text-muted small mb-0">{{ club.description|truncatechars:110 }}</p>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      {% endfor %}
+      <div class="text-center mt-3">
+        <a href="{% url 'school_life' %}" class="btn btn-outline-primary rounded-pill px-4">Tout klib &amp; espò <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 {% if site_settings.show_gallery %}
 <section class="section section-alt" id="galerie">
   <div class="container">
@@ -291,6 +317,46 @@
 {% endif %}
 
 {# ===== CONTACT ===== #}
+{% if site_settings.hashtag or site_settings.inspire_texts %}
+<section class="inspire-band">
+  <div class="container text-center">
+    {% if site_settings.inspire_texts %}
+      {% for line in site_settings.inspire_texts.splitlines %}
+      <p class="inspire-line" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}50">{{ line }}</p>
+      {% endfor %}
+    {% endif %}
+    {% if site_settings.hashtag %}<p class="inspire-tag" data-aos="zoom-in">{{ site_settings.hashtag }}</p>{% endif %}
+  </div>
+</section>
+{% endif %}
+
+{% if site_settings.show_testimonials and testimonials %}
+<section class="section" id="temwayaj">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Témwayaj — moun sa yo, se nou</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
+    <div id="testimonialCarousel" class="carousel slide carousel-fade mt-4" data-bs-ride="carousel" data-bs-interval="7000">
+      <div class="carousel-inner">
+        {% for t in testimonials %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <div class="testimonial-card mx-auto text-center">
+            {% if t.photo %}<img src="{{ t.photo.url }}" alt="{{ t.name }}" class="testimonial-photo">{% else %}<div class="testimonial-photo testimonial-photo-initial">{{ t.name|slice:":1" }}</div>{% endif %}
+            <p class="testimonial-quote">&laquo; {{ t.quote }} &raquo;</p>
+            <p class="testimonial-name">{{ t.name }}{% if t.class_name %} <span class="text-muted">— {{ t.class_name }}</span>{% endif %}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% if testimonials|length > 1 %}
+      <div class="carousel-indicators testimonial-indicators">
+        {% for t in testimonials %}<button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="{{ t.name }}"></button>{% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 {% if site_settings.show_contact %}
 <section class="section" id="contact">
   <div class="container">

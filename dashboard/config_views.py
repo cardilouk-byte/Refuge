@@ -3,14 +3,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from accounts.views import superadmin_required
 from core.models import (
-    About, GalleryImage, HeroSlide, MenuItem, NewsEvent, Program, Result,
-    Service, SiteSettings, TeamMember,
+    About, Club, FAQ, GalleryImage, HeroSlide, MenuItem, NewsEvent, Program,
+    Result, SchoolEvent, Service, SiteSettings, TeamMember, Testimonial,
 )
 
 from .config_forms import (
-    AboutForm, GalleryImageForm, HeroSlideForm, MenuItemForm, NewsEventForm,
-    ProgramForm, ResultForm, ServiceForm, SiteSettingsForm, TeamMemberForm,
-    SETTINGS_TABS,
+    AboutForm, ClubForm, FAQForm, GalleryImageForm, HeroSlideForm, MenuItemForm,
+    NewsEventForm, ProgramForm, ResultForm, SchoolEventForm, ServiceForm,
+    SiteSettingsForm, TeamMemberForm, TestimonialForm, SETTINGS_TABS,
 )
 
 SECTIONS = {
@@ -23,6 +23,10 @@ SECTIONS = {
     "nouveles": {"model": NewsEvent, "form": NewsEventForm, "label": "Nouvèl / Evènman", "icon": "bi-megaphone", "desc": "Aktualite lekòl la"},
     "ekip": {"model": TeamMember, "form": TeamMemberForm, "label": "Ekip / Pwofesè", "icon": "bi-people", "desc": "Manm ekip pedagojik la"},
     "rezilta": {"model": Result, "form": ResultForm, "label": "Rezilta", "icon": "bi-file-earmark-pdf", "desc": "Fichye rezilta PDF"},
+    "temwayaj": {"model": Testimonial, "form": TestimonialForm, "label": "Témwayaj", "icon": "bi-chat-quote", "desc": "Témwayaj elèv / fanmi (carousel dakèy)"},
+    "klib": {"model": Club, "form": ClubForm, "label": "Klib / Espò / Aktivite", "icon": "bi-trophy", "desc": "Vye lekòl la (klib, espò, aktivite)"},
+    "evenman": {"model": SchoolEvent, "form": SchoolEventForm, "label": "Kalandriye Evènman", "icon": "bi-calendar-event", "desc": "Evènman ki paret nan kalandriye a"},
+    "faq": {"model": FAQ, "form": FAQForm, "label": "FAQ", "icon": "bi-patch-question", "desc": "Kesyon moun poze souvan"},
 }
 
 

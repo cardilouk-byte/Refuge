@@ -119,3 +119,73 @@ class SignupTests(TestCase):
         self.client.login(username="user1", password="pass12345")
         response = self.client.get(reverse("signup"))
         self.assertRedirects(response, reverse("home"))
+
+
+class HwInspiredPagesTests(TestCase):
+    """Paj piblik nèf enpsire pa konsepsyon hw.com."""
+
+    @classmethod
+    def setUpTestData(cls):
+        from datetime import time
+        from datetime import date as date_cls
+
+        from .models import Club, FAQ, MenuItem, SchoolEvent, Testimonial
+
+        cls.parent_item = MenuItem.objects.create(label="Lekòl la", url="/apropo/", order=1)
+        cls.child_item = MenuItem.objects.create(label="Istwa", url="/apropo/", parent=cls.parent_item, order=1)
+        cls.hidden_child = MenuItem.objects.create(label="Ki pa vizib", url="/apropo/", parent=cls.parent_item, is_visible=False, order=2)
+        Testimonial.objects.create(name="Nathalie Jean", class_name="3ème AF", quote="Lekòl sa a chanje lavi mwen.")
+        Club.objects.create(name="Klib Débat", category="KLUB", description="Aprann pale devan moun.")
+        cls.event = SchoolEvent.objects.create(
+            title="Journée Culturelle",
+            date=date_cls(2099, 5, 8),
+            location="Cour d'honneur",
+        )
+        FAQ.objects.create(question="Ki lè enskripsyon an kòmanse?", answer="Toulepremye setanm.")
+
+    def test_new_pages_return_200(self):
+        for url_name in ["calendar", "school_life", "faq", "how_to_apply", "about_page"]:
+            response = self.client.get(reverse(url_name), HTTP_HOST="localhost")
+            self.assertEqual(response.status_code, 200, url_name)
+
+    def test_calendar_shows_event_in_grid(self):
+        response = self.client.get(reverse("calendar") + "?m=2099-05", HTTP_HOST="localhost")
+        self.assertContains(response, "Journée Culturelle")
+        self.assertContains(response, "cal-event")
+
+    def test_faq_shows_published_questions(self):
+        response = self.client.get(reverse("faq"), HTTP_HOST="localhost")
+        self.assertContains(response, "Ki lè enskripsyon an kòmanse?")
+
+    def test_apply_page_shows_steps_and_cta(self):
+        response = self.client.get(reverse("how_to_apply"), HTTP_HOST="localhost")
+        self.assertContains(response, "Etap enskripsyon yo")
+        self.assertContains(response, "/preinscription/")
+
+    def test_mega_menu_renders_children_without_duplication(self):
+        html = self.client.get(reverse("home"), HTTP_HOST="localhost").content.decode()
+        self.assertIn("dropdown-toggle", html)
+        self.assertIn("Istwa", html)
+        self.assertNotIn("Ki pa vizib", html)
+        self.assertEqual(html.count(">Lekòl la<"), 1)
+
+    def test_home_sections_respect_toggles(self):
+        settings_obj = SiteSettings.load()
+        response = self.client.get(reverse("home"), HTTP_HOST="localhost")
+        self.assertContains(response, "lavi-lekol")
+        self.assertContains(response, "testimonialCarousel")
+        settings_obj.show_school_life = False
+        settings_obj.show_testimonials = False
+        settings_obj.save()
+        html = self.client.get(reverse("home"), HTTP_HOST="localhost").content.decode()
+        self.assertNotIn('id="lavi-lekol"', html)
+        self.assertNotIn("testimonialCarousel", html)
+
+    def test_about_page_shows_stats_and_clubs(self):
+        response = self.client.get(reverse("about_page"), HTTP_HOST="localhost")
+        self.assertEqual(response.status_code, 200)
+
+    def test_life_page_shows_club_grouped(self):
+        response = self.client.get(reverse("school_life"), HTTP_HOST="localhost")
+        self.assertContains(response, "Klib Débat")
+        self.assertContains(response, "Klib")

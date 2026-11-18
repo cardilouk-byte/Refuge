@@ -1,0 +1,94 @@
+{% extends "core/base.html" %}
+
+{% block title %}Kalandriye - {{ site_settings.short_name }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1 class="page-title">Kalandriye Evènman</h1>
+    <p class="page-subtitle">Rès evènman lekòl la kilè ak kote</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="calendar-head d-flex justify-content-between align-items-center mb-3">
+      <a class="btn btn-outline-primary btn-sm" href="?m={{ prev_key }}"><i class="bi bi-chevron-left"></i> Mwa pase</a>
+      <h2 class="calendar-month">{{ month_label }}</h2>
+      <a class="btn btn-outline-primary btn-sm" href="?m={{ next_key }}">Mwa annapre <i class="bi bi-chevron-right"></i></a>
+    </div>
+
+    <div class="calendar-card">
+      <table class="calendar-table w-100">
+        <thead>
+          <tr>
+            <th>Lend</th><th>Madi</th><th>Mèkredi</th><th>Jedi</th><th>Vandredi</th><th>Samdi</th><th>Dimanch</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for week in weeks %}
+          <tr>
+            {% for cell in week %}
+              {% if cell.day %}
+              <td class="{% if cell.day == today.day %}cal-today{% endif %}">
+                <div class="cal-day">{{ cell.day }}</div>
+                {% if cell.events %}
+                  {% for ev in cell.events %}
+                    <a href="#ev-{{ ev.pk }}" class="cal-event" title="{{ ev.title }}">{{ ev.title|truncatechars:14 }}</a>
+                  {% endfor %}
+                {% else %}
+                  <div class="cal-empty">&nbsp;</div>
+                {% endif %}
+              </td>
+              {% else %}
+              <td class="cal-outside"></td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if by_day %}
+    <div class="row g-3 mt-4">
+      {% for day, day_events in by_day.items %}
+        {% for ev in day_events %}
+        <div class="col-md-6" id="ev-{{ ev.pk }}">
+          <div class="event-item h-100">
+            <span class="event-date-badge">{{ ev.date|date:"j" }}<small>{{ ev.date|date:"M" }}</small></span>
+            <div>
+              <h5 class="mb-1">{{ ev.title }}</h5>
+              {% if ev.location %}<p class="mb-0 text-muted"><i class="bi bi-geo-alt"></i> {{ ev.location }}</p>{% endif %}
+              {% if ev.end_date %}<p class="mb-0 text-muted"><i class="bi bi-calendar-range"></i> Jiska {{ ev.end_date|date:"j F" }}</p>{% endif %}
+              {% if ev.description %}<p class="mb-0 small">{{ ev.description }}</p>{% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-muted mt-4">Pa gen evènman pou mwa sa a.</p>
+    {% endif %}
+
+    {% if upcoming %}
+    <h3 class="section-title mt-5">Evènman k ap vini</h3>
+    <div class="section-underline mx-auto"></div>
+    <div class="row g-3 mt-3">
+      {% for ev in upcoming %}
+      <div class="col-md-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">
+        <div class="event-item h-100">
+          <span class="event-date-badge">{{ ev.date|date:"j" }}<small>{{ ev.date|date:"M" }}</small></span>
+          <div>
+            <h6 class="mb-0">{{ ev.title }}</h6>
+            {% if ev.location %}<p class="mb-0 text-muted small"><i class="bi bi-geo-alt"></i> {{ ev.location }}</p>{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

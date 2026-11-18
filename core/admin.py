@@ -3,8 +3,8 @@ from django.contrib import admin
 from django.core.mail import send_mail
 
 from .models import (
-    About, ContactMessage, GalleryImage, HeroSlide, MenuItem, NewsEvent,
-    Program, Result, Service, SiteSettings, TeamMember,
+    About, Club, ContactMessage, FAQ, GalleryImage, HeroSlide, MenuItem, NewsEvent,
+    Program, Result, SchoolEvent, Service, SiteSettings, TeamMember, Testimonial,
 )
 
 
@@ -29,7 +29,7 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 
 @admin.register(MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
-    list_display = ("label", "url", "order", "is_visible")
+    list_display = ("label", "url", "parent", "order", "is_visible")
     list_editable = ("order", "is_visible")
     list_filter = ("is_visible",)
 
@@ -117,3 +117,30 @@ class ContactMessageAdmin(admin.ModelAdmin):
                 [settings.ADMIN_EMAIL_NOTIFICATION],
                 fail_silently=True,
             )
+
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ("name", "class_name", "order", "is_published", "photo")
+    list_editable = ("order", "is_published")
+    list_filter = ("is_published",)
+
+
+@admin.register(Club)
+class ClubAdmin(admin.ModelAdmin):
+    list_display = ("name", "category", "supervisor", "schedule", "order", "is_active")
+    list_editable = ("order", "is_active")
+    list_filter = ("category", "is_active")
+
+
+@admin.register(SchoolEvent)
+class SchoolEventAdmin(admin.ModelAdmin):
+    list_display = ("title", "date", "end_date", "location", "is_published")
+    list_filter = ("is_published",)
+
+
+@admin.register(FAQ)
+class FAQAdmin(admin.ModelAdmin):
+    list_display = ("question", "order", "is_published")
+    list_editable = ("order", "is_published")
+    list_filter = ("is_published",)

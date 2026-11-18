@@ -17,8 +17,19 @@
 
       <div class="collapse navbar-collapse justify-content-center" id="mainMenu">
         <ul class="navbar-nav">
-          {% for item in menu_items %}
-            <li class="nav-item"><a class="nav-link" href="{{ item.url }}">{{ item.label }}</a></li>
+          {% for entry in menu_items %}
+            {% if entry.children %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="{{ entry.item.url }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ entry.item.label }}</a>
+                <ul class="dropdown-menu">
+                  {% for child in entry.children %}
+                    <li><a class="dropdown-item" href="{{ child.url }}">{{ child.label }}</a></li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% else %}
+              <li class="nav-item"><a class="nav-link" href="{{ entry.item.url }}">{{ entry.item.label }}</a></li>
+            {% endif %}
           {% endfor %}
         </ul>
         <div class="d-lg-none mt-3 d-flex flex-wrap gap-2">

@@ -5,9 +5,13 @@ from PIL import Image, ImageDraw
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 
+from datetime import date, timedelta
+
+from django.utils import timezone
+
 from core.models import (
-    About, GalleryImage, HeroSlide, MenuItem, NewsEvent, Program, Result,
-    Service, SiteSettings, TeamMember,
+    About, Club, FAQ, GalleryImage, HeroSlide, MenuItem, NewsEvent, Program,
+    Result, SchoolEvent, Service, SiteSettings, TeamMember, Testimonial,
 )
 
 PALETTE = [(13, 110, 253), (10, 88, 202), (29, 78, 216), (3, 105, 161), (67, 56, 202)]
@@ -208,5 +212,72 @@ class Command(BaseCommand):
             result.pdf_file.save(f"resultats-{i + 1}.pdf", minimal_pdf(title), save=False)
             result.save()
         self.stdout.write("OK Résultats")
+
+
+        Testimonial.objects.all().delete()
+        testimonials = [
+            ("Nathalie Jean", "3ème AF", "Nan lekòl sa, mwen dekouvri pasyon mwen pou syans. Pwofesè yo toujou gen tan pou ede w jis ou konprann."),
+            ("Widley Pierre", "Seconde", "Klib deba a chanje lavi mwen — kounye a mwen pale devan tout moun san krentifaj."),
+            ("Madame Laguerre", "Paran", "Depi timoun mwen an antre nan lekòl sa, rezilta li e konfyans li anpil pi wo."),
+        ]
+        for i, (name, klass, quote) in enumerate(testimonials):
+            t = Testimonial(name=name, class_name=klass, quote=quote, order=i)
+            t.photo.save(
+                f"temwayaj-{i + 1}.jpg",
+                gradient_image(300, 300, PALETTE[i % len(PALETTE)]),
+                save=False,
+            )
+            t.save()
+        self.stdout.write("OK Témwayaj")
+
+        Club.objects.all().delete()
+        clubs = [
+            ("Klib Débat & Éloquence", "KLUB", "Aprann pale devan moun, defann yon pozisyon ak sipase la pèl ak lòt elèv.", "Mèkredi 14h – 16h"),
+            ("Espò — Bol (Foutbol)", "ESPO", "Ekip gason ak fi, antrènman anyèl ak match amikal ak lòt lekòl yo.", "Madi ak Jedi 16h – 17h30"),
+            ("Klib Syans & Robotik", "AKTIVITE", "Eksperimantasyon, robotik, kodaj ak sèvi ak enfòmatik.", "Vanredi 13h – 15h"),
+        ]
+        for i, (name, category, description, schedule) in enumerate(clubs):
+            c = Club(name=name, category=category, description=description, schedule=schedule, order=i)
+            c.image.save(
+                f"klib-{i + 1}.jpg",
+                gradient_image(700, 450, PALETTE[i % len(PALETTE)]),
+                save=False,
+            )
+            c.save()
+        self.stdout.write("OK Klib")
+
+        SchoolEvent.objects.all().delete()
+        today = timezone.localdate()
+        SchoolEvent.objects.create(
+            title="Rentrée scolaire",
+            description="Premye joulekòl la — tout elèv davè.",
+            location="Kou LNFCL",
+            date=today + timedelta(days=12),
+        )
+        SchoolEvent.objects.create(
+            title="Réunion Parents-Professeurs",
+            description="Twouman rezilta twouzyèm péryèd la.",
+            location="Salle polyvalente",
+            date=today + timedelta(days=20),
+        )
+        SchoolEvent.objects.create(
+            title="Journée Culturelle",
+            description="Ekzibisyon, dans, teyat ak chante elèv yo!",
+            location="Cour d'honneur",
+            date=today + timedelta(days=35),
+            end_date=today + timedelta(days=37),
+        )
+        self.stdout.write("OK Kalandriye")
+
+        FAQ.objects.all().delete()
+        faqs = [
+            ("Ki lè enskripsyon an kòmanse?", "Pre-enskripsyon an ap fèt an liy tout ane a. Lekòl la ap kontakte ou nan anpil kout jan demann lan soumèt."),
+            ("Ki dokiman ki obligatwa?", "Se sèlman non, seks, dat nesans ak telefòn ki obligatwa. Ake nesans ak bilten se opsyonèl — ou ka pore yo pita."),
+            ("Èsk mwen ka enskri yon elèv ki pa te nan lekòl la?", "Wi! Jis klike sou « Pré-inscription » anwo paj la. Rantre nan 4 etap yo epi resevwa yon nimewo referans PRE-XXXXXXXX."),
+            ("Ki nivo ki disponib?", "Préscolaire, 1ère – 6ème AF (primaire), 7ème – 9ème AF ak Secondaire (NS1 – NS4)."),
+        ]
+        for i, (q, a) in enumerate(faqs):
+            FAQ.objects.create(question=q, answer=a, order=i)
+        self.stdout.write("OK FAQ")
 
         self.stdout.write(self.style.SUCCESS("Contenu de démonstration créé avec succès."))
