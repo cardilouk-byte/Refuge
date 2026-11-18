@@ -146,6 +146,11 @@ class SiteSettings(models.Model):
         "Position du texte du hero", max_length=10,
         choices=HERO_POSITIONS, default="left",
     )
+    secondary_color = models.CharField("Couleur secondaire", max_length=7, default="#6c757d")
+    success_color = models.CharField("Couleur succès (vèt)", max_length=7, default="#198754")
+    info_color = models.CharField("Couleur info (cyan)", max_length=7, default="#0dcaf0")
+    warning_color = models.CharField("Couleur avertissement (jòn)", max_length=7, default="#ffc107")
+    danger_color = models.CharField("Couleur danger (wouj)", max_length=7, default="#dc3545")
     hashtag = models.CharField("Hashtag (marque sociale)", max_length=60, blank=True, default="#LNFCLOuvè")
     inspire_texts = models.TextField(
         "Déclarations d'inspiration (une phrase par ligne)", blank=True,

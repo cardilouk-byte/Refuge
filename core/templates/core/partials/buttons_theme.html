@@ -1,4 +1,3 @@
-    /* Tout bouton mark yo swiv koulè prensipal la */
     :root { --bs-primary-rgb: var(--prime-rgb); }
     .btn-primary {
       --bs-btn-bg: var(--primary);
@@ -24,6 +23,75 @@
       --bs-btn-disabled-border-color: var(--primary);
       --bs-btn-focus-shadow-rgb: var(--prime-rgb);
     }
+    .btn-secondary {
+      --bs-btn-bg: var(--secondary-color, #6c757d);
+      --bs-btn-border-color: var(--secondary-color, #6c757d);
+      --bs-btn-hover-bg: color-mix(in srgb, var(--secondary-color, #6c757d) 85%, #000);
+      --bs-btn-hover-border-color: color-mix(in srgb, var(--secondary-color, #6c757d) 80%, #000);
+      --bs-btn-active-bg: color-mix(in srgb, var(--secondary-color, #6c757d) 78%, #000);
+      --bs-btn-disabled-bg: var(--secondary-color, #6c757d);
+    }
+    .btn-success {
+      --bs-btn-bg: var(--success-color, #198754);
+      --bs-btn-border-color: var(--success-color, #198754);
+      --bs-btn-hover-bg: color-mix(in srgb, var(--success-color, #198754) 85%, #000);
+      --bs-btn-hover-border-color: color-mix(in srgb, var(--success-color, #198754) 80%, #000);
+      --bs-btn-active-bg: color-mix(in srgb, var(--success-color, #198754) 78%, #000);
+      --bs-btn-disabled-bg: var(--success-color, #198754);
+    }
+    .btn-outline-success {
+      --bs-btn-color: var(--success-color, #198754);
+      --bs-btn-border-color: var(--success-color, #198754);
+      --bs-btn-hover-color: #fff;
+      --bs-btn-hover-bg: var(--success-color, #198754);
+      --bs-btn-hover-border-color: var(--success-color, #198754);
+      --bs-btn-active-color: #fff;
+      --bs-btn-active-bg: var(--success-color, #198754);
+      --bs-btn-active-border-color: var(--success-color, #198754);
+    }
+    .btn-danger {
+      --bs-btn-bg: var(--danger-color, #dc3545);
+      --bs-btn-border-color: var(--danger-color, #dc3545);
+      --bs-btn-hover-bg: color-mix(in srgb, var(--danger-color, #dc3545) 85%, #000);
+      --bs-btn-hover-border-color: color-mix(in srgb, var(--danger-color, #dc3545) 80%, #000);
+      --bs-btn-active-bg: color-mix(in srgb, var(--danger-color, #dc3545) 78%, #000);
+      --bs-btn-disabled-bg: var(--danger-color, #dc3545);
+    }
+    .btn-outline-danger {
+      --bs-btn-color: var(--danger-color, #dc3545);
+      --bs-btn-border-color: var(--danger-color, #dc3545);
+      --bs-btn-hover-color: #fff;
+      --bs-btn-hover-bg: var(--danger-color, #dc3545);
+      --bs-btn-hover-border-color: var(--danger-color, #dc3545);
+      --bs-btn-active-color: #fff;
+      --bs-btn-active-bg: var(--danger-color, #dc3545);
+      --bs-btn-active-border-color: var(--danger-color, #dc3545);
+    }
+    .btn-warning {
+      --bs-btn-bg: var(--warning-color, #ffc107);
+      --bs-btn-border-color: var(--warning-color, #ffc107);
+      --bs-btn-hover-bg: color-mix(in srgb, var(--warning-color, #ffc107) 88%, #000);
+      --bs-btn-active-bg: color-mix(in srgb, var(--warning-color, #ffc107) 82%, #000);
+      --bs-btn-disabled-bg: var(--warning-color, #ffc107);
+    }
+    .btn-outline-warning {
+      --bs-btn-color: color-mix(in srgb, var(--warning-color, #ffc107) 75%, #000);
+      --bs-btn-border-color: var(--warning-color, #ffc107);
+      --bs-btn-hover-bg: var(--warning-color, #ffc107);
+      --bs-btn-hover-border-color: var(--warning-color, #ffc107);
+    }
+    .btn-info {
+      --bs-btn-bg: var(--info-color, #0dcaf0);
+      --bs-btn-border-color: var(--info-color, #0dcaf0);
+      --bs-btn-hover-bg: color-mix(in srgb, var(--info-color, #0dcaf0) 88%, #000);
+      --bs-btn-disabled-bg: var(--info-color, #0dcaf0);
+    }
+    .btn-outline-info {
+      --bs-btn-color: color-mix(in srgb, var(--info-color, #0dcaf0) 70%, #000);
+      --bs-btn-border-color: var(--info-color, #0dcaf0);
+      --bs-btn-hover-bg: var(--info-color, #0dcaf0);
+      --bs-btn-hover-border-color: var(--info-color, #0dcaf0);
+    }
     .btn-link { --bs-btn-color: var(--primary); --bs-btn-hover-color: color-mix(in srgb, var(--primary) 80%, #000); }
     .bg-primary { background-color: var(--primary) !important; }
     .text-primary { color: var(--primary) !important; }
@@ -32,13 +100,30 @@
     .text-primary-emphasis { color: color-mix(in srgb, var(--primary) 80%, #000) !important; }
     .link-primary { color: var(--primary) !important; }
     .link-primary:hover { color: color-mix(in srgb, var(--primary) 80%, #000) !important; }
+    .bg-success { background-color: var(--success-color, #198754) !important; }
+    .text-success { color: var(--success-color, #198754) !important; }
+    .text-bg-success { background-color: var(--success-color, #198754) !important; }
+    .bg-danger { background-color: var(--danger-color, #dc3545) !important; }
+    .text-danger { color: var(--danger-color, #dc3545) !important; }
+    .text-bg-danger { background-color: var(--danger-color, #dc3545) !important; }
+    .bg-warning { background-color: var(--warning-color, #ffc107) !important; }
+    .text-warning { color: color-mix(in srgb, var(--warning-color, #ffc107) 70%, #000) !important; }
+    .text-bg-warning { background-color: var(--warning-color, #ffc107) !important; }
+    .bg-info { background-color: var(--info-color, #0dcaf0) !important; }
+    .text-info { color: color-mix(in srgb, var(--info-color, #0dcaf0) 70%, #000) !important; }
+    .text-bg-info { background-color: var(--info-color, #0dcaf0) !important; }
+    .bg-secondary { background-color: var(--secondary-color, #6c757d) !important; }
+    .text-secondary { color: var(--secondary-color, #6c757d) !important; }
     .form-control:focus, .form-select:focus, .form-check-input:focus {
       border-color: color-mix(in srgb, var(--primary) 60%, #fff);
       box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--prime-rgb) 25%, transparent);
     }
     .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+    .is-invalid:focus { border-color: var(--danger-color, #dc3545); }
     .page-item.active .page-link { background-color: var(--primary); border-color: var(--primary); }
     .nav-pills .nav-link.active, .btn-check:checked + .btn-outline-primary {
       background-color: var(--primary); border-color: var(--primary); color: #fff;
     }
     .dropdown-item.active, .dropdown-item:active { background-color: var(--primary); color: #fff; }
+    .alert-success { background-color: color-mix(in srgb, var(--success-color, #198754) 10%, #fff); border-color: color-mix(in srgb, var(--success-color, #198754) 30%, #fff); }
+    .alert-danger { background-color: color-mix(in srgb, var(--danger-color, #dc3545) 10%, #fff); border-color: color-mix(in srgb, var(--danger-color, #dc3545) 30%, #fff); }

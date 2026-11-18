@@ -221,3 +221,59 @@ class ButtonColorTests(TestCase):
         html = response.content.decode()
         self.assertIn("--bs-btn-bg: var(--primary)", html)
         self.assertNotIn("--primary: #0d6efd; }", html)
+
+
+class FullDesignColorTests(TestCase):
+    """Tout palet sit la (premye, sikonndè, siksè, danje, avètisman, info) dwe configurable epi swiv tout kote."""
+
+    def _settings(self, **kwargs):
+        from .models import SiteSettings
+        obj = SiteSettings.load()
+        for k, v in kwargs.items():
+            setattr(obj, k, v)
+        obj.save()
+        return obj
+
+    def test_root_vars_inject_all_brands(self):
+        obj = self._settings(secondary_color="#111111", success_color="#222222",
+                             info_color="#333333", warning_color="#444444", danger_color="#555555")
+        html = self.client.get(reverse("home"), HTTP_HOST="localhost").content.decode()
+        self.assertIn("--secondary-color: #111111", html)
+        self.assertIn("--success-color: #222222", html)
+        self.assertIn("--info-color: #333333", html)
+        self.assertIn("--warning-color: #444444", html)
+        self.assertIn("--danger-color: #555555", html)
+
+    def test_semantic_button_overrides_render(self):
+        html = self.client.get(reverse("home"), HTTP_HOST="localhost").content.decode()
+        for sel in [".btn-primary {", ".btn-outline-primary {", ".btn-success {", ".btn-danger {",
+                    ".btn-warning {", ".btn-info {", ".btn-secondary {", ".bg-danger",
+                    ".text-success", ".alert-danger"]:
+            self.assertIn(sel, html)
+
+    def test_portal_gets_full_palette(self):
+        from accounts.models import User as U
+        from students.models import Student
+        u, _ = U.objects.get_or_create(username="design_elv", defaults={"role": "ELEVE"})
+        u.set_password("T43s!pass")
+        u.save()
+        Student.objects.get_or_create(user=u, defaults={"matricule": "ELV-88888", "first_name": "D", "last_name": "E"})
+        c = self.client
+        c.login(username="design_elv", password="T43s!pass")
+        response = c.get("/portail/eleve/", HTTP_HOST="localhost")
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn("--danger-color", html)
+        self.assertIn(".btn-success {", html)
+
+    def test_settings_form_has_color_fields(self):
+        from accounts.models import User as U
+        u, _ = U.objects.get_or_create(username="design_su", defaults={"role": "SUPERADMIN", "is_staff": True, "is_superuser": True})
+        u.set_password("T43s!pass")
+        u.save()
+        c = self.client
+        c.login(username="design_su", password="T43s!pass")
+        response = c.get("/configuration/parametres/", HTTP_HOST="localhost")
+        html = response.content.decode()
+        for name in ["success_color", "danger_color", "warning_color", "info_color", "secondary_color"]:
+            self.assertIn(f'name="{name}"', html)

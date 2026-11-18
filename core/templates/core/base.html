@@ -17,6 +17,11 @@
     :root {
       --primary: {{ site_settings.primary_color|default:'#0d6efd' }};
       --prime-rgb: {{ site_settings.primary_color|default:'#0d6efd'|hexrgb }};
+      --secondary-color: {{ site_settings.secondary_color|default:'#6c757d' }};
+      --success-color: {{ site_settings.success_color|default:'#198754' }};
+      --info-color: {{ site_settings.info_color|default:'#0dcaf0' }};
+      --warning-color: {{ site_settings.warning_color|default:'#ffc107' }};
+      --danger-color: {{ site_settings.danger_color|default:'#dc3545' }};
       --font-title: '{{ site_settings.title_font|default:'Lobster' }}', cursive;
       --font-body: '{{ site_settings.body_font|default:'Poppins' }}', sans-serif;
     }
