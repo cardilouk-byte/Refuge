@@ -1,0 +1,44 @@
+    /* Tout bouton mark yo swiv koulè prensipal la */
+    :root { --bs-primary-rgb: var(--prime-rgb); }
+    .btn-primary {
+      --bs-btn-bg: var(--primary);
+      --bs-btn-border-color: var(--primary);
+      --bs-btn-hover-bg: color-mix(in srgb, var(--primary) 85%, #000);
+      --bs-btn-hover-border-color: color-mix(in srgb, var(--primary) 80%, #000);
+      --bs-btn-active-bg: color-mix(in srgb, var(--primary) 78%, #000);
+      --bs-btn-active-border-color: color-mix(in srgb, var(--primary) 78%, #000);
+      --bs-btn-disabled-bg: var(--primary);
+      --bs-btn-disabled-border-color: var(--primary);
+      --bs-btn-focus-shadow-rgb: var(--prime-rgb);
+    }
+    .btn-outline-primary {
+      --bs-btn-color: var(--primary);
+      --bs-btn-border-color: var(--primary);
+      --bs-btn-hover-color: #fff;
+      --bs-btn-hover-bg: var(--primary);
+      --bs-btn-hover-border-color: var(--primary);
+      --bs-btn-active-color: #fff;
+      --bs-btn-active-bg: var(--primary);
+      --bs-btn-active-border-color: var(--primary);
+      --bs-btn-disabled-color: var(--primary);
+      --bs-btn-disabled-border-color: var(--primary);
+      --bs-btn-focus-shadow-rgb: var(--prime-rgb);
+    }
+    .btn-link { --bs-btn-color: var(--primary); --bs-btn-hover-color: color-mix(in srgb, var(--primary) 80%, #000); }
+    .bg-primary { background-color: var(--primary) !important; }
+    .text-primary { color: var(--primary) !important; }
+    .text-bg-primary { background-color: var(--primary) !important; }
+    .bg-primary-subtle { background-color: color-mix(in srgb, var(--primary) 12%, #fff) !important; }
+    .text-primary-emphasis { color: color-mix(in srgb, var(--primary) 80%, #000) !important; }
+    .link-primary { color: var(--primary) !important; }
+    .link-primary:hover { color: color-mix(in srgb, var(--primary) 80%, #000) !important; }
+    .form-control:focus, .form-select:focus, .form-check-input:focus {
+      border-color: color-mix(in srgb, var(--primary) 60%, #fff);
+      box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--prime-rgb) 25%, transparent);
+    }
+    .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+    .page-item.active .page-link { background-color: var(--primary); border-color: var(--primary); }
+    .nav-pills .nav-link.active, .btn-check:checked + .btn-outline-primary {
+      background-color: var(--primary); border-color: var(--primary); color: #fff;
+    }
+    .dropdown-item.active, .dropdown-item:active { background-color: var(--primary); color: #fff; }

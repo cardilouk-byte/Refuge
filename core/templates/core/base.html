@@ -1,4 +1,4 @@
-{% load static %}<!DOCTYPE html>
+{% load static %}{% load theme_tags %}<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -16,6 +16,7 @@
   <style>
     :root {
       --primary: {{ site_settings.primary_color|default:'#0d6efd' }};
+      --prime-rgb: {{ site_settings.primary_color|default:'#0d6efd'|hexrgb }};
       --font-title: '{{ site_settings.title_font|default:'Lobster' }}', cursive;
       --font-body: '{{ site_settings.body_font|default:'Poppins' }}', sans-serif;
     }
@@ -28,6 +29,7 @@
     .site-footer { background: {{ site_settings.footer_bg_color|default:'#1f2937' }}; color: {{ site_settings.footer_text_color|default:'#ffffff' }}; }
     .site-footer .footer-title, .site-footer .footer-brand { color: {{ site_settings.footer_text_color|default:'#ffffff' }}; }
     .site-footer .footer-links a { color: {{ site_settings.footer_text_color|default:'#ffffff' }}; opacity: .85; }
+{% include "core/partials/buttons_theme.html" %}
   </style>
 </head>
 <body class="coins-{{ site_settings.style_coins|default:'arrondis' }}{% if not site_settings.activer_animations %} no-anim{% endif %}">

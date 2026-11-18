@@ -189,3 +189,35 @@ class HwInspiredPagesTests(TestCase):
         response = self.client.get(reverse("school_life"), HTTP_HOST="localhost")
         self.assertContains(response, "Klib Débat")
         self.assertContains(response, "Klib")
+
+
+class ButtonColorTests(TestCase):
+    """Tout bouton mark yo dwe swiv koulè prensipal la nan Configuration."""
+
+    def _html(self):
+        return self.client.get(reverse("home"), HTTP_HOST="localhost").content.decode()
+
+    def test_buttons_follow_primary_color(self):
+        from .models import SiteSettings
+        settings_obj = SiteSettings.load()
+        settings_obj.primary_color = "#e91e63"
+        settings_obj.save()
+        html = self._html()
+        self.assertIn("--primary: #e91e63", html)
+        self.assertIn("233, 30, 99", html)
+        self.assertIn("--bs-btn-bg: var(--primary)", html)
+
+    def test_button_override_present_on_portal(self):
+        from accounts.models import User as U
+        from students.models import Student
+        u, _ = U.objects.get_or_create(username="btn_elv", defaults={"role": "ELEVE"})
+        u.set_password("T43s!pass")
+        u.save()
+        Student.objects.get_or_create(user=u, defaults={"matricule": "ELV-77777", "first_name": "Btn", "last_name": "Elèv"})
+        c = self.client
+        c.login(username="btn_elv", password="T43s!pass")
+        response = c.get("/portail/eleve/", HTTP_HOST="localhost")
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn("--bs-btn-bg: var(--primary)", html)
+        self.assertNotIn("--primary: #0d6efd; }", html)
