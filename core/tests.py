@@ -277,3 +277,43 @@ class FullDesignColorTests(TestCase):
         html = response.content.decode()
         for name in ["success_color", "danger_color", "warning_color", "info_color", "secondary_color"]:
             self.assertIn(f'name="{name}"', html)
+
+
+class DashboardLogoTests(TestCase):
+    """Logo institution an ap parèt nan dashboard + pòtay yo."""
+
+    def test_portal_shows_logo_when_uploaded(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from io import BytesIO
+        from PIL import Image
+        from .models import SiteSettings
+        from accounts.models import User
+        buf = BytesIO()
+        Image.new("RGB", (120, 120), (13, 110, 253)).save(buf, "PNG")
+        settings_obj = SiteSettings.load()
+        settings_obj.logo.save("logo-t.png", SimpleUploadedFile("logo-t.png", buf.getvalue(), "image/png"), save=True)
+        u, _ = User.objects.get_or_create(username="logo_elv", defaults={"role": "ELEVE"})
+        u.set_password("T43s!pass")
+        u.save()
+        c = self.client
+        c.login(username="logo_elv", password="T43s!pass")
+        response = c.get("/portail/eleve/", HTTP_HOST="localhost")
+        html = response.content.decode()
+        self.assertIn("/media/site/logo-t", html)
+        self.assertIn("portal-logo", html)
+
+    def test_portal_shows_placeholder_without_logo(self):
+        from .models import SiteSettings
+        from accounts.models import User
+        settings_obj = SiteSettings.load()
+        settings_obj.logo = None
+        settings_obj.save()
+        u, _ = User.objects.get_or_create(username="logo_elv2", defaults={"role": "ELEVE"})
+        u.set_password("T43s!pass")
+        u.save()
+        c = self.client
+        c.login(username="logo_elv2", password="T43s!pass")
+        response = c.get("/portail/eleve/", HTTP_HOST="localhost")
+        html = response.content.decode()
+        self.assertIn('class="brand-logo-placeholder"', html)
+        self.assertNotIn('class="portal-logo"', html)
