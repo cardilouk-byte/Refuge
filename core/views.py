@@ -182,38 +182,3 @@ def about_page(request):
         "about": About.objects.first(),
         "departments": departments,
     })
-
-
-def download_page(request):
-    return render(request, "core/download.html")
-
-
-def download_app(request):
-    import io
-    import zipfile
-    from datetime import datetime
-    from pathlib import Path
-
-    from django.conf import settings as dj_settings
-    from django.http import HttpResponse
-
-    base = Path(dj_settings.BASE_DIR)
-    skip_dirs = {".git", "__pycache__", "env", ".venv", "venv", "node_modules", "backups_store", ".idea", ".vscode"}
-    skip_files = {"db.sqlite3", ".env", ".env.local", "app_run.pid"}
-    buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
-        for path in base.rglob("*"):
-            if not path.is_file():
-                continue
-            rel = path.relative_to(base)
-            parts = set(rel.parts[:-1])
-            if parts & skip_dirs or path.name in skip_files or path.suffix == ".pyc":
-                continue
-            try:
-                zf.write(path, str(rel))
-            except OSError:
-                continue
-    stamp = datetime.now().strftime("%Y%m%d")
-    response = HttpResponse(buffer.getvalue(), content_type="application/zip")
-    response["Content-Disposition"] = f'attachment; filename="lnfcl-siges-{stamp}.zip"'
-    return response
