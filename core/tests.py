@@ -318,3 +318,44 @@ class DashboardLogoTests(TestCase):
         self.assertIn('class="brand-logo-placeholder"', html)
         self.assertNotIn('class="portal-logo"', html)
 
+
+
+class SidebarSectionsTest(TestCase):
+    def _login(self, username, role):
+        from accounts.models import User
+        user, _ = User.objects.get_or_create(username=username, defaults={"role": role})
+        user.set_password("T43s!pass")
+        user.save()
+        self.client.login(username=username, password="T43s!pass")
+        return user
+
+    def test_teacher_sees_etablissement_section_with_students(self):
+        self._login("sb_prof", "ENSEIGNANT")
+        html = self.client.get("/eleve/", HTTP_HOST="localhost").content.decode()
+        self.assertEqual(self.client.get("/eleve/", HTTP_HOST="localhost").status_code, 200)
+        self.assertIn("ÉTABLISSEMENT", html)
+        self.assertIn("Elèv yo", html)
+        self.assertIn(">Devoirs<", html)
+        self.assertIn(">Examens<", html)
+        self.assertIn("KLAS &amp; KOUR", html)
+
+    def test_student_sees_own_sidebar_without_staff_sections(self):
+        self._login("sb_elv", "ELEVE")
+        html = self.client.get("/portail/eleve/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("EKÒL MWEN", html)
+        self.assertIn("Bulletin mwen", html)
+        self.assertIn("Kat idantite mwen", html)
+        self.assertNotIn("ÉTABLISSEMENT", html)
+        self.assertNotIn(">Tableau de bord<", html)
+
+    def test_direction_sidebar_full_sections(self):
+        from accounts.models import User
+        user, _ = User.objects.get_or_create(username="sb_dir", defaults={"role": "DIRECTION"})
+        user.set_password("T43s!pass")
+        user.save()
+        self.client.login(username="sb_dir", password="T43s!pass")
+        html = self.client.get("/tableau/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("ÉTABLISSEMENT", html)
+        self.assertIn("Nouvèl ane", html)
+        self.assertIn("Backup", html)
+        self.assertIn("Elèv yo", html)

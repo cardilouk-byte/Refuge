@@ -27,6 +27,11 @@
     .card { border: none; border-radius: 14px; box-shadow: 0 4px 14px rgba(0,0,0,.05); }
     .table > :not(caption) > * > * { padding: .8rem; }
     .badge-role { background: var(--primary); }
+    .side-head { font-size:.7rem; letter-spacing:.08em; color:#94a3b8; font-weight:700; }
+    .sidebar .nav-link { color:#334155; border-radius:10px; padding:.5rem .75rem; }
+    .sidebar .nav-link:hover { background: color-mix(in srgb, var(--primary) 7%, #fff); color: var(--primary); }
+    .sidebar .nav-link.active { background: var(--primary); color:#fff; }
+    .sidebar .nav-link.active .badge { color:#fff !important; }
 {% include "core/partials/buttons_theme.html" %}
   </style>
   {% block extra_head %}{% endblock %}
@@ -84,47 +89,63 @@
 
   <div class="container-fluid">
     <div class="row">
-      {% if user.is_staff or user.is_teaching_staff %}
-      <nav class="col-lg-2 d-none d-lg-block py-4 border-end bg-white min-vh-100">
+      {% if user.is_authenticated %}
+      <nav class="col-lg-2 d-none d-lg-block py-4 border-end bg-white min-vh-100 sidebar">
         <ul class="nav flex-column gap-1">
-          <li class="nav-item"><span class="text-muted small fw-bold px-3">SCOLARITÉ</span></li>
+          <li class="nav-item"><span class="side-head px-3">JENERAL</span></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'notifications' %}active fw-bold{% endif %}" href="{% url 'notifications:list' %}"><i class="bi bi-bell me-2"></i>Notifikasyon{% if unread_notifications %} <span class="badge rounded-pill text-bg-danger">{{ unread_notifications }}</span>{% endif %}</a></li>
+          {% if user.is_staff or user.is_teaching_staff %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'dashboard' and 'configuration' not in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:home' %}"><i class="bi bi-speedometer2 me-2"></i>Tableau de bord</a></li>
+          {% endif %}
+
+          {% if user.is_staff or user.is_teaching_staff %}
+          <li class="nav-item"><hr class="dropdown-divider"></li>
+          <li class="nav-item"><span class="side-head px-3">ÉTABLISSEMENT</span></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'students' %}active fw-bold{% endif %}" href="{% url 'students:student_list' %}"><i class="bi bi-people me-2"></i>Elèv yo <span class="small text-muted d-inline">(par klas)</span></a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'homework' %}active fw-bold{% endif %}" href="{% url 'homework:list' %}"><i class="bi bi-journal-check me-2"></i>Devoirs</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'exams' %}active fw-bold{% endif %}" href="{% url 'exams:list' %}"><i class="bi bi-file-earmark-text me-2"></i>Examens</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'quizzes' %}active fw-bold{% endif %}" href="{% url 'quizzes:list' %}"><i class="bi bi-ui-checks me-2"></i>Quiz (QCM)</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'library' %}active fw-bold{% endif %}" href="{% url 'library:list' %}"><i class="bi bi-book-half me-2"></i>Bibliothèque</a></li>
-          {% if user.is_teaching_staff or user.is_staff %}
+
+          <li class="nav-item"><hr class="dropdown-divider"></li>
+          <li class="nav-item"><span class="side-head px-3">KLAS &amp; KOUR</span></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'grades' %}active fw-bold{% endif %}" href="{% url 'grades:class_list' %}"><i class="bi bi-pencil-square me-2"></i>Nòt &amp; Bulletins</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'attendance' %}active fw-bold{% endif %}" href="{% url 'attendance:home' %}"><i class="bi bi-clipboard-check me-2"></i>Cahier d'appel (presans)</a></li>
-          {% if user.is_school_staff %}
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'students' %}active fw-bold{% endif %}" href="{% url 'students:student_list' %}"><i class="bi bi-people me-2"></i>Elèv yo</a></li>
-          {% endif %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'cahiers' %}active fw-bold{% endif %}" href="{% url 'cahiers:index' %}"><i class="bi bi-journal-text me-2"></i>Cahier de tèks</a></li>
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'quizzes' %}active fw-bold{% endif %}" href="{% url 'quizzes:list' %}"><i class="bi bi-ui-checks me-2"></i>Quiz (QCM)</a></li>
-          {% if user.is_staff or user.is_school_staff %}
+          {% if user.is_school_staff or user.is_staff %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'promotion' %}active fw-bold{% endif %}" href="{% url 'promotion:home' %}"><i class="bi bi-arrow-repeat me-2"></i>Nouvèl ane &amp; pasaj</a></li>
           {% endif %}
-          {% elif user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'grades' %}active fw-bold{% endif %}" href="{% url 'grades:bulletin_home' %}"><i class="bi bi-award me-2"></i>Bulletin mwen</a></li>
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'attendance' %}active fw-bold{% endif %}" href="{% url 'attendance:home' %}"><i class="bi bi-clipboard-check me-2"></i>Presans mwen</a></li>
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'quizzes' %}active fw-bold{% endif %}" href="{% url 'quizzes:list' %}"><i class="bi bi-ui-checks me-2"></i>Quiz mwen</a></li>
-          {% endif %}
-          {% if user.role == 'ELEVE' %}
-          <li class="nav-item"><a class="nav-link" href="{% url 'students:badge_own' %}"><i class="bi bi-person-badge me-2"></i>Kat idantite mwen</a></li>
-          {% endif %}
+
           <li class="nav-item"><hr class="dropdown-divider"></li>
-          <li class="nav-item"><span class="text-muted small fw-bold px-3">PRODUCTIVITÉ</span></li>
+          <li class="nav-item"><span class="side-head px-3">TOTALITE LEKÒL LA</span></li>
           {% if user.is_school_staff %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'backups' %}active fw-bold{% endif %}" href="{% url 'backups:index' %}"><i class="bi bi-cloud-arrow-up me-2"></i>Backup Center</a></li>
           {% endif %}
+          {% else %}
+          <li class="nav-item"><hr class="dropdown-divider"></li>
+          <li class="nav-item"><span class="side-head px-3">EKÒL MWEN</span></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'grades' %}active fw-bold{% endif %}" href="{% url 'grades:bulletin_home' %}"><i class="bi bi-award me-2"></i>Bulletin mwen</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'attendance' %}active fw-bold{% endif %}" href="{% url 'attendance:home' %}"><i class="bi bi-clipboard-check me-2"></i>Presans mwen</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'homework' %}active fw-bold{% endif %}" href="{% url 'homework:list' %}"><i class="bi bi-journal-check me-2"></i>Devoirs</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'exams' %}active fw-bold{% endif %}" href="{% url 'exams:list' %}"><i class="bi bi-file-earmark-text me-2"></i>Examens</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'quizzes' %}active fw-bold{% endif %}" href="{% url 'quizzes:list' %}"><i class="bi bi-ui-checks me-2"></i>Quiz mwen</a></li>
+          {% if user.role == 'ELEVE' %}
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'students' and 'badge' in request.path %}active fw-bold{% endif %}" href="{% url 'students:badge_own' %}"><i class="bi bi-person-badge me-2"></i>Kat idantite mwen</a></li>
+          {% endif %}
+          {% endif %}
+
+          <li class="nav-item"><hr class="dropdown-divider"></li>
+          <li class="nav-item"><span class="side-head px-3">PRODUCTIVITÉ</span></li>
+          {% if user.is_staff or user.is_teaching_staff %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'departments' %}active fw-bold{% endif %}" href="{% url 'departments:tree' %}"><i class="bi bi-diagram-3 me-2"></i>Organigramme</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'preregistration' %}active fw-bold{% endif %}" href="{% url 'preregistration:admin_list' %}"><i class="bi bi-inbox me-2"></i>Pré-inscriptions</a></li>
+          {% endif %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'document_editor' %}active fw-bold{% endif %}" href="{% url 'document_editor:index' %}"><i class="bi bi-file-earmark-word me-2"></i>Word Center</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'excel_manager' %}active fw-bold{% endif %}" href="{% url 'excel_manager:index' %}"><i class="bi bi-file-earmark-excel me-2"></i>Excel Center</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'media_library' %}active fw-bold{% endif %}" href="{% url 'media_library:index' %}"><i class="bi bi-images me-2"></i>Media Center</a></li>
           {% if user.is_superuser %}
           <li class="nav-item"><hr class="dropdown-divider"></li>
-          <li class="nav-item"><span class="text-muted small fw-bold px-3">SITE WEB</span></li>
+          <li class="nav-item"><span class="side-head px-3">SITE WEB</span></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'dashboard' and 'configuration' in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:config_home' %}"><i class="bi bi-sliders me-2"></i>Configuration</a></li>
           <li class="nav-item"><a class="nav-link {% if 'model-sit' in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:config_themes' %}"><i class="bi bi-palette2 me-2"></i>Modèls sit (20)</a></li>
           <li class="nav-item"><hr class="dropdown-divider"></li>

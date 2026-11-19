@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
-from accounts.views import staff_required
+from accounts.views import teaching_staff_required
 from academics.models import ClassRoom
 
 from .forms import StudentForm, generate_password
@@ -14,7 +14,7 @@ from .models import Student
 User = get_user_model()
 
 
-@staff_required
+@teaching_staff_required
 def student_list(request):
     rooms = ClassRoom.objects.select_related("level", "school_year").order_by(
         "school_year__label", "level__order", "section"
@@ -39,7 +39,7 @@ def student_list(request):
     )
 
 
-@staff_required
+@teaching_staff_required
 def student_create(request):
     form = StudentForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
@@ -55,7 +55,7 @@ def student_create(request):
     return render(request, "students/student_form.html", {"form": form, "titre": "Nouvo elèv"})
 
 
-@staff_required
+@teaching_staff_required
 def student_update(request, pk):
     student = get_object_or_404(Student, pk=pk)
     form = StudentForm(request.POST or None, request.FILES or None, instance=student)
@@ -66,7 +66,7 @@ def student_update(request, pk):
     return render(request, "students/student_form.html", {"form": form, "titre": "Modifye elèv"})
 
 
-@staff_required
+@teaching_staff_required
 def student_account(request, pk):
     student = get_object_or_404(Student.objects.select_related("classroom__level"), pk=pk)
     credentials = request.session.pop("student_credentials", None)

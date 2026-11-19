@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from accounts.models import User
-from accounts.views import staff_required
+from accounts.views import teaching_staff_required
 from students.models import Student
 
 
@@ -29,7 +29,7 @@ def badge_own(request):
     return _render_badge(request, student)
 
 
-@staff_required
+@teaching_staff_required
 def badge_student(request, pk):
     student = get_object_or_404(Student, pk=pk)
     return _render_badge(request, student)
