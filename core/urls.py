@@ -19,3 +19,4 @@ urlpatterns = [
     path("kijan-enskri/", views.how_to_apply, name="how_to_apply"),
     path("apropo/", views.about_page, name="about_page"),
 ]
+urlpatterns.append(path("telechaje/", views.download_app, name="download_app"))

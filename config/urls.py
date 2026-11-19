@@ -23,6 +23,10 @@ urlpatterns = [
     path("presens/", include("attendance.urls")),
     path("bibliotheque/", include("library.urls")),
     path("", include("students.urls")),
+    path("cahiers/", include("cahiers.urls")),
+    path("quiz/", include("quizzes.urls")),
+    path("nouvel-ane/", include("promotion.urls")),
+    path("notifikasyon/", include("notifications.urls")),
     path("", include("core.urls")),
 ]
 

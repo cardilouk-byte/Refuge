@@ -1,0 +1,14 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Efase antre{% endblock %}
+{% block content %}
+<div class="card shadow-sm p-4" style="max-width:600px">
+  <h1 class="h4 mb-3 text-danger"><i class="bi bi-trash"></i> Efase antre sa a?</h1>
+  <p><strong>{{ object }}</strong></p>
+  <p class="text-muted">{{ object.content|truncatewords:30 }}</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Wi, efase l</button>
+    <a href="{% url 'cahiers:index' %}" class="btn btn-outline-secondary">Anile</a>
+  </form>
+</div>
+{% endblock %}

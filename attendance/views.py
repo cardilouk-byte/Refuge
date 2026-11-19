@@ -132,3 +132,35 @@ def report(request):
             "f_end": end or "",
         },
     )
+
+
+@staff_required
+def report_excel(request):
+    from core.xlsx import xlsx_response
+
+    classroom_id = request.GET.get("klas")
+    student_id = request.GET.get("eleve")
+    start = request.GET.get("debut")
+    end = request.GET.get("fin")
+    qs = AttendanceRecord.objects.select_related("student")
+    if classroom_id:
+        qs = qs.filter(student__classroom_id=classroom_id)
+    if student_id:
+        qs = qs.filter(student_id=student_id)
+    try:
+        if start:
+            qs = qs.filter(date__gte=timezone.datetime.fromisoformat(start).date())
+        if end:
+            qs = qs.filter(date__lte=timezone.datetime.fromisoformat(end).date())
+    except ValueError:
+        pass
+    stats = qs.values("student__matricule", "student__first_name", "student__last_name").annotate(
+        absans=Count("id", filter=Q(status="ABSENT")),
+        retad=Count("id", filter=Q(status="RETARD")),
+        prezan=Count("id", filter=Q(status="PRESENT")),
+    ).order_by("-absans", "-retad")
+    rows = [
+        [s["student__matricule"], f'{s["student__first_name"]} {s["student__last_name"]}', s["absans"], s["retad"], s["prezan"]]
+        for s in stats
+    ]
+    return xlsx_response("Presans", ["Matricule", "Elèv", "Absans", "Retad", "Prezan"], rows, "rapor_presans.xlsx")

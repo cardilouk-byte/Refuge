@@ -2,6 +2,9 @@
 {% block title %}Rapor absans &amp; retad{% endblock %}
 {% block content %}
 <h1 class="h3 mb-3"><i class="bi bi-graph-up"></i> Rapor Absans &amp; Retad</h1>
+<div class="mb-3">
+  <a href="{% url 'attendance:report_excel' %}?{{ request.GET.urlencode }}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Telechaje Excel</a>
+</div>
 
 <form method="get" class="card shadow-sm p-3 mb-3">
   <div class="row g-2 align-items-end">

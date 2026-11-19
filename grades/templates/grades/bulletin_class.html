@@ -2,6 +2,9 @@
 {% block title %}Bulletins klase — {{ classroom.name }}{% endblock %}
 {% block content %}
 <h1 class="h3 mb-3"><i class="bi bi-award"></i> Bulletins &amp; Desizyon — {{ classroom.name }}</h1>
+<div class="mb-3">
+  <a href="{% url 'grades:bulletin_excel' classroom.pk %}{% if period %}?periyod={{ period.pk }}{% endif %}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Telechaje Excel</a>
+</div>
 
 {% if periods %}
 <form method="get" class="row g-2 align-items-end mb-3">

@@ -53,6 +53,10 @@ INSTALLED_APPS = [
     "homework",
     "exams",
     "library",
+    "notifications",
+    "cahiers",
+    "quizzes",
+    "promotion",
 ]
 
 MIDDLEWARE = [
@@ -79,6 +83,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.site_info",
+                "notifications.context_processors.unread_count",
             ],
         },
     },

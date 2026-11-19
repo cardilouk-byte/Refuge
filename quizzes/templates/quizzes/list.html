@@ -1,0 +1,68 @@
+{% extends "core/portal_base.html" %}
+{% load grades_tags %}
+{% block title %}Quiz{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 mb-0"><i class="bi bi-patch-question"></i> Quiz</h1>
+  {% if can_manage %}
+  <a href="{% url 'quizzes:create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nouvo quiz</a>
+  {% endif %}
+</div>
+<p class="text-muted small">
+  example: Kite yon quiz (kesyon chwa miltip) pou elèv yon klas. Lè w pibliye l, elèv yo resevwa yon notifikasyon.
+  Koreksyon an otomatik, epi ou ka telechaje rezilta yo an Excel.
+</p>
+
+<div class="row g-3">
+  {% for quiz in quizzes %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <h2 class="h6 mb-1">{{ quiz.title }}</h2>
+          {% if quiz.is_published %}<span class="badge text-bg-success">Pibliye</span>
+          {% else %}<span class="badge text-bg-secondary">Depibliye</span>{% endif %}
+        </div>
+        <div class="text-muted small mb-2">
+          <i class="bi bi-people me-1"></i>{{ quiz.classroom }}
+          · {{ quiz.nb_questions }} kesyon
+          {% if quiz.due_date %} · litm {{ quiz.due_date|date:"d/m/Y" }}{% endif %}
+        </div>
+        {% if quiz.description %}<p class="small text-muted mb-2">{{ quiz.description|linebreaksbr }}</p>{% endif %}
+
+        {% if can_manage %}
+        <div class="btn-group btn-group-sm">
+          <a href="{% url 'quizzes:questions' quiz.pk %}" class="btn btn-outline-primary"><i class="bi bi-list-ol"></i> Kesyon</a>
+          <a href="{% url 'quizzes:results' quiz.pk %}" class="btn btn-outline-success"><i class="bi bi-bar-chart"></i> Rezilta</a>
+          <a href="{% url 'quizzes:update' quiz.pk %}" class="btn btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+          <form method="post" action="{% url 'quizzes:publish' quiz.pk %}" class="m-0">
+            {% csrf_token %}
+            <button class="btn btn-outline-warning" title="{% if quiz.is_published %}Depibliye{% else %}Voye bay elèv yo{% endif %}">
+              <i class="bi {% if quiz.is_published %}bi-cloud-slash{% else %}bi-send{% endif %}"></i>
+            </button>
+          </form>
+          <a href="{% url 'quizzes:delete' quiz.pk %}" class="btn btn-outline-danger"><i class="bi bi-trash"></i></a>
+        </div>
+        {% else %}
+        {% if student and attempts|get_item:quiz.pk %}
+        {% with a=attempts|get_item:quiz.pk %}
+        <span class="badge text-bg-success">Fini — {{ a.score }}/{{ a.total }}</span>
+        <a href="{% url 'quizzes:take' quiz.pk %}" class="btn btn-sm btn-outline-primary">Wè rezilta m</a>
+        {% endwith %}
+        {% else %}
+        <a href="{% url 'quizzes:take' quiz.pk %}" class="btn btn-sm btn-primary"><i class="bi bi-play-fill"></i> Kòmanse quiz la</a>
+        {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="card shadow-sm"><div class="card-body text-center text-muted py-5">
+      <i class="bi bi-inbox display-5 d-block mb-2"></i>
+      Pa gen quiz ki disponib pou w kounye a.
+    </div></div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

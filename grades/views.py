@@ -240,3 +240,27 @@ def bulletin_cycle(request, student_pk):
 def grade_admin_list(request):
     grades = Grade.objects.select_related("student", "class_subject__subject", "class_subject__classroom", "period")[:500]
     return render(request, "grades/grade_list.html", {"grades": grades})
+
+
+@staff_required
+def bulletin_excel(request, classroom_pk):
+    from core.xlsx import xlsx_response
+
+    classroom = get_object_or_404(ClassRoom.objects.select_related("level", "school_year"), pk=classroom_pk)
+    period_id = request.GET.get("periyod")
+    period = Period.objects.filter(school_year=classroom.school_year, pk=period_id).first() or Period.objects.filter(
+        school_year=classroom.school_year
+    ).order_by("-order").first()
+    subjects = list(classroom.subjects.select_related("subject").order_by("subject__name"))
+    headers = ["Rang", "Matricule", "Elèvre"] + [f"{cs.subject.name} (koyef. {cs.coefficient})" for cs in subjects]
+    headers += ["Mwayèn /20", "Desizyon"]
+    rows = []
+    for rank, student, avg in Grade.class_ranking(classroom, period):
+        row = [rank, student.matricule, student.full_name]
+        for cs in subjects:
+            a = Grade.subject_average(student, cs, period)
+            row.append(float(a) if a is not None else None)
+        row += [avg, _decision(avg)[0]]
+        rows.append(row)
+    name = f"bulletin_{classroom.name.replace(' ', '_')}_{period.name.replace(' ', '_') if period else ''}.xlsx"
+    return xlsx_response("Bulletins", headers, rows, name)

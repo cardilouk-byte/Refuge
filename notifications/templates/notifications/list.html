@@ -1,0 +1,37 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Notifikasyon mwen{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0"><i class="bi bi-bell"></i> Notifikasyon mwen</h1>
+  <form method="post" action="{% url 'notifications:mark_all' %}">
+    {% csrf_token %}
+    <button class="btn btn-sm btn-outline-primary"><i class="bi bi-check2-all"></i> Make tout li</button>
+  </form>
+</div>
+<div class="list-group shadow-sm">
+  {% for n in items %}
+  <div class="list-group-item {% if not n.is_read %}border-start border-4 border-primary bg-light{% endif %}">
+    <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
+      <div>
+        <div class="fw-semibold">
+          {% if not n.is_read %}<i class="bi bi-dot text-primary" style="font-size:1.4rem"></i>{% endif %}{{ n.title }}
+        </div>
+        {% if n.body %}<div class="text-muted small">{{ n.body|linebreaksbr }}</div>{% endif %}
+        <div class="text-muted small">{{ n.created_at|date:"d/m/Y H:i" }}</div>
+      </div>
+      <div class="btn-group btn-group-sm">
+        {% if n.url %}<a href="{{ n.url }}" class="btn btn-outline-primary">Ouvri</a>{% endif %}
+        {% if not n.is_read %}
+        <form method="post" action="{% url 'notifications:mark_read' n.pk %}">
+          {% csrf_token %}
+          <button class="btn btn-outline-secondary">Make li</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="list-group-item text-muted text-center py-4">Pa gen notifikasyon.</div>
+  {% endfor %}
+</div>
+{% endblock %}
