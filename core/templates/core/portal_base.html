@@ -102,6 +102,12 @@
           <li class="nav-item"><hr class="dropdown-divider"></li>
           <li class="nav-item"><span class="side-head px-3">ÉTABLISSEMENT</span></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'students' %}active fw-bold{% endif %}" href="{% url 'students:student_list' %}"><i class="bi bi-people me-2"></i>Elèv yo <span class="small text-muted d-inline">(par klas)</span></a></li>
+          {% if user.is_school_staff or user.is_staff %}
+          <li class="nav-item"><a class="nav-link {% if 'done' in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:data_home' %}"><i class="bi bi-database me-2"></i>Done lekòl la</a></li>
+          <li class="nav-item"><a class="nav-link small py-1 ps-5" href="{% url 'dashboard:data_list' 'pwofese' %}">Pwofesè yo</a></li>
+          <li class="nav-item"><a class="nav-link small py-1 ps-5" href="{% url 'dashboard:data_list' 'klas' %}">Klas yo</a></li>
+          <li class="nav-item"><a class="nav-link small py-1 ps-5" href="{% url 'dashboard:data_list' 'matiye' %}">Matyè yo</a></li>
+          {% endif %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'homework' %}active fw-bold{% endif %}" href="{% url 'homework:list' %}"><i class="bi bi-journal-check me-2"></i>Devoirs</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'exams' %}active fw-bold{% endif %}" href="{% url 'exams:list' %}"><i class="bi bi-file-earmark-text me-2"></i>Examens</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'quizzes' %}active fw-bold{% endif %}" href="{% url 'quizzes:list' %}"><i class="bi bi-ui-checks me-2"></i>Quiz (QCM)</a></li>

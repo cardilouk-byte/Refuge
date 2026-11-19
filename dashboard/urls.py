@@ -1,11 +1,17 @@
 from django.urls import path
 
-from . import config_views, views
+from . import config_views, data_views, views
 
 app_name = "dashboard"
 
 urlpatterns = [
     path("tableau/", views.home, name="home"),
+    path("tableau/done/", data_views.data_home, name="data_home"),
+    path("tableau/done/<str:key>/", data_views.data_list, name="data_list"),
+    path("tableau/done/<str:key>/nouvo/", data_views.data_create, name="data_create"),
+    path("tableau/done/<str:key>/<int:pk>/modifye/", data_views.data_update, name="data_update"),
+    path("tableau/done/<str:key>/<int:pk>/efase/", data_views.data_delete, name="data_delete"),
+    path("tableau/done/pwofese/<int:pk>/kont/", data_views.teacher_account, name="teacher_account"),
     path("configuration/", config_views.config_home, name="config_home"),
     path("configuration/parametres/", config_views.config_settings, name="config_settings"),
     path("configuration/model-sit/", config_views.config_themes, name="config_themes"),

@@ -1,0 +1,38 @@
+{% extends "core/portal_base.html" %}
+{% block title %}{{ titre }} — LNFCL{% endblock %}
+{% block content %}
+<style>
+  .cred-box { border:2px dashed var(--primary); border-radius:16px; background: color-mix(in srgb, var(--primary) 4%, #fff); }
+  .cred-box .v { font-family: monospace; font-size:1.25rem; color: var(--primary); }
+</style>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 mb-0"><i class="bi bi-key me-2"></i>{{ titre }}</h1>
+  <a href="{% url 'dashboard:data_list' 'pwofese' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Pwofesè yo</a>
+</div>
+<div class="card shadow-sm" style="max-width:620px">
+  <div class="card-body p-4 text-center">
+    <p class="text-muted">
+      {% if teacher.user %}
+      Profèsè a gen yon kont deja — klike anba pou reyinisyalize modpas la oswa aksè a.
+      {% else %}
+      Profèsè a poko gen kont. Klike anba pou kreye yon kont (login + modpas) pou li konekte.
+      {% endif %}
+    </p>
+    {% if credentials %}
+    <div class="cred-box p-4 mb-3">
+      <div class="small text-muted mb-2"><i class="bi bi-person-check me-1"></i>Kont la sove — {{ credentials.who }} (kenbe enfòmasyon sa a!)</div>
+      <div class="d-flex justify-content-center gap-4 flex-wrap">
+        <div><div class="small text-muted">Login</div><div class="v">{{ credentials.username }}</div></div>
+        <div><div class="small text-muted">Modpas</div><div class="v">{{ credentials.password }}</div></div>
+      </div>
+    </div>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary rounded-pill px-4">
+        <i class="bi bi-key me-1"></i>{% if teacher.user %} Reyinisyalize modpas la{% else %} Kreye kont profesè a{% endif %}
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

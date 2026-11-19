@@ -1,0 +1,38 @@
+{% extends "core/portal_base.html" %}
+{% block title %}{{ titre }} — LNFCL{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 mb-0"><i class="bi {{ dk.icon }} me-2"></i>{{ titre }}</h1>
+  <div class="d-flex gap-2">
+    <form method="get" class="d-flex gap-2">
+      <input type="text" name="q" value="{{ q }}" class="form-control form-control-sm" placeholder="Chèche...">
+      <button class="btn btn-sm btn-outline-primary">Chèche</button>
+    </form>
+    <a href="{% url 'dashboard:data_create' key %}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Nouvo</a>
+  </div>
+</div>
+
+<div class="table-responsive card shadow-sm">
+  <table class="table table-hover mb-0 align-middle">
+    <thead class="table-light">
+      <tr>
+        {% for h in headers %}<th>{{ h }}</th>{% endfor %}
+        <th class="text-end">Aksyon</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pk, cells in rows %}
+      <tr>
+        {% for cell in cells %}<td class="small">{{ cell }}</td>{% endfor %}
+        <td class="text-end" style="width:110px">
+          <a href="{% url 'dashboard:data_update' key pk %}" class="btn btn-sm btn-outline-primary" title="Modifye"><i class="bi bi-pencil"></i></a>
+          <a href="{% url 'dashboard:data_delete' key pk %}" class="btn btn-sm btn-outline-danger" title="Efase"><i class="bi bi-trash"></i></a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="{{ headers|length|add:1 }}" class="text-muted text-center py-4">Pa gen done — klike « Nouvo » pou kòmanse.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

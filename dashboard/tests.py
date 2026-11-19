@@ -7,6 +7,8 @@ from django.test import TestCase, override_settings
 from PIL import Image
 
 from core.models import GalleryImage, HeroSlide, SiteSettings
+from academics.models import ClassRoom, ClassSubject, Cycle, Level, Period, SchoolYear, Subject
+from teachers.models import Teacher
 
 User = get_user_model()
 
@@ -472,3 +474,72 @@ class SiteThemesTest(TestCase):
         self.client.login(username="prof", password="Prof2026!")
         response = self.client.get("/configuration/model-sit/")
         self.assertEqual(response.status_code, 403)
+
+
+class DashboardDataTest(TestCase):
+    def _login(self, username, role, superuser=False):
+        User = get_user_model()
+        user = User.objects.create_user(username, password="T43s!pass", role=role)
+        if superuser:
+            user.is_superuser = True
+            user.save()
+        self.client.login(username=username, password="T43s!pass")
+        return user
+
+    def _direction(self):
+        return self._login("data_adm", "SUPERADMIN", superuser=True)
+
+    def test_data_home_and_lists(self):
+        self._direction()
+        r = self.client.get("/tableau/done/", HTTP_HOST="localhost")
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Klas yo")
+        for key in ["ane", "sik", "nivo", "periyod", "klas", "matiye", "pwofese", "asiyman"]:
+            self.assertEqual(self.client.get(f"/tableau/done/{key}/", HTTP_HOST="localhost").status_code, 200)
+
+    def test_classroom_create_update_delete(self):
+        self._direction()
+        from academics.models import ClassRoom, Cycle, Level, SchoolYear
+        year = SchoolYear.objects.create(label="2025-2026", is_current=True)
+        level = Level.objects.create(name="6èm AF", cycle=Cycle.objects.create(name="Fonmantal"))
+        r = self.client.post("/tableau/done/klas/nouvo/", {"school_year": year.pk, "level": level.pk, "section": "A"}, HTTP_HOST="localhost")
+        self.assertRedirects(r, "/tableau/done/klas/")
+        room = ClassRoom.objects.get(school_year=year, level=level, section="A")
+        r = self.client.post(f"/tableau/done/klas/{room.pk}/modifye/", {"school_year": year.pk, "level": level.pk, "section": "B"}, HTTP_HOST="localhost")
+        self.assertRedirects(r, "/tableau/done/klas/")
+        room.refresh_from_db()
+        self.assertEqual(room.section, "B")
+        r = self.client.post(f"/tableau/done/klas/{room.pk}/efase/", HTTP_HOST="localhost")
+        self.assertRedirects(r, "/tableau/done/klas/")
+        self.assertFalse(ClassRoom.objects.filter(pk=room.pk).exists())
+
+    def test_subject_and_assignment_create(self):
+        self._direction()
+        from academics.models import ClassRoom, ClassSubject, Cycle, Level, SchoolYear
+        year = SchoolYear.objects.create(label="2025-2026", is_current=True)
+        level = Level.objects.create(name="5èm AF", cycle=Cycle.objects.create(name="Fonmantal"))
+        room = ClassRoom.objects.create(school_year=year, level=level, section="A")
+        teacher = Teacher.objects.create(matricule="PROF-001", first_name="Ana", last_name="Rive")
+        r = self.client.post("/tableau/done/matiye/nouvo/", {"name": "Matematik", "code": "MATH"}, HTTP_HOST="localhost")
+        self.assertRedirects(r, "/tableau/done/matiye/")
+        subject = Subject.objects.get(name="Matematik")
+        r = self.client.post("/tableau/done/asiyman/nouvo/", {"classroom": room.pk, "subject": subject.pk, "teacher": teacher.pk, "coefficient": 4, "weekly_hours": 5}, HTTP_HOST="localhost")
+        self.assertRedirects(r, "/tableau/done/asiyman/")
+        cs = ClassSubject.objects.get(classroom=room, subject=subject)
+        self.assertEqual(cs.teacher, teacher)
+
+    def test_teacher_account_creation(self):
+        self._direction()
+        from teachers.models import Teacher
+        t = Teacher.objects.create(first_name="Jean", last_name="Lwis", matricule="PROF-002")
+        r = self.client.post(f"/tableau/done/pwofese/{t.pk}/kont/", HTTP_HOST="localhost")
+        self.assertRedirects(r, f"/tableau/done/pwofese/{t.pk}/kont/")
+        t.refresh_from_db()
+        self.assertIsNotNone(t.user)
+        self.assertEqual(t.user.role, "ENSEIGNANT")
+        self.assertIn("Kont profes\u00e8 a", self.client.get(f"/tableau/done/pwofese/{t.pk}/kont/", HTTP_HOST="localhost").content.decode())
+
+    def test_teacher_cannot_access_data_pages(self):
+        self._login("data_prof", "ENSEIGNANT")
+        r = self.client.get("/tableau/done/klas/", HTTP_HOST="localhost")
+        self.assertEqual(r.status_code, 403)

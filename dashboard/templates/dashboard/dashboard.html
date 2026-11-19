@@ -23,7 +23,11 @@
       <div class="d-flex flex-wrap gap-2">
         <a href="{% url 'students:student_create' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-person-plus"></i> Elèv nèf</a>
         <a href="{% url 'students:student_list' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-people"></i> Elèv yo</a>
-        <a href="{% url 'grades:class_list' %}" class="btn btn-sm btn-outline-success"><i class="bi bi-pencil-square"></i> Antre nòt</a>
+        <a href="{% url 'dashboard:data_list' 'pwofese' %}" class="btn btn-sm btn-outline-success"><i class="bi bi-person-video3"></i> Pwofesè yo</a>
+        <a href="{% url 'dashboard:data_list' 'klas' %}" class="btn btn-sm btn-outline-success"><i class="bi bi-door-open"></i> Klas yo</a>
+        <a href="{% url 'dashboard:data_list' 'matiye' %}" class="btn btn-sm btn-outline-success"><i class="bi bi-collection"></i> Matyè yo</a>
+        <a href="{% url 'dashboard:data_list' 'asiyman' %}" class="btn btn-sm btn-outline-success"><i class="bi bi-link-45deg"></i> Prof pa klas/matyè</a>
+        <a href="{% url 'grades:class_list' %}" class="btn btn-sm btn-outline-info"><i class="bi bi-pencil-square"></i> Antre nòt</a>
         <a href="{% url 'attendance:home' %}" class="btn btn-sm btn-outline-info"><i class="bi bi-clipboard-check"></i> Cahier d'appel</a>
         <a href="{% url 'cahiers:index' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-journal-text"></i> Cahier de tèks</a>
         <a href="{% url 'quizzes:create' %}" class="btn btn-sm btn-outline-warning"><i class="bi bi-ui-checks"></i> Nouvo quiz</a>
