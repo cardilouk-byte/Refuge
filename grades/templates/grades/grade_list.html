@@ -1,0 +1,27 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Tout nòt yo{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3"><i class="bi bi-list-check"></i> Tout nòt yo (500 dènye)</h1>
+<div class="table-responsive card shadow-sm">
+  <table class="table table-hover table-sm mb-0 align-middle">
+    <thead class="table-light">
+      <tr><th>Elèv</th><th>Matiye</th><th>Klas</th><th>Peryòd</th><th>Kalite</th><th class="text-center">Nòt</th><th>Saisi pa</th></tr>
+    </thead>
+    <tbody>
+      {% for g in grades %}
+      <tr>
+        <td class="fw-semibold">{{ g.student.full_name }}</td>
+        <td>{{ g.class_subject.subject.name }}</td>
+        <td>{{ g.class_subject.classroom.name }}</td>
+        <td>{{ g.period.name }}</td>
+        <td><span class="badge text-bg-secondary">{{ g.kind }}</span></td>
+        <td class="text-center fw-semibold">{{ g.score|floatformat:2 }}</td>
+        <td class="text-muted small">{{ g.entered_by.get_full_name|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-muted text-center py-4">Pa gen nòt anrejistre.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

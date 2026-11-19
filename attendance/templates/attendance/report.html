@@ -1,0 +1,82 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Rapor absans &amp; retad{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3"><i class="bi bi-graph-up"></i> Rapor Absans &amp; Retad</h1>
+
+<form method="get" class="card shadow-sm p-3 mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Klas</label>
+      <select name="klas" class="form-select form-select-sm">
+        <option value="">— Tout klas —</option>
+        {% for c in classrooms %}<option value="{{ c.pk }}" {% if f_classroom == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }} ({{ c.school_year }})</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Elèv</label>
+      <select name="eleve" class="form-select form-select-sm">
+        <option value="">— Tout elèv —</option>
+        {% for st in students %}<option value="{{ st.pk }}" {% if f_student == st.pk|stringformat:"s" %}selected{% endif %}>{{ st.full_name }} ({{ st.matricule }})</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">De</label>
+      <input type="date" name="debut" value="{{ f_start }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-2">
+      <label class="form-label small mb-1">Jiska</label>
+      <input type="date" name="fin" value="{{ f_end }}" class="form-control form-control-sm">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-funnel"></i> Filtre</button>
+    </div>
+  </div>
+</form>
+
+<h2 class="h5 mt-2"><i class="bi bi-bar-chart"></i> Total pa elèv</h2>
+<div class="table-responsive card shadow-sm mb-4">
+  <table class="table table-hover table-sm mb-0 align-middle">
+    <thead class="table-light">
+      <tr><th>Elèv</th><th class="text-center">Absans</th><th class="text-center">Retad</th><th class="text-center">Prezan</th></tr>
+    </thead>
+    <tbody>
+      {% for s in stats %}
+      <tr>
+        <td class="fw-semibold">{{ s.student__first_name }} {{ s.student__last_name }} <span class="text-muted small">({{ s.student__matricule }})</span></td>
+        <td class="text-center">{% if s.absans %}<span class="badge text-bg-danger">{{ s.absans }}</span>{% else %}0{% endif %}</td>
+        <td class="text-center">{% if s.retad %}<span class="badge text-bg-warning">{{ s.retad }}</span>{% else %}0{% endif %}</td>
+        <td class="text-center">{{ s.prezan }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="text-muted text-center py-4">Pa gen done ak filtè sa a.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2 class="h5"><i class="bi bi-list-ul"></i> Dènye rekò (200)</h2>
+<div class="table-responsive card shadow-sm">
+  <table class="table table-hover table-sm mb-0 align-middle">
+    <thead class="table-light">
+      <tr><th>Elèv</th><th>Dat</th><th class="text-center">Estati</th><th class="text-center">Jistifye</th><th>Remak</th></tr>
+    </thead>
+    <tbody>
+      {% for r in recent %}
+      <tr>
+        <td class="fw-semibold">{{ r.student.full_name }}</td>
+        <td>{{ r.date|date:"d/m/Y" }}</td>
+        <td class="text-center">
+          {% if r.status == "PRESENT" %}<span class="badge text-bg-success">Prezan</span>
+          {% elif r.status == "ABSENT" %}<span class="badge text-bg-danger">Absan</span>
+          {% else %}<span class="badge text-bg-warning">Reta</span>{% endif %}
+        </td>
+        <td class="text-center">{% if r.status == "ABSENT" %}{% if r.justified %}<i class="bi bi-check-lg text-success"></i>{% else %}<i class="bi bi-x-lg text-danger"></i>{% endif %}{% else %}—{% endif %}</td>
+        <td class="text-muted">{{ r.note|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-muted text-center py-4">Pa gen rekò.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

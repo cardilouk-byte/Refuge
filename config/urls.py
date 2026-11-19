@@ -19,6 +19,8 @@ urlpatterns = [
     path("", include("media_library.urls")),
     path("devoirs/", include("homework.urls")),
     path("examens/", include("exams.urls")),
+    path("notes/", include("grades.urls")),
+    path("presens/", include("attendance.urls")),
     path("bibliotheque/", include("library.urls")),
     path("", include("students.urls")),
     path("", include("core.urls")),

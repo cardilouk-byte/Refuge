@@ -1,0 +1,82 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Bulletin — {{ student.full_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+  <h1 class="h3 mb-0"><i class="bi bi-award"></i> Bulletin — {{ student.full_name }}</h1>
+  <div class="btn-group">
+    <a href="{% url 'grades:bulletin_student' student.pk %}" class="btn btn-sm btn-outline-primary active">Bulletin</a>
+    <a href="{% url 'grades:bulletin_cycle' student.pk %}" class="btn btn-sm btn-outline-primary">Rele sik</a>
+  </div>
+</div>
+<p class="text-muted">
+  {{ student.matricule }} — {{ student.classroom.name|default:"pa gen klas" }} <span class="badge text-bg-secondary">{{ student.classroom.level.cycle|default:"" }}</span> {{ student.classroom.school_year|default:"" }}
+</p>
+
+{% if periods %}
+<form method="get" class="row g-2 align-items-end mb-3">
+  <div class="col-auto">
+    <label class="form-label small mb-1">Peryòd</label>
+    <select name="periyod" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for p in periods %}<option value="{{ p.pk }}" {% if p == period %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+    </select>
+  </div>
+</form>
+{% endif %}
+
+{% if data %}
+<div class="card shadow-sm mb-3">
+  <div class="card-header table-light fw-semibold">{{ period.name }}</div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead class="table-light">
+        <tr><th>Matiye</th><th>Nòt yo</th><th class="text-center">Mwayèn</th><th class="text-center">Koyef.</th><th class="text-center">Pwen</th></tr>
+      </thead>
+      <tbody>
+        {% for r in data.rows %}
+        <tr>
+          <td class="fw-semibold">{{ r.cs.subject.name }}</td>
+          <td class="small text-muted">
+            {% for n in r.notes %}<span class="badge text-bg-light border">{{ n.kind }} : {{ n.score|floatformat:2 }}</span> {% endfor %}
+          </td>
+          <td class="text-center fw-semibold">{{ r.avg|floatformat:2|default:"—" }}</td>
+          <td class="text-center">{{ r.cs.coefficient }}</td>
+          <td class="text-center">{{ r.points|floatformat:2|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-muted text-center py-4">Pa gen matye nan klas sa a.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card text-center h-100 shadow-sm border-top border-4 border-primary">
+      <div class="card-body">
+        <div class="display-6 fw-bold">{{ data.moy|floatformat:2|default:"—" }}</div>
+        <div class="text-muted">Mwayèn jeneral /20</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center h-100 shadow-sm border-top border-4 border-info">
+      <div class="card-body">
+        <div class="display-6 fw-bold">{{ data.rank|default:"—" }}</div>
+        <div class="text-muted">Rang sou {{ data.out_of|default:"—" }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center h-100 shadow-sm border-top border-4 border-{{ data.tone }}">
+      <div class="card-body">
+        <div class="h4 fw-bold text-{{ data.tone }}">{{ data.decision }}</div>
+        <div class="text-muted">Desizyon peryòd la</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-info">Pa gen peryòd konfigire pou klas elèv sa a.</div>
+{% endif %}
+{% endblock %}

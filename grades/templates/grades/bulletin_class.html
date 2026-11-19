@@ -1,0 +1,41 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Bulletins klase — {{ classroom.name }}{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3"><i class="bi bi-award"></i> Bulletins &amp; Desizyon — {{ classroom.name }}</h1>
+
+{% if periods %}
+<form method="get" class="row g-2 align-items-end mb-3">
+  <div class="col-auto">
+    <label class="form-label small mb-1">Peryòd</label>
+    <select name="periyod" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for p in periods %}<option value="{{ p.pk }}" {% if p == period %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+    </select>
+  </div>
+</form>
+{% endif %}
+
+<div class="table-responsive card shadow-sm">
+  <table class="table table-hover mb-0 align-middle">
+    <thead class="table-light">
+      <tr><th class="text-center">Rang</th><th>Matricule</th><th>Elèv</th><th class="text-center">Mwayèn /20</th><th class="text-center">Desizyon</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for r in ranked %}
+      <tr>
+        <td class="text-center fw-bold">{% if r.rank == 1 %}<i class="bi bi-trophy-fill text-warning"></i> {% endif %}{{ r.rank }}</td>
+        <td class="text-muted">{{ r.student.matricule }}</td>
+        <td class="fw-semibold">{{ r.student.full_name }}</td>
+        <td class="text-center fw-semibold">{{ r.avg|floatformat:2 }}</td>
+        <td class="text-center"><span class="badge text-bg-{{ r.tone }}">{{ r.decision }}</span></td>
+        <td class="text-end">
+          <a href="{% url 'grades:bulletin_student' r.student.pk %}{% if period %}?periyod={{ period.pk }}{% endif %}" class="btn btn-sm btn-outline-primary">Bulletin</a>
+          <a href="{% url 'grades:bulletin_cycle' r.student.pk %}" class="btn btn-sm btn-outline-secondary">Rele sik</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-muted text-center py-4">Pa gen nòt pou klas sa a nan peryòd sa a.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
