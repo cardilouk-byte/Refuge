@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 
-from accounts.views import superadmin_required
+from accounts.views import direction_required
 from core.models import (
     About, Club, FAQ, GalleryImage, HeroSlide, MenuItem, NewsEvent, Program,
     Result, SchoolEvent, Service, SiteSettings, TeamMember, Testimonial,
@@ -41,12 +41,12 @@ def _single_object(cfg):
     return model.objects.first() or model.objects.create()
 
 
-@superadmin_required
+@direction_required
 def config_home(request):
     return render(request, "dashboard/config/index.html", {"sections": SECTIONS})
 
 
-@superadmin_required
+@direction_required
 def config_settings(request):
     settings_obj = SiteSettings.load()
     if request.method == "POST":
@@ -61,7 +61,7 @@ def config_settings(request):
     return render(request, "dashboard/config/settings.html", {"form": form, "tabs_data": tabs_data})
 
 
-@superadmin_required
+@direction_required
 def config_list(request, section):
     cfg = _section(section)
     if cfg is None:
@@ -73,7 +73,7 @@ def config_list(request, section):
     return render(request, "dashboard/config/object_list.html", {"section": section, "cfg": cfg, "items": items})
 
 
-@superadmin_required
+@direction_required
 def config_create(request, section):
     cfg = _section(section)
     if cfg is None:
@@ -92,7 +92,7 @@ def config_create(request, section):
     return render(request, "dashboard/config/object_form.html", {"section": section, "cfg": cfg, "form": form})
 
 
-@superadmin_required
+@direction_required
 def config_update(request, section, pk):
     cfg = _section(section)
     if cfg is None:
@@ -113,7 +113,7 @@ def config_update(request, section, pk):
     return render(request, "dashboard/config/object_form.html", {"section": section, "cfg": cfg, "form": form, "obj": obj})
 
 
-@superadmin_required
+@direction_required
 def config_delete(request, section, pk):
     cfg = _section(section)
     if cfg is None:
@@ -130,7 +130,7 @@ def config_delete(request, section, pk):
     return render(request, "dashboard/config/object_confirm_delete.html", {"section": section, "cfg": cfg, "obj": obj})
 
 
-@superadmin_required
+@direction_required
 def config_themes(request):
     from core.models import SiteSettings
 
@@ -144,7 +144,7 @@ def config_themes(request):
     )
 
 
-@superadmin_required
+@direction_required
 def config_theme_apply(request, key):
     from django.contrib import messages
 

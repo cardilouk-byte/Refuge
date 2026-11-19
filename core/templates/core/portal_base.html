@@ -96,6 +96,9 @@
           {% if user.is_teaching_staff or user.is_staff %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'grades' %}active fw-bold{% endif %}" href="{% url 'grades:class_list' %}"><i class="bi bi-pencil-square me-2"></i>Nòt &amp; Bulletins</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'attendance' %}active fw-bold{% endif %}" href="{% url 'attendance:home' %}"><i class="bi bi-clipboard-check me-2"></i>Cahier d'appel (presans)</a></li>
+          {% if user.is_school_staff %}
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'students' %}active fw-bold{% endif %}" href="{% url 'students:student_list' %}"><i class="bi bi-people me-2"></i>Elèv yo</a></li>
+          {% endif %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'cahiers' %}active fw-bold{% endif %}" href="{% url 'cahiers:index' %}"><i class="bi bi-journal-text me-2"></i>Cahier de tèks</a></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'quizzes' %}active fw-bold{% endif %}" href="{% url 'quizzes:list' %}"><i class="bi bi-ui-checks me-2"></i>Quiz (QCM)</a></li>
           {% if user.is_staff or user.is_school_staff %}

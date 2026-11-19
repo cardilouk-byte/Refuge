@@ -144,3 +144,13 @@ class FAQAdmin(admin.ModelAdmin):
     list_display = ("question", "order", "is_published")
     list_editable = ("order", "is_published")
     list_filter = ("is_published",)
+
+
+# Sèlman SUPERADMIN gen dwa antre nan admin Django (/kontwol/).
+# DIRECTION, ENSEIGNANT elatriye gen is_staff men pa superuser — 403.
+def _admin_superadmin_only(request):
+    user = getattr(request, "user", None)
+    return bool(user is not None and user.is_active and user.is_superuser)
+
+
+admin.site.has_permission = _admin_superadmin_only

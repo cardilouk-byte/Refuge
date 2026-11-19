@@ -11,9 +11,28 @@
       {% if period %} — {{ period.name }}{% endif %}
     </p>
   </div>
-  {% if user.is_superuser %}<a href="{% url 'dashboard:config_home' %}" class="btn btn-primary"><i class="bi bi-sliders me-1"></i>Configuration</a>{% endif %}
+  {% if user.is_superuser or user.role == 'DIRECTION' %}<a href="{% url 'dashboard:config_home' %}" class="btn btn-primary"><i class="bi bi-sliders me-1"></i>Configuration</a>{% endif %}
   {% if user.is_staff %}<a href="{% url "admin:index" %}" class="btn btn-outline-primary"><i class="bi bi-gear me-1"></i>Administration</a>{% endif %}
 </div>
+
+{% if user.is_school_staff %}
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="card shadow-sm"><div class="card-body">
+      <h5 class="card-title mb-3"><i class="bi bi-lightning-charge me-2 text-warning"></i>Aksyon rapid — mete done</h5>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'students:student_create' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-person-plus"></i> Elèv nèf</a>
+        <a href="{% url 'students:student_list' %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-people"></i> Elèv yo</a>
+        <a href="{% url 'grades:class_list' %}" class="btn btn-sm btn-outline-success"><i class="bi bi-pencil-square"></i> Antre nòt</a>
+        <a href="{% url 'attendance:home' %}" class="btn btn-sm btn-outline-info"><i class="bi bi-clipboard-check"></i> Cahier d'appel</a>
+        <a href="{% url 'cahiers:index' %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-journal-text"></i> Cahier de tèks</a>
+        <a href="{% url 'quizzes:create' %}" class="btn btn-sm btn-outline-warning"><i class="bi bi-ui-checks"></i> Nouvo quiz</a>
+        <a href="{% url 'promotion:new_year' %}" class="btn btn-sm btn-outline-dark"><i class="bi bi-arrow-repeat"></i> Nouvèl ane</a>
+      </div>
+    </div></div>
+  </div>
+</div>
+{% endif %}
 
 <div class="row g-3 mb-4">
   <div class="col-6 col-lg-3">

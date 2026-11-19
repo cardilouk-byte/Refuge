@@ -20,7 +20,7 @@
 <div class="table-responsive card shadow-sm">
   <table class="table table-hover mb-0 align-middle">
     <thead class="table-light">
-      <tr><th class="text-center">Rang</th><th>Matricule</th><th>Elèv</th><th class="text-center">Mwayèn /20</th><th class="text-center">Desizyon</th><th></th></tr>
+      <tr><th class="text-center">Rang</th><th>Matricule</th><th>Elèv</th><th class="text-center">Mwayèn /10</th><th class="text-center">Desizyon</th><th></th></tr>
     </thead>
     <tbody>
       {% for r in ranked %}
@@ -28,7 +28,7 @@
         <td class="text-center fw-bold">{% if r.rank == 1 %}<i class="bi bi-trophy-fill text-warning"></i> {% endif %}{{ r.rank }}</td>
         <td class="text-muted">{{ r.student.matricule }}</td>
         <td class="fw-semibold">{{ r.student.full_name }}</td>
-        <td class="text-center fw-semibold">{{ r.avg|floatformat:2 }}</td>
+        <td class="text-center fw-semibold">{{ r.avg_10|floatformat:2 }}</td>
         <td class="text-center"><span class="badge text-bg-{{ r.tone }}">{{ r.decision }}</span></td>
         <td class="text-end">
           <a href="{% url 'grades:bulletin_student' r.student.pk %}{% if period %}?periyod={{ period.pk }}{% endif %}" class="btn btn-sm btn-outline-primary">Bulletin</a>

@@ -1,0 +1,51 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Kont elèv — {{ student.full_name }}{% endblock %}
+{% block content %}
+<h1 class="h3 mb-1"><i class="bi bi-key"></i> Kont elèv la</h1>
+<p class="text-muted">{{ student.full_name }} ({{ student.matricule }}) — {{ student.classroom.name|default:"pa gen klas" }}</p>
+
+{% if credentials %}
+<div class="card shadow-sm border-top border-4 border-warning mb-3" style="max-width:520px">
+  <div class="card-body">
+    <h2 class="h6 fw-bold"><i class="bi bi-sticky"></i> Enfòmasyon koneksyon an (atenksyon — pate parèt ankò!)</h2>
+    <div id="cred-box" class="border rounded p-3 bg-light">
+      <p class="mb-1">Sit la: <span class="badge text-bg-secondary">/connexion/</span></p>
+      <p class="mb-1">Non itilizatè: <strong class="fs-5">{{ credentials.username }}</strong></p>
+      <p class="mb-0">Modpas: <strong class="fs-5">{{ credentials.password }}</strong></p>
+    </div>
+    <p class="small text-muted mt-2 mb-0">Ede elèv la konekte yon premye fwa, epi encourage l chanje modpas li.</p>
+  </div>
+</div>
+{% endif %}
+
+<div class="card shadow-sm p-4" style="max-width:520px">
+  {% if messages %}{% for m in messages %}<div class="alert alert-success py-2">{{ m }}</div>{% endfor %}{% endif %}
+  {% if student.user %}
+  <p><i class="bi bi-check-circle text-success"></i> Kont egziste: <strong>{{ student.user.username }}</strong> (rol {{ student.user.get_role_display }})</p>
+  <button class="btn btn-warning" data-bs-toggle="collapse" data-bs-target="#confirm-reset">
+    <i class="bi bi-arrow-repeat"></i> Rekreye modpas (reset)
+  </button>
+  <div id="confirm-reset" class="collapse mt-3">
+    <div class="alert alert-warning small">
+      Ki pral example: modpas ki te genyen an pa va mache ankò. Konfime swa:
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger"><i class="bi bi-check-lg"></i> Wi, nouvo modpas</button>
+    </form>
+  </div>
+  {% else %}
+  <p class="text-muted">Elèv sa a poko gen kont sou sistèm nan.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button class="btn btn-primary"><i class="bi bi-person-plus"></i> Kreye kont elèv la (login + modpas)</button>
+  </form>
+  {% endif %}
+  <hr>
+  <div class="btn-group btn-group-sm">
+    <a href="{% url 'students:badge' student.pk %}" class="btn btn-outline-secondary"><i class="bi bi-person-badge"></i> Badge</a>
+    <a href="{% url 'students:student_update' student.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil"></i> Modifye elèv</a>
+    <a href="{% url 'students:student_list' %}" class="btn btn-outline-secondary">Tounen</a>
+  </div>
+</div>
+{% endblock %}

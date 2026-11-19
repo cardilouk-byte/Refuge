@@ -118,6 +118,47 @@ class BulletinTest(TestCase):
         self.assertContains(response, "ADMIS")
         self.assertContains(response, "Matematik")
         self.assertContains(response, "15,50")
+        # mwayèn jeneral an sou /10: 14,33 /20 → 7,17 /10
+        self.assertContains(response, "Mway\u00e8n jeneral /10")
+        self.assertContains(response, "7,17")
+
+    def test_bulletin_locked_for_unpaid_student(self):
+        from finance.models import FeeType, Invoice
+
+        Grade.objects.create(
+            student=self.d["s1"], class_subject=self.d["cs_math"], period=self.d["period"], kind="DEVOIR", score=16
+        )
+        fee = FeeType.objects.create(name="Frais scolarit\u00e9", amount=5000, school_year=self.d["year"])
+        user = User.objects.create_user("elv1", password="Pass1234!", role="ELEVE")
+        self.d["s1"].user = user
+        self.d["s1"].save(update_fields=["user"])
+        Invoice.objects.create(student=self.d["s1"], fee_type=fee, amount=5000)
+        self.client.login(username="elv1", password="Pass1234!")
+        response = self.client.get(f"/notes/bulletin/eleve/{self.d['s1'].pk}/", **HOST)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "bloke")
+        self.assertNotContains(response, "Matematik")
+        # rele sik tou bloke
+        response = self.client.get(f"/notes/bulletin/cik/{self.d['s1'].pk}/", **HOST)
+        self.assertContains(response, "bloke")
+        # apre paye — bulletin an louvri
+        inv = Invoice.objects.get()
+        inv.status = "PAYE"
+        inv.save()
+        response = self.client.get(f"/notes/bulletin/eleve/{self.d['s1'].pk}/", **HOST)
+        self.assertContains(response, "Matematik")
+
+    def test_staff_not_locked_by_unpaid(self):
+        from finance.models import FeeType, Invoice
+
+        Grade.objects.create(
+            student=self.d["s1"], class_subject=self.d["cs_math"], period=self.d["period"], kind="DEVOIR", score=16
+        )
+        fee = FeeType.objects.create(name="Frais scolarit\u00e9", amount=5000, school_year=self.d["year"])
+        Invoice.objects.create(student=self.d["s1"], fee_type=fee, amount=5000)
+        self.client.login(username="adm", password="Pass1234!")
+        response = self.client.get(f"/notes/bulletin/eleve/{self.d['s1'].pk}/", **HOST)
+        self.assertContains(response, "Matematik")
 
     def test_bulletin_redouble_score(self):
         Grade.objects.create(

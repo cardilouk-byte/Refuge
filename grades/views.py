@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 
+from finance.models import Invoice
+
 from accounts.models import User
 from accounts.views import staff_required, teaching_staff_required
 from academics.models import ClassRoom, Period
@@ -74,7 +76,8 @@ def _bulletin_data(student, period):
             if s.pk == student.pk:
                 rank = r
                 break
-    return {"rows": rows, "moy": moy, "rank": rank, "out_of": out_of, "decision": decision, "tone": tone}
+    return {"rows": rows, "moy": moy, "moy_10": round(moy / 2, 2) if moy is not None else None,
+            "rank": rank, "out_of": out_of, "decision": decision, "tone": tone}
 
 
 @login_required
@@ -160,6 +163,21 @@ def note_saisie(request, classroom_pk):
     )
 
 
+def _bulletin_locked(request, student):
+    if request.user.is_staff:
+        return None
+    is_guardian = (
+        getattr(request.user, "student_profile", None) is not None
+        or Student.objects.filter(parentstudent__parent__user=request.user).exists()
+    )
+    if not is_guardian:
+        return None
+    unpaid = Invoice.objects.filter(student=student).exclude(status=Invoice.Status.PAYE).exists()
+    if unpaid:
+        return render(request, "grades/bulletin_locked.html", {"student": student})
+    return None
+
+
 @login_required
 def bulletin_home(request):
     user = request.user
@@ -184,7 +202,7 @@ def bulletin_class(request, classroom_pk):
     ranked = []
     for r, s, a in ranking:
         dec, tone = _decision(a)
-        ranked.append({"rank": r, "student": s, "avg": a, "decision": dec, "tone": tone})
+        ranked.append({"rank": r, "student": s, "avg": a, "avg_10": round(a / 2, 2), "decision": dec, "tone": tone})
     return render(
         request,
         "grades/bulletin_class.html",
@@ -195,6 +213,9 @@ def bulletin_class(request, classroom_pk):
 @login_required
 def bulletin_student(request, student_pk):
     student = _get_student_for_view(request, student_pk)
+    locked = _bulletin_locked(request, student)
+    if locked:
+        return locked
     periods = Period.objects.filter(school_year=student.classroom.school_year).order_by("order") if student.classroom else Period.objects.none()
     period_id = request.GET.get("periyod")
     period = periods.filter(pk=period_id).first() if period_id else periods.order_by("-order").first()
@@ -209,6 +230,9 @@ def bulletin_student(request, student_pk):
 @login_required
 def bulletin_cycle(request, student_pk):
     student = _get_student_for_view(request, student_pk)
+    locked = _bulletin_locked(request, student)
+    if locked:
+        return locked
     periods = Period.objects.filter(school_year=student.classroom.school_year).order_by("order") if student.classroom else Period.objects.none()
     summary = []
     year_points = 0
@@ -230,6 +254,7 @@ def bulletin_cycle(request, student_pk):
             "cycle": cycle,
             "summary": summary,
             "year_avg": year_avg,
+            "year_avg_10": round(year_avg / 2, 2) if year_avg is not None else None,
             "cycle_decision": cycle_decision,
             "tone": tone,
         },
@@ -253,14 +278,14 @@ def bulletin_excel(request, classroom_pk):
     ).order_by("-order").first()
     subjects = list(classroom.subjects.select_related("subject").order_by("subject__name"))
     headers = ["Rang", "Matricule", "Elèvre"] + [f"{cs.subject.name} (koyef. {cs.coefficient})" for cs in subjects]
-    headers += ["Mwayèn /20", "Desizyon"]
+    headers += ["Mwayèn /20", "Mwayèn /10", "Desizyon"]
     rows = []
     for rank, student, avg in Grade.class_ranking(classroom, period):
         row = [rank, student.matricule, student.full_name]
         for cs in subjects:
             a = Grade.subject_average(student, cs, period)
             row.append(float(a) if a is not None else None)
-        row += [avg, _decision(avg)[0]]
+        row += [avg, round(avg / 2, 2), _decision(avg)[0]]
         rows.append(row)
     name = f"bulletin_{classroom.name.replace(' ', '_')}_{period.name.replace(' ', '_') if period else ''}.xlsx"
     return xlsx_response("Bulletins", headers, rows, name)

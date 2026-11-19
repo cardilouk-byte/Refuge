@@ -26,11 +26,16 @@ class ConfigAccessTest(TestCase):
         response = self.client.get("/configuration/")
         self.assertEqual(response.status_code, 302)
 
-    def test_staff_non_superuser_gets_403(self):
+    def test_direction_has_configuration_access(self):
         User.objects.create_user("dir", password="Pass1234!", role="DIRECTION", is_staff=True)
         self.client.login(username="dir", password="Pass1234!")
-        response = self.client.get("/configuration/")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(self.client.get("/configuration/").status_code, 200)
+        self.assertEqual(self.client.get("/configuration/parametres/").status_code, 200)
+
+    def test_enseignant_gets_403_on_configuration(self):
+        User.objects.create_user("prof", password="Pass1234!", role="ENSEIGNANT")
+        self.client.login(username="prof", password="Pass1234!")
+        self.assertEqual(self.client.get("/configuration/").status_code, 403)
 
     def test_superuser_gets_200(self):
         User.objects.create_superuser("adm", "a@a.ht", "Pass1234!")
@@ -458,8 +463,12 @@ class SiteThemesTest(TestCase):
         home = self.client.get("/", HTTP_HOST="localhost").content.decode()
         self.assertIn("linear-gradient(160deg, #0f172a, #1e3a8a)", home)
 
-    def test_themes_superadmin_only(self):
+    def test_themes_direction_access(self):
         User.objects.create_user("direction", password="Direction2026!", role="DIRECTION", is_staff=True)
         self.client.login(username="direction", password="Direction2026!")
+        response = self.client.get("/configuration/model-sit/")
+        self.assertEqual(response.status_code, 200)
+        User.objects.create_user("prof", password="Prof2026!", role="ENSEIGNANT")
+        self.client.login(username="prof", password="Prof2026!")
         response = self.client.get("/configuration/model-sit/")
         self.assertEqual(response.status_code, 403)

@@ -54,8 +54,8 @@
   <div class="col-md-4">
     <div class="card text-center h-100 shadow-sm border-top border-4 border-primary">
       <div class="card-body">
-        <div class="display-6 fw-bold">{{ data.moy|floatformat:2|default:"—" }}</div>
-        <div class="text-muted">Mwayèn jeneral /20</div>
+        <div class="display-6 fw-bold">{{ data.moy_10|floatformat:2|default:"—" }}</div>
+        <div class="text-muted">Mwayèn jeneral /10 <span class="small text-muted">({{ data.moy|floatformat:2 }}/20)</span></div>
       </div>
     </div>
   </div>
