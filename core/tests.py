@@ -317,3 +317,27 @@ class DashboardLogoTests(TestCase):
         html = response.content.decode()
         self.assertIn('class="brand-logo-placeholder"', html)
         self.assertNotIn('class="portal-logo"', html)
+
+
+class DownloadTabTest(TestCase):
+    HOST = {"HTTP_HOST": "localhost"}
+
+    def test_download_page_is_html(self):
+        response = self.client.get("/telechaje/", **self.HOST)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("text/html", response["Content-Type"])
+        self.assertContains(response, "Telechaje ZIP aplicasyon an")
+
+    def test_download_zip_endpoint(self):
+        import io
+        import zipfile
+
+        response = self.client.get("/telechaje/aplikasyon/", **self.HOST)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("application/zip", response["Content-Type"])
+        zf = zipfile.ZipFile(io.BytesIO(response.content))
+        names = zf.namelist()
+        self.assertIn("manage.py", names)
+        self.assertIn("requirements.txt", names)
+        self.assertTrue(any(n.startswith("students/") for n in names))
+        self.assertFalse(any(n.startswith("env/") for n in names))

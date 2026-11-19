@@ -184,6 +184,10 @@ def about_page(request):
     })
 
 
+def download_page(request):
+    return render(request, "core/download.html")
+
+
 def download_app(request):
     import io
     import zipfile
