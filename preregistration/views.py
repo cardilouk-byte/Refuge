@@ -13,6 +13,7 @@ from .models import PreRegistration
 
 STEP_FORMS = {1: StudentStepForm, 2: ParentStepForm, 3: SchoolStepForm}
 STEP_LABELS = {1: "Elèv", 2: "Paran / Responsab", 3: "Eskolè & Dokiman", 4: "Rezime & Soumèt"}
+STEPS = {num: {"num": num, "label": label} for num, label in STEP_LABELS.items()}
 SESSION_KEYS = {1: "pre_step1", 2: "pre_step2"}
 
 
@@ -49,7 +50,7 @@ def step(request, num):
 
     return render(
         request, "preregistration/wizard.html",
-        {"form": form, "step_num": num, "step_labels": STEP_LABELS},
+        {"form": form, "step_num": num, "step_labels": STEP_LABELS, "steps": STEPS},
     )
 
 
@@ -96,7 +97,7 @@ def review(request):
         pre.save()
         request.session.pop("pre_registration_pk", None)
         return render(request, "preregistration/confirmation.html", {"pre": pre})
-    return render(request, "preregistration/review.html", {"pre": pre, "step_labels": STEP_LABELS})
+    return render(request, "preregistration/review.html", {"pre": pre, "step_num": 4, "steps": STEPS})
 
 
 @staff_required
