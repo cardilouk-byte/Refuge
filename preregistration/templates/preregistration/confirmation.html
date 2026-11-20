@@ -1,0 +1,58 @@
+{% extends "core/base.html" %}
+
+{% block title %}Pré-inscription reçue — {{ site_settings.name }}{% endblock %}
+
+{% block content %}
+<style>
+  .pre-hero { background: linear-gradient(135deg, var(--success-color,#198754) 0%, color-mix(in srgb, var(--success-color,#198754) 45%, #22d3ee) 100%); color:#fff; border-radius: 24px; padding: 38px 24px; text-align:center; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+  .pre-hero .ok { width:84px; height:84px; margin:0 auto 14px; border-radius:50%; background:rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; font-size:2.6rem; animation: pop .5s ease; }
+  @keyframes pop { 0%{transform:scale(.4);opacity:0} 70%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+  .ticket { border:2px dashed var(--primary); border-radius:16px; background: color-mix(in srgb, var(--primary) 4%, #fff); padding: 18px 22px; }
+  .ticket .ref { font-family: var(--font-title); font-size: 1.9rem; color: var(--primary); letter-spacing: 2px; }
+  .next-steps .ic { width:38px; height:38px; border-radius:10px; background: color-mix(in srgb, var(--primary) 9%, #fff); color: var(--primary); display:flex; align-items:center; justify-content:center; flex:none; }
+  @media print { .no-print{display:none!important} }
+</style>
+
+<section class="container py-5" style="max-width: 680px;">
+  <div class="pre-hero" data-aos="fade-down">
+    <div class="ok"><i class="bi bi-check-lg"></i></div>
+    <h1 class="h3 mb-1">Pré-inscription soumèt!</h1>
+    <p class="mb-0 opacity-75">Mèsi, {{ pre.full_name }} — dosye ou a rive lekòl la</p>
+  </div>
+
+  <div class="card shadow-sm text-center mt-4" data-aos="fade-up">
+    <div class="card-body p-4 p-md-5">
+      <p class="text-muted mb-3">
+        Nivo lekòl la ap egzamine dosye a epi yo <strong>ap kontakte ou</strong> sou
+        <strong>{{ pre.parent_phone }}</strong>.
+      </p>
+      <div class="ticket mb-3">
+        <div class="small text-muted mb-1">
+          <i class="bi bi-ticket-perforated me-1"></i>Nimewo referans ou (kenbe l!)
+        </div>
+        <div class="ref">{{ pre.reference }}</div>
+      </div>
+
+      <div class="next-steps text-start mx-auto mt-4" style="max-width:420px">
+        <div class="d-flex gap-3 align-items-start mb-3">
+          <span class="ic"><i class="bi bi-1-circle"></i></span>
+          <div><strong>Lekòl la egzamine dosye a</strong><div class="small text-muted">Nan 2-3 jou travay estati a vin « Egzamen ».</div></div>
+        </div>
+        <div class="d-flex gap-3 align-items-start mb-3">
+          <span class="ic"><i class="bi bi-2-circle"></i></span>
+          <div><strong>Nou kontakte w</strong><div class="small text-muted">Sou telefòn {{ pre.parent_phone }} pou konvokesyon.</div></div>
+        </div>
+        <div class="d-flex gap-3 align-items-start">
+          <span class="ic"><i class="bi bi-3-circle"></i></span>
+          <div><strong>Swivi dosye a</strong><div class="small text-muted">Kenbe nimewo referans ou a — konvoke l' le ou rele sekretarya lekòl la.</div></div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 justify-content-center flex-wrap mt-4 no-print">
+        <button onclick="window.print()" class="btn btn-outline-primary rounded-pill px-4"><i class="bi bi-printer me-1"></i> Enprime</button>
+        <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-4"><i class="bi bi-house me-1"></i> Retounen sou sit la</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

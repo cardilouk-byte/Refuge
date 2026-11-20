@@ -1,0 +1,165 @@
+{% extends "core/portal_base.html" %}
+
+{% block title %}Éditeur — {{ document.title|default:"Nouveau document" }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+  <h1 class="page-title mb-0"><i class="bi bi-pencil-square me-2"></i>Éditeur de document</h1>
+  <div>
+    <span id="saveStatus" class="text-muted me-2"></span>
+    {% if document %}
+    <a href="{% url 'document_editor:preview' document.pk %}" class="btn btn-outline-secondary" target="_blank"><i class="bi bi-eye me-1"></i>Aperçu</a>
+    <a href="{% url 'document_editor:export_docx' document.pk %}" class="btn btn-outline-primary" id="btnDocx"><i class="bi bi-file-earmark-word me-1"></i>DOCX</a>
+    <a href="{% url 'document_editor:export_pdf' document.pk %}" class="btn btn-outline-danger" id="btnPdf" target="_blank"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a>
+    {% endif %}
+    <button class="btn btn-primary" id="btnSave"><i class="bi bi-check2 me-1"></i>Enregistrer</button>
+  </div>
+</div>
+
+<form id="docForm" method="post">
+  {% csrf_token %}
+  <div class="row g-2 mb-3">
+    <div class="col-md-5">
+      <input type="text" name="title" class="form-control" placeholder="Titre du document"
+             value="{{ document.title|default:'' }}" required>
+    </div>
+    <div class="col-md-3">
+      <select name="category" class="form-select">
+        {% for value, label in template_categories %}
+        <option value="{{ value }}" {% if document.category == value %}selected{% elif not document and template.category == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <input type="text" name="watermark" class="form-control" placeholder="Filigrane (optionnel)"
+             value="{{ initial_watermark }}">
+    </div>
+  </div>
+
+  <div class="card mb-3"><div class="card-body py-2">
+    <div class="btn-toolbar gap-2 flex-wrap" id="toolbar">
+      <div class="btn-group">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-cmd="bold"><i class="bi bi-type-bold"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-cmd="italic"><i class="bi bi-type-italic"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-cmd="underline"><i class="bi bi-type-underline"></i></button>
+      </div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-cmd="justifyLeft"><i class="bi bi-text-left"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-cmd="justifyCenter"><i class="bi bi-text-center"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-cmd="justifyRight"><i class="bi bi-text-right"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-cmd="justifyFull"><i class="bi bi-justify"></i></button>
+      </div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-cmd="insertUnorderedList"><i class="bi bi-list-ul"></i></button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-cmd="insertOrderedList"><i class="bi bi-list-ol"></i></button>
+      </div>
+      <select id="fontFamily" class="form-select form-select-sm w-auto">
+        <option value="">Police</option>
+        <option value="Poppins">Poppins</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Arial">Arial</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Lobster">Lobster</option>
+      </select>
+      <select id="fontSize" class="form-select form-select-sm w-auto">
+        <option value="">Taille</option>
+        <option value="2">Petit</option>
+        <option value="3">Normal</option>
+        <option value="4">Moyen</option>
+        <option value="5">Grand</option>
+        <option value="6">Très grand</option>
+      </select>
+      <input type="color" id="foreColor" class="form-control form-control-color form-control-sm" title="Couleur du texte" value="#000000">
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="btnTable"><i class="bi bi-table me-1"></i>Tableau</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="btnLogo"><i class="bi bi-image me-1"></i>Logo</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1"></i>Imprimer</button>
+    </div>
+  </div></div>
+
+  <input type="hidden" name="body_html" id="bodyHtmlInput">
+  <div id="editor" contenteditable="true" class="doc-editor{% if initial_watermark %} has-watermark{% endif %}"
+       data-watermark="{{ initial_watermark }}">{{ initial_body }}</div>
+</form>
+
+<style>
+  .doc-editor {
+    min-height: 60vh; background: #fff; border: 1px solid #dee2e6; border-radius: 8px;
+    padding: 40px 60px; box-shadow: 0 4px 14px rgba(0,0,0,.06); position: relative;
+    font-family: 'Poppins', sans-serif; font-size: 12pt; line-height: 1.6;
+  }
+  .doc-editor:focus { outline: 2px solid var(--primary, #0d6efd); }
+  .doc-editor.has-watermark::before {
+    content: attr(data-watermark);
+    position: absolute; top: 40%; left: 50%; transform: translate(-50%,-50%) rotate(-30deg);
+    font-size: 72px; color: rgba(0,0,0,.07); pointer-events: none; white-space: nowrap;
+    font-weight: 700;
+  }
+  .doc-editor table { border-collapse: collapse; }
+  .doc-editor table td, .doc-editor table th { border: 1px solid #999; padding: 6px 10px; }
+  @media print {
+    .portal-navbar, #toolbar, form .row, .btn, #saveStatus { display: none !important; }
+    .doc-editor { border: none; box-shadow: none; }
+  }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const editor = document.getElementById('editor');
+  const form = document.getElementById('docForm');
+  const bodyInput = document.getElementById('bodyHtmlInput');
+  const saveStatus = document.getElementById('saveStatus');
+
+  document.querySelectorAll('#toolbar [data-cmd]').forEach(btn => {
+    btn.addEventListener('mousedown', e => e.preventDefault());
+    btn.addEventListener('click', () => { document.execCommand(btn.dataset.cmd); editor.focus(); });
+  });
+  document.getElementById('fontFamily').addEventListener('change', e => {
+    if (e.target.value) document.execCommand('fontName', false, e.target.value);
+  });
+  document.getElementById('fontSize').addEventListener('change', e => {
+    if (e.target.value) document.execCommand('fontSize', false, e.target.value);
+  });
+  document.getElementById('foreColor').addEventListener('input', e => {
+    document.execCommand('foreColor', false, e.target.value);
+  });
+  document.getElementById('btnTable').addEventListener('click', () => {
+    document.execCommand('insertHTML', false,
+      '<table><tr><th>Colonne 1</th><th>Colonne 2</th></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr></table><p></p>');
+  });
+  document.getElementById('btnLogo').addEventListener('click', () => {
+    const src = '{% if site.logo %}{{ site.logo.url }}{% endif %}';
+    if (src) document.execCommand('insertHTML', false, '<img src="' + src + '" width="120">');
+    else {
+      const url = prompt("URL de l'image :");
+      if (url) document.execCommand('insertImage', false, url);
+    }
+  });
+
+  function save(auto) {
+    bodyInput.value = editor.innerHTML;
+    const data = new FormData(form);
+    data.append('action', 'stay');
+    fetch(window.location.href, {
+      method: 'POST', body: data,
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(r => r.json()).then(j => {
+      if (j.id && !window.location.pathname.endsWith('/' + j.id + '/')) {
+        const url = new URL(window.location.href);
+        url.pathname = url.pathname.replace(/\/$/, '') + '/' + j.id + '/';
+        history.replaceState(null, '', url);
+        form.action = url;
+      }
+      saveStatus.textContent = auto ? 'Sauvegardé automatiquement ✓' : 'Enregistré ✓';
+    }).catch(() => { saveStatus.textContent = 'Erreur de sauvegarde !'; });
+  }
+
+  document.getElementById('btnSave').addEventListener('click', e => { e.preventDefault(); save(false); });
+  let timer = null;
+  editor.addEventListener('input', () => {
+    clearTimeout(timer);
+    saveStatus.textContent = 'Modification...';
+    timer = setTimeout(() => save(true), 3000);
+  });
+</script>
+{% endblock %}

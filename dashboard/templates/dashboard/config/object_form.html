@@ -1,0 +1,44 @@
+{% extends "core/portal_base.html" %}
+
+{% block title %}{{ cfg.label }} — Configuration{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'dashboard:config_list' section=section %}" class="small text-decoration-none">← {{ cfg.label }}</a>
+  <h1 class="h3 mb-0 mt-1"><i class="bi {{ cfg.icon }} me-2"></i>{% if obj %}Modifye{% else %}Nouvo{% endif %} — {{ cfg.label }}</h1>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <div class="row g-3">
+        {% for field in form %}
+        <div class="{% if field.field.widget.input_type == 'checkbox' %}col-12{% else %}col-md-6{% endif %}">
+          <div class="mb-2">
+            {% if field.field.widget.input_type == 'checkbox' %}
+              <div class="form-check">
+                {{ field }}
+                <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              </div>
+            {% else %}
+              <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+            {% endif %}
+            {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Anrejistre</button>
+        <a href="{% url 'dashboard:config_list' section=section %}" class="btn btn-outline-secondary">Anile</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

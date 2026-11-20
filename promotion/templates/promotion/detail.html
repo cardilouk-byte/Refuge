@@ -1,0 +1,28 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Pasaj — {{ room.name }}{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3"><i class="bi bi-arrow-repeat"></i> Pasaj — {{ room.name }}</h1>
+<p class="text-muted">Ane nèf: {{ new_year|default:"—" }} — Monte default → <strong>{{ entry.target|default:"pa gen" }}</strong></p>
+{% if entry %}
+<table class="table table-hover card shadow-sm align-middle">
+  <thead class="table-light"><tr><th>Elèv</th><th>Decizyon</th></tr></thead>
+  <tbody>
+  {% for st in entry.students %}
+    <tr>
+      <td class="fw-semibold">{{ st.full_name }} <span class="text-muted small">({{ st.matricule }})</span></td>
+      <td>
+        <select class="form-select form-select-sm" name="act_{{ st.pk }}" style="max-width:320px">
+          <option value="MONT" selected>Monte → {{ entry.target|default:"—" }}</option>
+          <option value="REDOUBLE">Redouble → {{ entry.repeat|default:"menm klase" }}</option>
+          <option value="KITE">Kite lekòl la</option>
+        </select>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="alert alert-warning">Chwazi yon ane nèf nan <a href="{% url 'promotion:transition' %}">paj pasaj la</a>.</div>
+{% endif %}
+<a href="{% url 'promotion:transition' %}" class="btn btn-outline-secondary mt-2">Retounen</a>
+{% endblock %}

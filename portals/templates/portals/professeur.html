@@ -1,0 +1,86 @@
+{% extends "core/portal_base.html" %}
+
+{% block title %}Espace Professeur — LNFCL{% endblock %}
+
+{% block content %}
+<h1 class="page-title mb-4"><i class="bi bi-person-workspace me-2"></i>Espace Professeur</h1>
+
+{% if teacher %}
+<div class="card mb-4"><div class="card-body d-flex align-items-center">
+  <i class="bi bi-person-video3 display-5 text-primary me-3"></i>
+  <div>
+    <h4 class="mb-0">{{ teacher }}</h4>
+    <span class="text-muted">Matricule : {{ teacher.matricule }}{% if teacher.specialty %} — {{ teacher.specialty }}{% endif %}</span>
+  </div>
+</div></div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-journals me-2"></i>Mes classes et matières</h5>
+      {% if assignments %}
+      <table class="table table-sm align-middle">
+        <thead><tr><th>Classe</th><th>Matière</th><th>Coef.</th><th>H/sem</th></tr></thead>
+        <tbody>
+        {% for assignment in assignments %}
+        <tr>
+          <td>{{ assignment.classroom.name }}</td>
+          <td>{{ assignment.subject.name }}</td>
+          <td>{{ assignment.coefficient }}</td>
+          <td>{{ assignment.weekly_hours }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}<p class="text-muted mb-0">Aucune matière ne vous est encore assignée.</p>{% endif %}
+    </div></div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-calendar3 me-2"></i>Mon emploi du temps</h5>
+      {% if slots %}
+      <table class="table table-sm align-middle">
+        <thead><tr><th>Jour</th><th>Heures</th><th>Matière</th><th>Classe</th><th>Local</th></tr></thead>
+        <tbody>
+        {% for slot in slots %}
+        <tr>
+          <td>{{ slot.get_weekday_display }}</td>
+          <td>{{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}</td>
+          <td>{{ slot.class_subject.subject.name }}</td>
+          <td>{{ slot.class_subject.classroom.name }}</td>
+          <td>{{ slot.room|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}<p class="text-muted mb-0">Aucun créneau programmé.</p>{% endif %}
+    </div></div>
+  </div>
+  <div class="col-12">
+    <div class="card"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-pencil-square me-2"></i>Mes dernières notes saisies</h5>
+      {% if recent_grades %}
+      <table class="table table-sm align-middle">
+        <thead><tr><th>Élève</th><th>Matière</th><th>Type</th><th>Note</th><th>Date</th></tr></thead>
+        <tbody>
+        {% for grade in recent_grades %}
+        <tr>
+          <td>{{ grade.student.full_name }}</td>
+          <td>{{ grade.class_subject.subject.name }}</td>
+          <td>{{ grade.get_kind_display }}</td>
+          <td><strong>{{ grade.score }}/20</strong></td>
+          <td>{{ grade.created_at|date:"d/m/Y" }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}<p class="text-muted mb-0">Vous n'avez pas encore saisi de notes.</p>{% endif %}
+    </div></div>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-warning">
+  <i class="bi bi-exclamation-triangle me-2"></i>Aucun dossier professeur n'est lié à votre compte. Contactez l'administration.
+</div>
+{% endif %}
+{% endblock %}

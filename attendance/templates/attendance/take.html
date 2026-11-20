@@ -1,0 +1,53 @@
+{% extends "core/portal_base.html" %}
+{% load grades_tags %}
+{% block title %}Presans — {{ classroom.name }}{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3"><i class="bi bi-clipboard-check"></i> Presans — {{ classroom.name }}</h1>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+  <div class="col-auto">
+    <label class="form-label small mb-1">Dat</label>
+    <input type="date" name="dat" value="{{ day.isoformat }}" class="form-control form-control-sm" onchange="this.form.submit()">
+  </div>
+  <div class="col-auto">
+    <a href="{% url 'attendance:take' classroom.pk %}" class="btn btn-sm btn-outline-secondary">Jodi a</a>
+  </div>
+</form>
+
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="dat" value="{{ day.isoformat }}">
+  <div class="card shadow-sm">
+    <div class="card-header table-light fw-semibold">
+      {{ day|date:"d/m/Y" }}{% if day == today %} <span class="badge text-bg-success">Jodi a</span>{% endif %}
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr><th>Elèv</th><th class="text-center">Prezan</th><th class="text-center">Absan</th><th class="text-center">Reta</th><th class="text-center">Jistifye</th><th>Remak</th></tr>
+        </thead>
+        <tbody>
+          {% for st in students %}
+          {% with r=existing|get_item:st.pk %}
+          <tr>
+            <td>
+              <div class="fw-semibold">{{ st.full_name }}</div>
+              <div class="text-muted small">{{ st.matricule }}</div>
+            </td>
+            <td class="text-center"><input class="form-check-input" type="radio" name="status_{{ st.pk }}" value="PRESENT" {% if not r or r.status == "PRESENT" %}checked{% endif %}></td>
+            <td class="text-center"><input class="form-check-input" type="radio" name="status_{{ st.pk }}" value="ABSENT" {% if r and r.status == "ABSENT" %}checked{% endif %}></td>
+            <td class="text-center"><input class="form-check-input" type="radio" name="status_{{ st.pk }}" value="RETARD" {% if r and r.status == "RETARD" %}checked{% endif %}></td>
+            <td class="text-center"><input class="form-check-input" type="checkbox" name="justifie_{{ st.pk }}" {% if r and r.justified %}checked{% endif %}></td>
+            <td><input type="text" class="form-control form-control-sm" name="note_{{ st.pk }}" value="{{ r.note|default:'' }}" placeholder="Remak…"></td>
+          </tr>
+          {% endwith %}
+          {% empty %}
+          <tr><td colspan="6" class="text-muted text-center py-4">Pa gen elèv nan klas sa a.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary mt-3 mb-4"><i class="bi bi-save"></i> Sove presans la</button>
+</form>
+{% endblock %}

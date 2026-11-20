@@ -1,0 +1,403 @@
+{% extends "core/base.html" %}
+
+{% block title %}{{ site_settings.seo_title|default:site_settings.name }}{% endblock %}
+
+{% block content %}
+{# ===== HERO / SLIDER ===== #}
+{% if site_settings.show_hero %}
+<section class="hero{% if site_settings.activer_animations and site_settings.hero_animation != 'aucune' %} hero-anim-{{ site_settings.hero_animation }}{% endif %}" id="accueil">
+  {% if site_settings.activer_animations and site_settings.hero_animation == 'flottant' %}
+  <div class="hero-forme-flottante hero-forme-flottante-1"></div>
+  <div class="hero-forme-flottante hero-forme-flottante-2"></div>
+  {% endif %}
+  {% if site_settings.activer_animations and site_settings.hero_animation == 'particules' %}
+  <div class="hero-particule" style="left: 8%; animation-delay: 0s;"></div>
+  <div class="hero-particule" style="left: 22%; animation-delay: 2s;"></div>
+  <div class="hero-particule" style="left: 38%; animation-delay: 4s;"></div>
+  <div class="hero-particule" style="left: 55%; animation-delay: 1s;"></div>
+  <div class="hero-particule" style="left: 70%; animation-delay: 5s;"></div>
+  <div class="hero-particule" style="left: 85%; animation-delay: 3s;"></div>
+  <div class="hero-particule" style="left: 93%; animation-delay: 6s;"></div>
+  {% endif %}
+  <div class="hero-slides effect-{{ site_settings.slider_effect|default:'fade' }}">
+    {% for slide in slides %}
+    <div class="hero-slide{% if forloop.first %} active{% endif %}" {% if slide.image and not slide.video %}style="background-image:url('{{ slide.image.url }}')"{% endif %}>
+      {% if slide.video %}
+        <video class="hero-video" src="{{ slide.video.url }}" autoplay muted loop playsinline></video>
+      {% endif %}
+      {% if not slide.image and not slide.video %}
+        <div class="hero-overlay" style="background-color: rgba(13, 110, 253, {% widthratio site_settings.hero_overlay_opacity 100 1 %})"></div>
+      {% endif %}
+      <div class="container hero-content hero-text-{{ site_settings.hero_text_position|default:'left' }}">
+        <h1 class="hero-title">{{ slide.title }}</h1>
+        {% if slide.subtitle %}<p class="hero-subtitle">&laquo; {{ slide.subtitle }} &raquo;</p>{% endif %}
+        <a href="{{ slide.button_url }}" class="btn btn-primary btn-lg rounded-pill px-4 mt-3">{{ slide.button_text }}</a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="hero-slide active">
+      <div class="hero-overlay" style="background-color: rgba(13, 110, 253, 0.55)"></div>
+      <div class="container hero-content hero-text-{{ site_settings.hero_text_position|default:'left' }}">
+        <h1 class="hero-title">{{ site_settings.name }}</h1>
+        <p class="hero-subtitle">&laquo; {{ site_settings.motto }} &raquo;</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if slides|length > 1 %}
+  <button class="hero-arrow hero-arrow-left" id="heroPrev" aria-label="Slide précédent"><i class="bi bi-chevron-left"></i></button>
+  <button class="hero-arrow hero-arrow-right" id="heroNext" aria-label="Slide suivant"><i class="bi bi-chevron-right"></i></button>
+  <div class="hero-dots" id="heroDots"></div>
+  {% endif %}
+</section>
+{% endif %}
+
+{# ===== À PROPOS ===== #}
+{% if site_settings.show_about %}
+<section class="section" id="apropos">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6" data-aos="fade-right">
+        {% if about and about.image %}
+          <img src="{{ about.image.url }}" alt="{{ about.title }}" class="img-fluid rounded-4 shadow about-img">
+        {% else %}
+          <div class="about-img-placeholder rounded-4 shadow"><i class="bi bi-building"></i></div>
+        {% endif %}
+      </div>
+      <div class="col-lg-6" data-aos="fade-left">
+        <h2 class="section-title">{{ about.title|default:"À Propos de nous" }}</h2>
+        <div class="section-underline"></div>
+        <p class="about-text">{{ about.text|default:"Présentation de l'école."|linebreaks }}</p>
+        <div class="stats-grid">
+          <div class="stat-box" data-aos="zoom-in" data-aos-delay="0">
+            <span class="stat-number" data-count="{{ about.stat_students|default:0 }}">0</span>
+            <span class="stat-label">Élèves</span>
+          </div>
+          <div class="stat-box" data-aos="zoom-in" data-aos-delay="100">
+            <span class="stat-number" data-count="{{ about.stat_teachers|default:0 }}">0</span>
+            <span class="stat-label">Professeurs</span>
+          </div>
+          <div class="stat-box" data-aos="zoom-in" data-aos-delay="200">
+            <span class="stat-number" data-count="{{ about.stat_years|default:0 }}">0</span>
+            <span class="stat-label">Années</span>
+          </div>
+          <div class="stat-box" data-aos="zoom-in" data-aos-delay="300">
+            <span class="stat-number" data-count="{{ about.stat_graduates|default:0 }}">0</span>
+            <span class="stat-label">Diplômés</span>
+          </div>
+        </div>
+        {% if about.mission %}
+        <div class="accordion mt-4" id="aboutAccordion">
+          {% if about.mission %}
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#missionPanel"><i class="bi bi-bullseye me-2"></i>Mission</button></h3>
+            <div id="missionPanel" class="accordion-collapse collapse" data-bs-parent="#aboutAccordion"><div class="accordion-body">{{ about.mission|linebreaks }}</div></div>
+          </div>
+          {% endif %}
+          {% if about.vision %}
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#visionPanel"><i class="bi bi-eye me-2"></i>Vision</button></h3>
+            <div id="visionPanel" class="accordion-collapse collapse" data-bs-parent="#aboutAccordion"><div class="accordion-body">{{ about.vision|linebreaks }}</div></div>
+          </div>
+          {% endif %}
+          {% if about.director_message %}
+          <div class="accordion-item">
+            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#directorPanel"><i class="bi bi-person-badge me-2"></i>Mot du directeur</button></h3>
+            <div id="directorPanel" class="accordion-collapse collapse" data-bs-parent="#aboutAccordion">
+              <div class="accordion-body d-flex gap-3 align-items-start">
+                {% if about.director_photo %}<img src="{{ about.director_photo.url }}" alt="{{ about.director_name }}" class="director-photo">{% endif %}
+                <div>{{ about.director_message|linebreaks }}{% if about.director_name %}<strong class="d-block mt-2">{{ about.director_name }}</strong>{% endif %}</div>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== SERVICES ===== #}
+{% if site_settings.show_services %}
+<section class="section section-alt" id="services">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Nos Services</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
+    <div class="row g-4 mt-4">
+      {% for service in services %}
+      <div class="col-md-6 col-lg-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">
+        <div class="service-card h-100">
+          <div class="service-icon"><i class="bi {{ service.icon }}"></i></div>
+          <h3 class="service-title">{{ service.title }}</h3>
+          <p class="service-description">{{ service.description }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== PROGRAMMES ===== #}
+{% if site_settings.show_programs %}
+<section class="section" id="programmes">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Nos Programmes</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
+    <div class="row g-4 mt-4">
+      {% for program in programs %}
+      <div class="col-md-6 col-lg-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}00">
+        <div class="program-card h-100" data-bs-toggle="modal" data-bs-target="#programModal{{ program.pk }}" style="cursor: pointer;">
+          {% if program.image %}
+            <img src="{{ program.image.url }}" alt="{{ program.name }}" class="program-img">
+          {% else %}
+            <div class="program-img program-img-placeholder"><i class="bi bi-journal-bookmark-fill"></i></div>
+          {% endif %}
+          <div class="program-body">
+            <span class="badge bg-primary-subtle text-primary mb-2">{{ program.level }}</span>
+            <h3 class="program-title">{{ program.name }}</h3>
+            <p class="program-description">{{ program.description|truncatewords:25 }}</p>
+            <span class="text-primary fw-semibold small"><i class="bi bi-plus-circle"></i> Gade plis detay →</span>
+          </div>
+        </div>
+        <div class="modal fade" id="programModal{{ program.pk }}" tabindex="-1" aria-labelledby="programModalLabel{{ program.pk }}" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="programModalLabel{{ program.pk }}">{{ program.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fèmen"></button>
+              </div>
+              <div class="modal-body">
+                {% if program.image %}
+                  <img src="{{ program.image.url }}" alt="{{ program.name }}" class="img-fluid rounded-3 mb-3 w-100">
+                {% endif %}
+                <span class="badge bg-primary mb-2">{{ program.level }}</span>
+                <div>{{ program.description|linebreaks }}</div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fèmen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== GALERIE ===== #}
+{% if site_settings.show_school_life %}
+<section class="section" id="lavi-lekol">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Lavi Lekòl la</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
+    <div class="row g-4 mt-2">
+      {% for club in clubs %}
+      <div class="col-md-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}00">
+        <a href="{% url 'school_life' %}" class="life-card h-100 text-decoration-none text-reset d-block">
+          {% if club.image %}<img src="{{ club.image.url }}" alt="{{ club.name }}" class="life-card-img">{% else %}<div class="life-card-img d-flex align-items-center justify-content-center"><i class="bi bi-trophy"></i></div>{% endif %}
+          <div class="p-3">
+            <h5 class="mb-1">{{ club.name }}</h5>
+            <p class="text-muted small mb-0">{{ club.description|truncatechars:110 }}</p>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      {% endfor %}
+      <div class="text-center mt-3">
+        <a href="{% url 'school_life' %}" class="btn btn-outline-primary rounded-pill px-4">Tout klib &amp; espò <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if site_settings.show_gallery %}
+<section class="section section-alt" id="galerie">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Galerie</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
+    <div class="gallery-grid mt-4">
+      {% for image in gallery %}
+      <figure class="gallery-item" data-aos="zoom-in" data-aos-delay="{{ forloop.counter0 }}0">
+        {% if image.video %}
+          <video src="{{ image.video.url }}" class="gallery-img" controls preload="metadata"></video>
+        {% elif image.video_embed_url %}
+          <div class="ratio ratio-4x3"><iframe src="{{ image.video_embed_url }}" title="{{ image.title|default:'Vidéo' }}" allowfullscreen></iframe></div>
+        {% elif image.image %}
+          <img src="{{ image.image.url }}" alt="{{ image.title|default:'Photo' }}" class="gallery-img" data-lightbox>
+        {% endif %}
+        {% if image.title %}<figcaption class="gallery-caption">{{ image.title }}</figcaption>{% endif %}
+      </figure>
+      {% empty %}
+      <p class="text-muted">Aucune photo pour le moment.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== NOUVELLES / ÉVÉNEMENTS ===== #}
+{% if site_settings.show_news and news %}
+<section class="section" id="nouveles">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Nouvelles & Événements</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
+    <div class="row g-4 mt-4">
+      {% for item in news %}
+      <div class="col-md-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}00">
+        <div class="news-card h-100">
+          {% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }}" class="news-img">{% endif %}
+          <div class="news-body">
+            <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ item.date|date:"d F Y" }}</small>
+            <h3 class="news-title">{{ item.title }}</h3>
+            <p class="news-text">{{ item.body|truncatewords:20 }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== ÉQUIPE ===== #}
+{% if site_settings.show_team and team %}
+<section class="section section-alt" id="equipe">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Notre Équipe</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
+    <div class="row g-4 mt-4">
+      {% for member in team %}
+      <div class="col-6 col-md-4 col-lg-3" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}0">
+        <div class="team-card text-center h-100" data-bs-toggle="modal" data-bs-target="#teamModal{{ member.pk }}" style="cursor: pointer;">
+          {% if member.photo %}
+            <img src="{{ member.photo.url }}" alt="{{ member.name }}" class="team-photo">
+          {% else %}
+            <div class="team-photo team-photo-placeholder"><i class="bi bi-person-fill"></i></div>
+          {% endif %}
+          <h3 class="team-name">{{ member.name }}</h3>
+          <p class="team-position">{{ member.position }}</p>
+          {% if member.subjects %}<p class="team-subjects">{{ member.subjects }}</p>{% endif %}
+        </div>
+        <div class="modal fade" id="teamModal{{ member.pk }}" tabindex="-1" aria-labelledby="teamModalLabel{{ member.pk }}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="teamModalLabel{{ member.pk }}">{{ member.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fèmen"></button>
+              </div>
+              <div class="modal-body text-center">
+                {% if member.photo %}
+                  <img src="{{ member.photo.url }}" alt="{{ member.name }}" class="rounded-circle mb-3" style="width: 140px; height: 140px; object-fit: cover;">
+                {% else %}
+                  <div class="team-photo team-photo-placeholder mx-auto mb-3"><i class="bi bi-person-fill"></i></div>
+                {% endif %}
+                <p class="text-primary fw-semibold mb-1">{{ member.position }}</p>
+                {% if member.subjects %}<p class="text-muted mb-1"><i class="bi bi-book"></i> {{ member.subjects }}</p>{% endif %}
+                {% if member.email %}<p class="mb-1"><i class="bi bi-envelope"></i> <a href="mailto:{{ member.email }}">{{ member.email }}</a></p>{% endif %}
+                {% if member.bio %}<div class="text-start mt-3 border-top pt-3">{{ member.bio|linebreaks }}</div>{% endif %}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fèmen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# ===== CONTACT ===== #}
+{% if site_settings.hashtag or site_settings.inspire_texts %}
+<section class="inspire-band">
+  <div class="container text-center">
+    {% if site_settings.inspire_texts %}
+      {% for line in site_settings.inspire_texts.splitlines %}
+      <p class="inspire-line" data-aos="fade-up" data-aos-delay="{{ forloop.counter0 }}50">{{ line }}</p>
+      {% endfor %}
+    {% endif %}
+  </div>
+</section>
+{% endif %}
+
+{% if site_settings.show_testimonials and testimonials %}
+<section class="section" id="temwayaj">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Témwayaj — moun sa yo, se nou</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
+    <div id="testimonialCarousel" class="carousel slide carousel-fade mt-4" data-bs-ride="carousel" data-bs-interval="7000">
+      <div class="carousel-inner">
+        {% for t in testimonials %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <div class="testimonial-card mx-auto text-center">
+            {% if t.photo %}<img src="{{ t.photo.url }}" alt="{{ t.name }}" class="testimonial-photo">{% else %}<div class="testimonial-photo testimonial-photo-initial">{{ t.name|slice:":1" }}</div>{% endif %}
+            <p class="testimonial-quote">&laquo; {{ t.quote }} &raquo;</p>
+            <p class="testimonial-name">{{ t.name }}{% if t.class_name %} <span class="text-muted">— {{ t.class_name }}</span>{% endif %}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% if testimonials|length > 1 %}
+      <div class="carousel-indicators testimonial-indicators">
+        {% for t in testimonials %}<button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="{{ t.name }}"></button>{% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if site_settings.show_contact %}
+<section class="section" id="contact">
+  <div class="container">
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Contact</h2>
+    <div class="section-underline mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}"></div>
+    <div class="row g-5 mt-4">
+      <div class="col-lg-6" data-aos="fade-right">
+        <form method="post" action="{% url 'home' %}#contact" novalidate>
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">{{ form.name }}</div>
+            <div class="col-md-6">{{ form.email }}</div>
+            <div class="col-12">{{ form.subject }}</div>
+            <div class="col-12">{{ form.message }}</div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-send me-2"></i>Envoyer</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="col-lg-6" data-aos="fade-left">
+        <ul class="contact-info">
+          {% if site_settings.address %}<li><i class="bi bi-geo-alt-fill"></i><span>{{ site_settings.address }}</span></li>{% endif %}
+          {% if site_settings.phone %}<li><i class="bi bi-telephone-fill"></i><span>{{ site_settings.phone }}</span></li>{% endif %}
+          {% if site_settings.email %}<li><i class="bi bi-envelope-fill"></i><span>{{ site_settings.email }}</span></li>{% endif %}
+        </ul>
+        {% if site_settings.google_maps_url %}
+        <div class="map-wrapper rounded-4 overflow-hidden shadow-sm mt-3">
+          <iframe src="{{ site_settings.google_maps_url }}" width="100%" height="280" style="border:0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Localisation"></iframe>
+        </div>
+        {% elif site_settings.address %}
+        <div class="map-wrapper rounded-4 overflow-hidden shadow-sm mt-3">
+          <iframe src="https://www.google.com/maps?q={{ site_settings.address|urlencode }}&output=embed" width="100%" height="280" style="border:0" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Localisation"></iframe>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>window.HERO_SLIDER_INTERVAL = {{ site_settings.slider_interval|default:6 }};</script>
+{% endblock %}

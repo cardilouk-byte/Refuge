@@ -1,0 +1,26 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Annè scilè &amp; Pasaj{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3"><i class="bi bi-arrow-repeat"></i> Nouvèl annè &amp; Pasaj elèv</h1>
+<div class="card shadow-sm p-4 mb-4">
+  <p>Iswit lekol la nan <strong>administrasyon ane scilè</strong>:</p>
+  <ol>
+    <li>L'finis ane a, klike <strong>"Kreye annè ki prale a"</strong> — sistem nan kopi klas, matye, pwofesè otomatikman.</li>
+    <li>Nan paj <strong>Pasaj</strong> la, pou chak elèv ou chwazi: <span class="badge text-bg-success">Monte klase</span> (tut klas la moun ak elèv la), <span class="badge text-bg-warning">Redouble</span> (li rete nan menm klase sa san pwblem), oswa <span class="badge text-bg-danger">Kite lekòl la</span>.</li>
+    <li>Klike <strong>Aplike</strong> — tout bagay sove, annè nèf la vin ane kouran an.</li>
+  </ol>
+  <p class="text-muted small">Ou pa bezwen rekreye elèv yo: tout elèv ki pa kite lekòl la vin nan annè nèf la.</p>
+  <a href="{% url 'promotion:new_year' %}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Kreye annè ki prale a</a>
+  <a href="{% url 'promotion:transition' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-right"></i> Fe pasaj elèv yo</a>
+</div>
+<h2 class="h5">Annè scilè yo</h2>
+<table class="table table-hover card shadow-sm mb-0 align-middle">
+  <thead class="table-light"><tr><th>Libè</th><th>Estati</th></tr></thead>
+  <tbody>
+  {% for y in years %}
+    <tr><td class="fw-semibold">{{ y.label }}</td>
+    <td>{% if y.is_current %}<span class="badge text-bg-success">Ane kouran</span>{% else %}<span class="badge text-bg-secondary">Fin</span>{% endif %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Tablo donè — LNFCL{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3"><i class="bi bi-trophy"></i> Tablo donè — 10 pi bon elèv /10</h1>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+  <div class="col-auto">
+    <label class="form-label small mb-1">Peryòd</label>
+    <select name="periyod" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for p in periods %}<option value="{{ p.pk }}" {% if p.pk|stringformat:"s" == f_period %}selected{% endif %}>{{ p }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <label class="form-label small mb-1">Klas (opsyonèl)</label>
+    <select name="klas" class="form-select form-select-sm" onchange="this.form.submit()">
+      <option value="">Tout klas yo</option>
+      {% for c in classrooms %}<option value="{{ c.pk }}" {% if c.pk|stringformat:"s" == f_classroom %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+  </div>
+</form>
+
+<div class="table-responsive card shadow-sm">
+  <table class="table table-hover mb-0 align-middle">
+    <thead class="table-light">
+      <tr><th class="text-center">#</th><th>Matricule</th><th>Elèv</th><th>Klas</th><th class="text-center">Mwayèn /10</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for h in honoured %}
+      <tr>
+        <td class="text-center fw-bold">{% if h.rank == 1 %}🥇{% elif h.rank == 2 %}🥈{% elif h.rank == 3 %}🥉{% else %}{{ h.rank }}{% endif %}</td>
+        <td class="text-muted">{{ h.student.matricule }}</td>
+        <td class="fw-semibold">{{ h.student.full_name }}</td>
+        <td class="small">{{ h.classroom }}</td>
+        <td class="text-center fw-bold text-success">{{ h.avg|floatformat:2 }}</td>
+        <td class="text-end"><a href="{% url 'grades:bulletin_student' h.student.pk %}?periyod={{ f_period }}" class="btn btn-sm btn-outline-primary">Bulletin</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-muted text-center py-4">Pa gen elèv ki gen mwayèn ≥ 10 pou peryòd sa a. Antre nòt anvan ou tcheke tablo donè a.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

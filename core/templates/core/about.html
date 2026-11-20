@@ -1,0 +1,123 @@
+{% extends "core/base.html" %}
+
+{% block title %}À Propos - {{ site_settings.short_name }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1 class="page-title">{{ about.title|default:"À Propos de nous" }}</h1>
+    <p class="page-subtitle">&laquo; {{ site_settings.motto }} &raquo;</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    {% if about %}
+    <div class="row align-items-center g-4 mb-5">
+      <div class="col-lg-6" data-aos="{{ site_settings.section_animation|default:'fade-right' }}">
+        {% if about.image %}<img src="{{ about.image.url }}" alt="{{ about.title }}" class="img-fluid rounded-4 shadow-sm">{% endif %}
+      </div>
+      <div class="col-lg-6" data-aos="{{ site_settings.section_animation|default:'fade-left' }}">
+        <h2 class="section-title">{{ about.title }}</h2>
+        <div class="section-underline"></div>
+        <div>{{ about.text|linebreaks }}</div>
+      </div>
+    </div>
+
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Lekòl la an chif</h2>
+    <div class="section-underline mx-auto"></div>
+    <div class="row g-4 text-center my-4">
+      <div class="col-6 col-lg-3" data-aos="zoom-in">
+        <h3 class="stat-number">{{ about.stat_students }}</h3><p class="mb-0">Elèv</p>
+      </div>
+      <div class="col-6 col-lg-3" data-aos="zoom-in" data-aos-delay="100">
+        <h3 class="stat-number">{{ about.stat_teachers }}</h3><p class="mb-0">Pwofesè</p>
+      </div>
+      <div class="col-6 col-lg-3" data-aos="zoom-in" data-aos-delay="200">
+        <h3 class="stat-number">{{ about.stat_years }}</h3><p class="mb-0">Ane egzistans</p>
+      </div>
+      <div class="col-6 col-lg-3" data-aos="zoom-in" data-aos-delay="300">
+        <h3 class="stat-number">{{ about.stat_graduates }}</h3><p class="mb-0">Diplème</p>
+      </div>
+    </div>
+
+    {% if about.history %}
+    <h2 class="section-title text-center mt-5" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Istwa lekòl la</h2>
+    <div class="section-underline mx-auto"></div>
+    <div class="row mt-3">
+      <div class="col-lg-8 mx-auto" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">
+        <div>{{ about.history|linebreaks }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4 mt-5">
+      {% if about.mission %}
+      <div class="col-lg-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">
+        <div class="card h-100 text-center p-3"><div class="card-body">
+          <i class="bi bi-bullseye display-6 text-primary"></i>
+          <h5 class="mt-3">Misyon</h5><div class="small">{{ about.mission|linebreaks }}</div>
+        </div></div>
+      </div>
+      {% endif %}
+      {% if about.vision %}
+      <div class="col-lg-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="100">
+        <div class="card h-100 text-center p-3"><div class="card-body">
+          <i class="bi bi-binoculars display-6 text-primary"></i>
+          <h5 class="mt-3">Vizyon</h5><div class="small">{{ about.vision|linebreaks }}</div>
+        </div></div>
+      </div>
+      {% endif %}
+      {% if about.values %}
+      <div class="col-lg-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="200">
+        <div class="card h-100 text-center p-3"><div class="card-body">
+          <i class="bi bi-hearts display-6 text-primary"></i>
+          <h5 class="mt-3">Valè</h5><div class="small">{{ about.values|linebreaks }}</div>
+        </div></div>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if about.director_name %}
+    <div class="row align-items-center g-4 mt-5 section-alt p-4 rounded-4">
+      <div class="col-md-2 text-center" data-aos="zoom-in">
+        {% if about.director_photo %}<img src="{{ about.director_photo.url }}" alt="{{ about.director_name }}" class="director-photo">{% else %}<i class="bi bi-person-circle display-3 text-primary"></i>{% endif %}
+      </div>
+      <div class="col-md-10" data-aos="{{ site_settings.section_animation|default:'fade-left' }}">
+        <h5 class="mb-2">{{ about.director_name }} <small class="text-muted fw-normal">— Direksyon Jeneral</small></h5>
+        <div class="fst-italic">{{ about.director_message|linebreaks }}</div>
+      </div>
+    </div>
+    {% endif %}
+    {% if not about %}
+      <p class="text-center text-muted">Paj sa a p ap gen kontni — direksyon an ap mete l byento.</p>
+    {% endif %}
+    {% endif %}
+
+    {% if departments %}
+    <h2 class="section-title text-center mt-5" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Lidraj lekòl la (Departman yo)</h2>
+    <div class="section-underline mx-auto"></div>
+    <div class="row g-3 mt-3">
+      {% for dept in departments %}
+      <div class="col-md-6 col-lg-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">
+        <div class="card h-100 p-3 dept-card">
+          <div class="d-flex align-items-center gap-2"><i class="bi bi-diagram-3 text-primary"></i><strong>{{ dept.name }}</strong><span class="badge bg-primary-subtle text-primary ms-auto">{{ dept.get_kind_display }}</span></div>
+          {% if dept.head_title %}<p class="mb-0 small text-muted mt-2"><i class="bi bi-person-badge"></i> {{ dept.head_title }}</p>{% endif %}
+          {% if dept.description %}<p class="mb-0 small mt-1">{{ dept.description }}</p>{% endif %}
+          {% if dept.positions.all %}
+            <div class="mt-2 small">
+              {% for sp in dept.positions.all %}<span class="me-3"><i class="bi bi-person"></i> {{ sp.title }}: <strong>{{ sp.person_name }}</strong></span>{% endfor %}
+            </div>
+          {% endif %}
+          {% if dept.phone or dept.email %}<p class="mb-0 small text-muted mt-2">{% if dept.phone %}<i class="bi bi-telephone"></i> {{ dept.phone }} {% endif %}{% if dept.email %} <i class="bi bi-envelope"></i> {{ dept.email }}{% endif %}</p>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+      <a href="{% url 'departments:tree' %}" class="btn btn-outline-primary rounded-pill px-4">Wè òganigram konplè</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

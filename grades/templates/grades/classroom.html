@@ -1,0 +1,69 @@
+{% extends "core/portal_base.html" %}
+{% load grades_tags %}
+{% block title %}Nòt — {{ classroom.name }}{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3"><i class="bi bi-pencil-square"></i> Nòt — {{ classroom.name }} <span class="badge text-bg-secondary">{{ classroom.school_year }}</span></h1>
+
+<form method="get" class="row g-2 align-items-end mb-3">
+  <input type="hidden" name="tip" value="{{ kind }}">
+  <div class="col-auto">
+    <label class="form-label small mb-1">Peryòd</label>
+    <select name="periyod" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for p in periods %}<option value="{{ p.pk }}" {% if p == period %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <label class="form-label small mb-1">Matiye</label>
+    <select name="matye" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for s in subjects %}<option value="{{ s.pk }}" {% if s == cs %}selected{% endif %}>{{ s.subject.name }} (koyef. {{ s.coefficient }})</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <label class="form-label small mb-1">Kalite nòt</label>
+    <select class="form-select form-select-sm" onchange="var u=new URL(window.location.href);u.searchParams.set('tip',this.value);window.location.href=u;">
+      {% for v, l in kinds %}<option value="{{ v }}" {% if v == kind %}selected{% endif %}>{{ l }}</option>{% endfor %}
+    </select>
+  </div>
+</form>
+
+{% if cs and period %}
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="periyod" value="{{ period.pk }}">
+  <input type="hidden" name="matye" value="{{ cs.pk }}">
+  <input type="hidden" name="tip" value="{{ kind }}">
+  <div class="card shadow-sm">
+    <div class="card-header table-light fw-semibold">
+      {{ cs.subject.name }} — {{ period.name }} <span class="text-muted small">(nòt sou 20)</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+          <tr><th>Matricule</th><th>Elèv</th><th style="width:140px">Nòt /20</th></tr>
+        </thead>
+        <tbody>
+          {% for st in students %}
+          <tr>
+            <td class="text-muted">{{ st.matricule }}</td>
+            <td class="fw-semibold">{{ st.full_name }}</td>
+            <td>
+              {% with g=existing|get_item:st.pk %}
+              <input type="number" class="form-control form-control-sm" step="0.25" min="0" max="20"
+                     name="note_{{ st.pk }}" value="{% if g %}{{ g.score }}{% endif %}"
+                     placeholder="—" inputmode="decimal">
+              {% endwith %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-muted text-center py-4">Pa gen elèv nan klas sa a.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary mt-3 mb-4"><i class="bi bi-save"></i> Sove tout nòt yo</button>
+</form>
+{% else %}
+<div class="alert alert-info">Chwazi yon matye ak yon peryòd pou antre nòt yo.</div>
+{% endif %}
+{% endblock %}

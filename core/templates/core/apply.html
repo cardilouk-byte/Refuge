@@ -1,0 +1,53 @@
+{% extends "core/base.html" %}
+
+{% block title %}Kijan pou enskri - {{ site_settings.short_name }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1 class="page-title">Kijan pou enskri elèv ou a</h1>
+    <p class="page-subtitle">4 etap senp, tout detay an kreyòl</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container" style="max-width: 900px;">
+    <div class="apply-intro card mb-5">
+      <div class="card-body p-4">
+        {% if admission_intro %}
+          {{ admission_intro|linebreaks }}
+        {% else %}
+          <p class="mb-0">Padon pou jwenn yon lekòl ki bon pou timoun ou se yon desizyon enpòtan.
+          Nan lekòl la, enskripsyon ap fèt an liy nan 4 etap senp — se sèlman bona enfòmasyon
+          ki obligatwa. Apre w soumèt demann lan, n ap kontakte w.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <h2 class="section-title text-center" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Etap enskripsyon yo</h2>
+    <div class="section-underline mx-auto"></div>
+
+    <div class="row g-4 mt-3">
+      {% for num, label, text in steps %}
+      <div class="col-md-6" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}00">
+        <div class="apply-step h-100">
+          <div class="apply-step-num">{{ num }}</div>
+          <div>
+            <h5 class="mb-1">{{ label }}</h5>
+            <p class="mb-0 text-muted">{{ text }}</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-5 p-4 apply-cta">
+      <h3 class="mb-3">Pare pou kòmanse?</h3>
+      <div class="d-flex gap-2 justify-content-center flex-wrap">
+        <a href="{% url 'preregistration:start' %}" class="btn btn-success btn-lg rounded-pill px-5">Kòmanse pre-enskripsyon an</a>
+        <a href="{% url 'faq' %}" class="btn btn-outline-primary btn-lg rounded-pill px-4">Wè FAQ</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Bibliothèque{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0"><i class="bi bi-book-half"></i> Bibliothèque</h1>
+  <div>
+    <a href="{% url 'library:loan_create' %}" class="btn btn-outline-primary"><i class="bi bi-arrow-left-right"></i> Nouvo emprunt</a>
+    <a href="{% url 'library:book_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nouvo liv</a>
+  </div>
+</div>
+<div class="table-responsive card shadow-sm mb-4">
+  <table class="table table-hover mb-0 align-middle">
+    <thead class="table-light"><tr><th>Titre</th><th>Auteur</th><th>Catégorie</th><th>Disponibles</th><th>Total</th><th></th></tr></thead>
+    <tbody>
+      {% for book in books %}
+      <tr>
+        <td class="fw-semibold">{{ book.title }}</td>
+        <td>{{ book.author|default:"—" }}</td>
+        <td><span class="badge bg-secondary">{{ book.category }}</span></td>
+        <td><span class="badge {% if book.available_copies > 0 %}bg-success{% else %}bg-danger{% endif %}">{{ book.available_copies }}</span></td>
+        <td>{{ book.total_copies }}</td>
+        <td class="text-end">
+          {% if book.available_copies > 0 %}<a href="{% url 'library:loan_create_book' book.pk %}" class="btn btn-sm btn-outline-success">Prete</a>{% endif %}
+          <a href="{% url 'library:book_update' book.pk %}" class="btn btn-sm btn-outline-primary">Modifye</a>
+          <a href="{% url 'library:book_delete' book.pk %}" class="btn btn-sm btn-outline-danger">Efase</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-muted text-center py-4">Pa gen liv nan bibliyotèk la pou lemoman nan.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<h2 class="h5 mb-3">Emprunts ki an kour</h2>
+<div class="table-responsive card shadow-sm">
+  <table class="table table-hover mb-0 align-middle">
+    <thead class="table-light"><tr><th>Livre</th><th>Élève</th><th>Emprunt</th><th>Retour prévu</th><th>Statut</th><th></th></tr></thead>
+    <tbody>
+      {% for loan in active_loans %}
+      <tr>
+        <td>{{ loan.book.title }}</td>
+        <td>{{ loan.student }}</td>
+        <td>{{ loan.borrowed_at }}</td>
+        <td>{{ loan.due_date }}</td>
+        <td>{% if loan.is_late %}<span class="badge bg-danger">An reta</span>{% else %}<span class="badge bg-success">Bon</span>{% endif %}</td>
+        <td class="text-end">
+          <form method="post" action="{% url 'library:loan_return' loan.pk %}">{% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-success">Retounen</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-muted text-center py-4">Pa gen emprunt ki an kour.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

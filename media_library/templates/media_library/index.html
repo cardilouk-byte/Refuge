@@ -1,0 +1,67 @@
+{% extends "core/portal_base.html" %}
+
+{% block title %}Media Center — LNFCL{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="page-title mb-0"><i class="bi bi-images me-2"></i>Media Center</h1>
+</div>
+
+<div class="card mb-3"><div class="card-body">
+  <form method="post" action="{% url 'media_library:upload' %}" enctype="multipart/form-data" class="row g-2 align-items-end">
+    {% csrf_token %}
+    <div class="col-md-4">
+      <label class="form-label fw-semibold">Catégorie</label>
+      <select name="category" class="form-select">
+        {% for value, label in categories %}
+        <option value="{{ value }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-5">
+      <label class="form-label fw-semibold">Fichiers (importation multiple)</label>
+      <input type="file" name="files" class="form-control" multiple accept="image/*,.pdf,.doc,.docx,.xlsx">
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-primary w-100"><i class="bi bi-cloud-arrow-up me-1"></i>Téléverser</button>
+    </div>
+  </form>
+  <small class="text-muted">Les images sont automatiquement compressées et redimensionnées (max 1600px, JPG).</small>
+</div></div>
+
+<div class="d-flex gap-2 mb-3 flex-wrap">
+  <a href="{% url 'media_library:index' %}" class="btn btn-sm {% if not current_category %}btn-primary{% else %}btn-outline-primary{% endif %}">Tous</a>
+  {% for value, label in categories %}
+  <a href="?categorie={{ value }}" class="btn btn-sm {% if current_category == value %}btn-primary{% else %}btn-outline-primary{% endif %}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+{% if files %}
+<div class="row g-3">
+  {% for media in files %}
+  <div class="col-6 col-md-4 col-lg-3">
+    <div class="card h-100"><div class="card-body text-center p-2">
+      {% if media.is_image %}
+      <a href="{{ media.file.url }}" target="_blank">
+        <img src="{{ media.file.url }}" class="img-fluid rounded" style="height:140px; object-fit:cover; width:100%" alt="{{ media.original_name }}">
+      </a>
+      {% else %}
+      <a href="{{ media.file.url }}" target="_blank" class="d-block py-4">
+        <i class="bi bi-file-earmark display-4 text-secondary"></i>
+      </a>
+      {% endif %}
+      <div class="text-truncate small mt-2" title="{{ media.original_name }}">{{ media.original_name }}</div>
+      <div class="text-muted small">{{ media.size_display }} — {{ media.get_category_display }}</div>
+      <form method="post" action="{% url 'media_library:delete' media.pk %}" class="mt-1"
+            onsubmit="return confirm('Supprimer ce fichier ?');">
+        {% csrf_token %}
+        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+      </form>
+    </div></div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">La bibliothèque est vide.</p>
+{% endif %}
+{% endblock %}

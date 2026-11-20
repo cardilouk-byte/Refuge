@@ -1,0 +1,30 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Presans mwen{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3"><i class="bi bi-clipboard-check"></i> Presans{% if students|length > 1 %} — timoun ou yo{% endif %}</h1>
+
+<div class="table-responsive card shadow-sm">
+  <table class="table table-hover mb-0 align-middle">
+    <thead class="table-light">
+      <tr><th>Elèv</th><th>Date</th><th class="text-center">Estati</th><th class="text-center">Jistifye</th><th>Remak</th></tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+      <tr>
+        <td class="fw-semibold">{{ r.student.full_name }}</td>
+        <td>{{ r.date|date:"d/m/Y" }}</td>
+        <td class="text-center">
+          {% if r.status == "PRESENT" %}<span class="badge text-bg-success">Prezan</span>
+          {% elif r.status == "ABSENT" %}<span class="badge text-bg-danger">Absan</span>
+          {% else %}<span class="badge text-bg-warning">Reta</span>{% endif %}
+        </td>
+        <td class="text-center">{% if r.status == "ABSENT" %}{% if r.justified %}<i class="bi bi-check-lg text-success"></i>{% else %}<i class="bi bi-x-lg text-danger"></i>{% endif %}{% else %}—{% endif %}</td>
+        <td class="text-muted">{{ r.note|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-muted text-center py-4">Pa gen rekò presans.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

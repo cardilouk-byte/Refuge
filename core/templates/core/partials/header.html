@@ -1,0 +1,70 @@
+{% load static %}
+<header id="siteHeader" class="site-header">
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home' %}">
+        {% if site_settings.logo %}
+          <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.short_name }}" class="brand-logo">
+        {% else %}
+          <span class="brand-logo-placeholder"><i class="bi bi-mortarboard-fill"></i></span>
+        {% endif %}
+        <span class="brand-name">{{ site_settings.short_name }}</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Menu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-center" id="mainMenu">
+        <ul class="navbar-nav">
+          {% for entry in menu_items %}
+            {% if entry.children %}
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="{{ entry.item.url }}" role="button" data-bs-toggle="dropdown" aria-expanded="false">{{ entry.item.label }}</a>
+                <ul class="dropdown-menu">
+                  {% for child in entry.children %}
+                    <li><a class="dropdown-item" href="{{ child.url }}">{{ child.label }}</a></li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% else %}
+              <li class="nav-item"><a class="nav-link" href="{{ entry.item.url }}">{{ entry.item.label }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+        <div class="d-lg-none mt-3 d-flex flex-wrap gap-2">
+          <a href="{% url 'results' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Résultats</a>
+        <a href="{% url 'preregistration:start' %}" class="btn btn-outline-success btn-sm rounded-pill px-3">Pré-inscription</a>
+          {% if user.is_authenticated %}
+            {% if user.is_staff %}
+              <a href="{% url "admin:index" %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Admin</a>
+            {% endif %}
+            <form method="post" action="{% url 'logout' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Déconnexion</button></form>
+          {% else %}
+            <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Inscription</a>
+            <a href="{% url 'login' %}" class="btn btn-primary btn-sm rounded-pill px-3">Connecter</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="header-actions d-none d-lg-flex align-items-center gap-2">
+        <a href="{% url 'results' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Résultats</a>
+        <a href="{% url 'preregistration:start' %}" class="btn btn-outline-success btn-sm rounded-pill px-3">Pré-inscription</a>
+        {% if user.is_authenticated %}
+          {% if user.is_staff %}
+            <a href="{% url "admin:index" %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Admin</a>
+          {% endif %}
+          <form method="post" action="{% url 'logout' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-primary btn-sm rounded-pill px-3">Déconnexion</button></form>
+        {% else %}
+          <a href="{% url 'signup' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">Inscription</a>
+          <a href="{% url 'login' %}" class="btn btn-primary btn-sm rounded-pill px-3">Connecter</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+  <div class="header-wave" aria-hidden="true">
+    <svg viewBox="0 0 1440 60" preserveAspectRatio="none">
+      <path d="M0,30 C240,70 480,-10 720,25 C960,60 1200,10 1440,35 L1440,0 L0,0 Z" fill="currentColor"></path>
+    </svg>
+  </div>
+</header>

@@ -1,0 +1,66 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Pasaj elèv{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3"><i class="bi bi-arrow-repeat"></i> Pasaj elèv — annè nèf</h1>
+
+<form method="get" class="card shadow-sm p-3 mb-3 row g-2 align-items-end">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label small mb-1">Ane anvye (ki fin)</label>
+      <select name="anvye" class="form-select form-select-sm">
+        {% for y in years %}<option value="{{ y.pk }}" {% if y == old_year %}selected{% endif %}>{{ y.label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label small mb-1">Ane nèf (ki prale)</label>
+      <select name="novel" class="form-select form-select-sm">
+        {% for y in years %}<option value="{{ y.pk }}" {% if y == new_year %}selected{% endif %}>{{ y.label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2"><button class="btn btn-sm btn-primary w-100">Chaje</button></div>
+  </div>
+</form>
+
+{% if new_year and old_year %}
+<form method="post" action="{% url 'promotion:apply' %}">
+  {% csrf_token %}
+  <input type="hidden" name="old_year" value="{{ old_year.pk }}">
+  <input type="hidden" name="new_year" value="{{ new_year.pk }}">
+  {% for d in rooms_data %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header table-light d-flex justify-content-between flex-wrap gap-2">
+      <div class="fw-semibold">{{ d.room.name }} <span class="text-muted small">({{ old_year.label }})</span></div>
+      <div class="small">
+        Monte default → <strong>{% if d.target %}{{ d.target }} {% if d.target.level.cycle %}({{ d.target.level.cycle }}){% endif %}{% else %}⚠️ pa gen klas pou nivo sa nan annè nèf la{% endif %}</strong>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-sm table-hover mb-0 align-middle">
+        <thead class="table-light"><tr><th>Elèv</th><th>Decizyon pou annè nèf</th></tr></thead>
+        <tbody>
+          {% for st in d.students %}
+          <tr>
+            <td class="fw-semibold">{{ st.full_name }} <span class="text-muted small">({{ st.matricule }})</span></td>
+            <td>
+              <select class="form-select form-select-sm" name="act_{{ st.pk }}" style="max-width:320px">
+                <option value="MONT" {% if not d.target %}{% else %}selected{% endif %}>Monte → {{ d.target|default:"(pa gen klas)" }}</option>
+                <option value="REDOUBLE" {% if not d.repeat %}{% else %}{% endif %}>Redouble → {{ d.repeat|default:"(menm klase)" }}</option>
+                <option value="KITE">Kite lekòl la</option>
+              </select>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="2" class="text-muted text-center py-3">Klas vid.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% empty %}
+  <div class="alert alert-info">Pa gen klas nan annè sa a.</div>
+  {% endfor %}
+  <button class="btn btn-success btn-lg mb-4"><i class="bi bi-check2-circle"></i> Aplike pasaj pou tut elèv yo</button>
+{% else %}
+<div class="alert alert-warning">Kreye annè nèf la avan <a href="{% url 'promotion:new_year' %}">klik isit la</a>.</div>
+{% endif %}
+{% endblock %}

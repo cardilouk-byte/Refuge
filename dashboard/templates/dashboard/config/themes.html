@@ -1,0 +1,34 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Modèls sit{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1"><i class="bi bi-palette2"></i> Modèls sit (20)</h1>
+    <p class="text-muted mb-0">Chwazi yon modèl — koulè, dégradé ak polis sit la chanje touswit.</p>
+  </div>
+  <a href="{% url 'dashboard:config_home' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Retounen</a>
+</div>
+<div class="row g-4">
+  {% for theme in themes %}
+  <div class="col-6 col-md-4 col-lg-3">
+    <div class="card h-100 shadow-sm">
+      <div class="theme-preview" style="height: 110px; {% if theme.degrade %}background: linear-gradient({{ theme.angle }}deg, {{ theme.debut }}, {{ theme.fin }});{% else %}background: {{ theme.header_bg }};{% endif %} display: flex; align-items: center; justify-content: center;">
+        <span class="fw-bold" style="color: {{ theme.header_text }}; font-family: '{{ theme.title_font }}', cursive; font-size: 1.2rem;">{{ theme.label }}</span>
+      </div>
+      <div class="card-body text-center">
+        <div class="d-flex justify-content-center gap-1 mb-2">
+          <span class="d-inline-block rounded-circle" style="width: 18px; height: 18px; background: {{ theme.primary }};"></span>
+          <span class="d-inline-block rounded-circle border" style="width: 18px; height: 18px; background: {{ theme.footer_bg }};"></span>
+          <span class="d-inline-block rounded-circle border" style="width: 18px; height: 18px; background: {{ theme.header_bg }};"></span>
+        </div>
+        <p class="small text-muted mb-2">{{ theme.title_font }} + {{ theme.body_font }}</p>
+        <form method="post" action="{% url 'dashboard:config_theme_apply' theme.key %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-primary w-100"><i class="bi bi-check-lg"></i> Aplike</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

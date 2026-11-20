@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+
+{% block title %}Connexion - {{ site_settings.short_name }}{% endblock %}
+
+{% block content %}
+<style>
+  .auth-hero { background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 55%, #000) 100%); color:#fff; border-radius: 24px 24px 0 0; padding: 30px 24px 42px; text-align:center; position:relative; }
+  .auth-hero .ic { width:72px; height:72px; margin:0 auto 12px; border-radius:50%; background:rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; font-size:2rem; }
+  .auth-hero h1 { font-family: var(--font-title); font-weight:700; letter-spacing:.3px }
+  .auth-body { border:none; border-radius:0 0 24px 24px; box-shadow: 0 12px 34px rgba(13,20,50,.08); }
+  .auth-body .form-control { border-radius:12px; padding:.65rem .9rem; }
+  .auth-body .form-label { font-size:.92rem; font-weight:600; }
+  .login-section { max-width: 900px; margin: 0 auto; padding-top: 2rem; }
+</style>
+
+<section class="login-section container" style="max-width: 460px;">
+  <div class="shadow-lg" style="border-radius: 24px; overflow: hidden;" data-aos="fade-up">
+    <div class="auth-hero">
+      {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" alt="logo" style="height:44px;background:#fff;border-radius:10px;padding:4px;margin-bottom:10px">{% endif %}
+      <div class="ic"><i class="bi bi-person-circle"></i></div>
+      <h1 class="h4 mb-0">Koneksyon</h1>
+    </div>
+    <div class="card auth-body border-0">
+      <div class="card-body p-4 p-md-5">
+        {% if form.errors %}
+        <div class="alert alert-danger py-2" style="border-radius:12px">Non d'utilisateur oswa modpas la pa kòrèk.</div>
+        {% endif %}
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="id_username" class="form-label">Non d'utilisateur</label>
+            <input type="text" name="username" id="id_username" class="form-control" autofocus required>
+          </div>
+          <div class="mb-4">
+            <label for="id_password" class="form-label">Modpas</label>
+            <input type="password" name="password" id="id_password" class="form-control" required>
+          </div>
+          <input type="hidden" name="next" value="{{ next }}">
+          <button type="submit" class="btn btn-primary w-100 rounded-pill py-2"><i class="bi bi-box-arrow-in-right me-1"></i> Konekte</button>
+        </form>
+        <p class="text-center mt-3 mb-0">
+          <a href="{% url 'home' %}" class="login-back"><i class="bi bi-arrow-left me-1"></i>Retounen sou akèy la</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
