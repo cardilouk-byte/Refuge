@@ -13,9 +13,16 @@ echo "=============================================="
 read -rp "Username PythonAnywhere [Entrée = $(whoami)]: " IN_USER
 PU="${IN_USER:-$(whoami)}"
 read -rsp "API token ou (Web tab > API Token > Create): " PT; echo
+read -rp "Domaine sit la [Entrée = $PU.pythonanywhere.com ; ou ka mete celab.eu.org si kont ou peye]: " IN_DOMAIN
 echo ""
 
-DOMAIN="$PU.pythonanywhere.com"
+if [ -n "${DOMAIN:-}" ]; then
+  :   # respekte env DOMAIN
+elif [ -n "$IN_DOMAIN" ]; then
+  DOMAIN="$IN_DOMAIN"
+else
+  DOMAIN="$PU.pythonanywhere.com"
+fi
 API="https://www.pythonanywhere.com/api/v0/user/$PU"
 AUTH="Authorization: Token $PT"
 APP="$HOME/Refuge"
