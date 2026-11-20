@@ -1,0 +1,16 @@
+[Unit]
+Description=LNFCL SIGES (Gunicorn)
+After=network.target postgresql.service
+
+[Service]
+User=lnfcl
+Group=www-data
+WorkingDirectory=/opt/lnfcl
+EnvironmentFile=/opt/lnfcl/.env
+ExecStart=/opt/lnfcl/venv/bin/gunicorn config.wsgi:application \
+    --bind unix:/run/lnfcl.sock --workers 3 --timeout 120
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
