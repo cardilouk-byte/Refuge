@@ -85,6 +85,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.site_info",
                 "notifications.context_processors.unread_count",
+                "core.context_processors.portal_counts",
             ],
         },
     },

@@ -359,3 +359,35 @@ class SidebarSectionsTest(TestCase):
         self.assertIn("Nouvèl ane", html)
         self.assertIn("Backup", html)
         self.assertIn("Elèv yo", html)
+
+
+class NotificationBellAndBadgesTest(TestCase):
+    def _login(self, username, role):
+        from accounts.models import User
+        user, _ = User.objects.get_or_create(username=username, defaults={"role": role})
+        user.set_password("T43s!pass")
+        user.save()
+        self.client.login(username=username, password="T43s!pass")
+        return user
+
+    def test_direction_sees_badge_counts(self):
+        from datetime import date
+
+        from preregistration.models import PreRegistration
+        self._login("badge_dir", "DIRECTION")
+        PreRegistration.objects.create(
+            first_name="Mari", last_name="Poul", birth_date=date(2012, 1, 1),
+            parent_name="P Poul", parent_phone="+50937000000", status="SOUMET",
+        )
+        html = self.client.get("/tableau/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("text-bg-danger", html)
+        self.assertIn("El\u00e8v yo", html)
+
+    def test_student_sees_bell_with_unread(self):
+        from notifications.models import Notification
+        user = self._login("badge_elv", "ELEVE")
+        Notification.send(user, "Quiz n\u00e8f!", url="/quiz/")
+        html = self.client.get("/portail/eleve/", HTTP_HOST="localhost").content.decode()
+        self.assertIn("bi-bell", html)
+        self.assertIn("Quiz n\u00e8f!", html)
+        self.assertIn("text-bg-danger", html)

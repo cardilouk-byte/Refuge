@@ -69,6 +69,22 @@
           {% endif %}
           <li class="nav-item"><a class="nav-link" href="{% url 'home' %}"><i class="bi bi-globe me-1"></i>Site web</a></li>
           <li class="nav-item dropdown">
+            <a class="nav-link position-relative" href="#" data-bs-toggle="dropdown" title="Notifikasyon">
+              <i class="bi bi-bell"></i>{% if unread_notifications %}<span class="badge rounded-pill text-bg-danger position-absolute top-0 start-100 translate-middle">{{ unread_notifications }}</span>{% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width:320px">
+              <li class="fw-bold small px-3 pt-2 pb-1">Notifikasyon</li>
+              {% for n in recent_notifications %}
+              <li><a class="dropdown-item small text-wrap" href="{% if n.url %}{{ n.url }}{% else %}{% url 'notifications:list' %}{% endif %}">
+                <span class="dot-notif bi bi-circle-fill text-primary me-1" style="font-size:.4rem;vertical-align:middle"></span>{{ n.title|truncatechars:44 }}</a></li>
+              {% empty %}
+              <li><span class="dropdown-item small text-muted">Pa gen notifikasyon nèf.</span></li>
+              {% endfor %}
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-center small fw-bold text-primary" href="{% url 'notifications:list' %}">Gade tout →</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
               <i class="bi bi-person-circle me-1"></i>{{ user.get_full_name|default:user.username }}
               <span class="badge badge-role ms-1">{{ user.get_role_display }}</span>
@@ -101,7 +117,7 @@
           {% if user.is_staff or user.is_teaching_staff %}
           <li class="nav-item"><hr class="dropdown-divider"></li>
           <li class="nav-item"><span class="side-head px-3">ÉTABLISSEMENT</span></li>
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'students' %}active fw-bold{% endif %}" href="{% url 'students:student_list' %}"><i class="bi bi-people me-2"></i>Elèv yo <span class="small text-muted d-inline">(par klas)</span></a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'students' %}active fw-bold{% endif %}" href="{% url 'students:student_list' %}"><i class="bi bi-people me-2"></i>Elèv yo{% if n_students %} <span class="badge rounded-pill text-bg-primary">{{ n_students }}</span>{% endif %}</a></li>
           {% if user.is_school_staff or user.is_staff %}
           <li class="nav-item"><a class="nav-link {% if 'done' in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:data_home' %}"><i class="bi bi-database me-2"></i>Done lekòl la</a></li>
           <li class="nav-item"><a class="nav-link small py-1 ps-5" href="{% url 'dashboard:data_list' 'pwofese' %}">Pwofesè yo</a></li>
@@ -116,16 +132,16 @@
           <li class="nav-item"><hr class="dropdown-divider"></li>
           <li class="nav-item"><span class="side-head px-3">KLAS &amp; KOUR</span></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'grades' %}active fw-bold{% endif %}" href="{% url 'grades:class_list' %}"><i class="bi bi-pencil-square me-2"></i>Nòt &amp; Bulletins</a></li>
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'attendance' %}active fw-bold{% endif %}" href="{% url 'attendance:home' %}"><i class="bi bi-clipboard-check me-2"></i>Cahier d'appel (presans)</a></li>
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'cahiers' %}active fw-bold{% endif %}" href="{% url 'cahiers:index' %}"><i class="bi bi-journal-text me-2"></i>Cahier de tèks</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'attendance' %}active fw-bold{% endif %}" href="{% url 'attendance:home' %}"><i class="bi bi-clipboard-check me-2"></i>Presans</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'cahiers' %}active fw-bold{% endif %}" href="{% url 'cahiers:index' %}"><i class="bi bi-journal-text me-2"></i>Cahier kour</a></li>
           {% if user.is_school_staff or user.is_staff %}
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'promotion' %}active fw-bold{% endif %}" href="{% url 'promotion:home' %}"><i class="bi bi-arrow-repeat me-2"></i>Nouvèl ane &amp; pasaj</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'promotion' %}active fw-bold{% endif %}" href="{% url 'promotion:home' %}"><i class="bi bi-arrow-repeat me-2"></i>Pasaj ane</a></li>
           {% endif %}
 
           <li class="nav-item"><hr class="dropdown-divider"></li>
           <li class="nav-item"><span class="side-head px-3">TOTALITE LEKÒL LA</span></li>
           {% if user.is_school_staff %}
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'backups' %}active fw-bold{% endif %}" href="{% url 'backups:index' %}"><i class="bi bi-cloud-arrow-up me-2"></i>Backup Center</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'backups' %}active fw-bold{% endif %}" href="{% url 'backups:index' %}"><i class="bi bi-cloud-arrow-up me-2"></i>Backup</a></li>
           {% endif %}
           {% else %}
           <li class="nav-item"><hr class="dropdown-divider"></li>
@@ -144,16 +160,16 @@
           <li class="nav-item"><span class="side-head px-3">PRODUCTIVITÉ</span></li>
           {% if user.is_staff or user.is_teaching_staff %}
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'departments' %}active fw-bold{% endif %}" href="{% url 'departments:tree' %}"><i class="bi bi-diagram-3 me-2"></i>Organigramme</a></li>
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'preregistration' %}active fw-bold{% endif %}" href="{% url 'preregistration:admin_list' %}"><i class="bi bi-inbox me-2"></i>Pré-inscriptions</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'preregistration' %}active fw-bold{% endif %}" href="{% url 'preregistration:admin_list' %}"><i class="bi bi-inbox me-2"></i>Pré-inscriptions{% if n_pending_pre %} <span class="badge rounded-pill text-bg-danger">{{ n_pending_pre }}</span>{% endif %}</a></li>
           {% endif %}
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'document_editor' %}active fw-bold{% endif %}" href="{% url 'document_editor:index' %}"><i class="bi bi-file-earmark-word me-2"></i>Word Center</a></li>
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'excel_manager' %}active fw-bold{% endif %}" href="{% url 'excel_manager:index' %}"><i class="bi bi-file-earmark-excel me-2"></i>Excel Center</a></li>
-          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'media_library' %}active fw-bold{% endif %}" href="{% url 'media_library:index' %}"><i class="bi bi-images me-2"></i>Media Center</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'document_editor' %}active fw-bold{% endif %}" href="{% url 'document_editor:index' %}"><i class="bi bi-file-earmark-word me-2"></i>Word</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'excel_manager' %}active fw-bold{% endif %}" href="{% url 'excel_manager:index' %}"><i class="bi bi-file-earmark-excel me-2"></i>Excel</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'media_library' %}active fw-bold{% endif %}" href="{% url 'media_library:index' %}"><i class="bi bi-images me-2"></i>Medya</a></li>
           {% if user.is_superuser %}
           <li class="nav-item"><hr class="dropdown-divider"></li>
           <li class="nav-item"><span class="side-head px-3">SITE WEB</span></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'dashboard' and 'configuration' in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:config_home' %}"><i class="bi bi-sliders me-2"></i>Configuration</a></li>
-          <li class="nav-item"><a class="nav-link {% if 'model-sit' in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:config_themes' %}"><i class="bi bi-palette2 me-2"></i>Modèls sit (20)</a></li>
+          <li class="nav-item"><a class="nav-link {% if 'model-sit' in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:config_themes' %}"><i class="bi bi-palette2 me-2"></i>Modèl sit</a></li>
           <li class="nav-item"><hr class="dropdown-divider"></li>
           <li class="nav-item"><a class="nav-link" href="{% url "admin:index" %}"><i class="bi bi-gear me-2"></i>Administration</a></li>
           {% endif %}
