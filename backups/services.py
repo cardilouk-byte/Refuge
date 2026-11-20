@@ -76,6 +76,20 @@ def _cleanup_old_backups(keep_last):
         record.delete()
 
 
+def verify_backup_zip(path):
+    path = Path(path)
+    if not path.exists():
+        return False, "Fichier introuvable sur le serveur."
+    try:
+        with zipfile.ZipFile(path) as zf:
+            if "data.json" not in zf.namelist():
+                return False, "Archive invalide : data.json absent."
+            zf.read("data.json")
+    except zipfile.BadZipFile:
+        return False, "Archive ZIP invalide."
+    return True, "Sauvegarde int\u00e8gre et v\u00e9rifi\u00e9e."
+
+
 def verify_backup(record):
     path = BACKUP_DIR / record.filename
     if not path.exists():
@@ -93,14 +107,11 @@ def verify_backup(record):
     return True, "Sauvegarde intègre et vérifiée."
 
 
-def restore_backup(record, restore_media=True):
-    path = BACKUP_DIR / record.filename
-    if not path.exists():
-        raise FileNotFoundError(path)
-    ok, message = verify_backup(record)
+def _extract_and_load(path, restore_media=True):
+    """Verifie + flush DB + loaddata + reskri media. Retounen True si OK."""
+    ok, message = verify_backup_zip(path)
     if not ok:
         raise ValueError(message)
-
     with zipfile.ZipFile(path) as zf:
         management.call_command("flush", "--noinput", verbosity=0)
         with tempfile.TemporaryDirectory() as tmp:
@@ -108,7 +119,7 @@ def restore_backup(record, restore_media=True):
             data_file.write_bytes(zf.read("data.json"))
             management.call_command("loaddata", str(data_file), verbosity=0)
 
-        if restore_media and record.includes_media:
+        if restore_media:
             media_root = Path(settings.MEDIA_ROOT)
             media_root.mkdir(exist_ok=True)
             for name in zf.namelist():
@@ -118,3 +129,57 @@ def restore_backup(record, restore_media=True):
                     with zf.open(name) as src, open(target, "wb") as dst:
                         shutil.copyfileobj(src, dst)
     return True
+
+
+def restore_backup(record, restore_media=True):
+    path = BACKUP_DIR / record.filename
+    if not path.exists():
+        raise FileNotFoundError(path)
+    ok, message = verify_backup(record)
+    if not ok:
+        raise ValueError(message)
+    return _extract_and_load(path, restore_media=restore_media and record.includes_media)
+
+
+def import_backup(uploaded_file, restore_media=True):
+    """Importe yon fichye backup ZIP ki te telechaje anvan (pa egzanp).
+
+    1. Verifie ZIP la valide + gen data.json (backup LNFCL)
+    2. F restore konplè (DB + media opsyonèl)
+    3. Anrejistre yon BackupRecord IMPORT nan listwa apre restore a fini
+    """
+    data = uploaded_file.read()
+    if not data:
+        raise ValueError("Fichye a vid.")
+
+    BACKUP_DIR.mkdir(exist_ok=True)
+    stamp = date.today().strftime("%Y%m%d%H%M%S")
+    filename = f"backup_{stamp}_import.zip"
+    target = BACKUP_DIR / filename
+    target.write_bytes(data)
+
+    try:
+        _extract_and_load(target, restore_media=restore_media)
+    except Exception:
+        target.unlink(missing_ok=True)
+        raise
+    return target
+
+
+def register_imported_backup(filename, user=None, restore_media=True):
+    """Ape restore fin fet — anrejistre achiv la kòm yon backup IMPORT."""
+    from django.utils import timezone
+
+    path = BACKUP_DIR / filename
+    record = BackupRecord(
+        kind=BackupRecord.Kind.MANUAL,
+        status=BackupRecord.Status.SUCCESS,
+        filename=filename,
+        size_bytes=path.stat().st_size if path.exists() else 0,
+        checksum=hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else "",
+        includes_media=restore_media,
+        created_by=user,
+        note="Initialement, restauré (importing)",
+    )
+    record.save()
+    return record

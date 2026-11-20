@@ -63,6 +63,26 @@ def restore(request, pk):
 
 
 @superadmin_required
+def import_backup_file(request):
+    uploaded = request.FILES.get("backup_file")
+    if request.method != "POST" or uploaded is None:
+        messages.error(request, "Chwazi yon fichye backup ZIP (.zip) pou w importe.")
+        return redirect("backups:index")
+    if not uploaded.name.lower().endswith(".zip"):
+        messages.error(request, "Fichye a dwe yon ZIP (backup LNFCL).")
+        return redirect("backups:index")
+    restore_media = request.POST.get("media") == "on"
+    try:
+        target = services.import_backup(uploaded, restore_media=restore_media)
+    except Exception as exc:
+        messages.error(request, f"Import echwe : {exc}")
+        return redirect("backups:index")
+    services.register_imported_backup(target.name, user=request.user, restore_media=restore_media)
+    messages.success(request, f"Backup {uploaded.name} importe epi restore av\u00e8k siks\u00e8. Ou ka bezwen konekte ank\u00f2.")
+    return redirect("backups:index")
+
+
+@superadmin_required
 def settings_view(request):
     settings_obj = BackupSettings.load()
     if request.method == "POST":

@@ -83,6 +83,70 @@ class BackupTests(TestCase):
         response = self.client.post(reverse("backups:create"))
         self.assertRedirects(response, reverse("backups:index"))
 
+    def test_import_backup_zip_restores_data(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        # 1. F yon backup
+        record = services.create_backup(user=self.superadmin)
+        path = services.BACKUP_DIR / record.filename
+
+        # 2. Ajoute done NOUVÈO apre backup la (dwe efase pa restore a)
+        Student.objects.create(matricule="ELV-IMP-001", first_name="Apre", last_name="Import")
+
+        # 3. Importe ZIP la (jan yon itilizatè telechaje l + re-upload l ta fè)
+        with open(path, "rb") as fh:
+            uploaded = SimpleUploadedFile("backup_test.zip", fh.read(), content_type="application/zip")
+        self.client.login(username="root", password="test1234!")
+        response = self.client.post(
+            reverse("backups:import"),
+            {"backup_file": uploaded, "media": "on"},
+            format="multipart",
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Student.objects.filter(matricule="ELV-IMP-001").exists())  # restore absolve
+
+        # 4. Backup la anrejistre nan listwa
+        self.assertTrue(BackupRecord.objects.filter(note__contains="import").exists() or
+                        BackupRecord.objects.filter(filename__contains="_import.zip").exists())
+
+    def test_import_rejects_non_lnfcl_zip(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        # ZIP ki pa gen data.json → refize
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as zf:
+            zf.writestr("random.txt", "hello")
+        self.client.login(username="root", password="test1234!")
+        uploaded = SimpleUploadedFile("fake.zip", buffer.getvalue(), content_type="application/zip")
+        response = self.client.post(
+            reverse("backups:import"),
+            {"backup_file": uploaded},
+            format="multipart",
+        )
+        self.assertEqual(response.status_code, 302)
+        # pa gen _import.zip ki rete nan backups_store
+        leftovers = list(services.BACKUP_DIR.glob("backup_*_import.zip"))
+        self.assertEqual(leftovers, [])
+
+    def test_import_rejects_non_zip_file(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        # ensure dir exists
+        BackupSettings.objects.get_or_create(pk=1)
+        self.client.login(username="root", password="test1234!")
+        uploaded = SimpleUploadedFile("fichier.txt", b"not a zip", content_type="text/plain")
+        response = self.client.post(
+            reverse("backups:import"),
+            {"backup_file": uploaded},
+            format="multipart",
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_import_requires_superadmin(self):
+        self.client.login(username="dir1", password="test1234!")
+        response = self.client.post(reverse("backups:import"))
+        self.assertEqual(response.status_code, 403)
+
     def test_backup_page_accessible_to_staff(self):
         self.client.login(username="dir1", password="test1234!")
         response = self.client.get(reverse("backups:index"))
