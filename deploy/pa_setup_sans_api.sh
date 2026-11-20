@@ -51,7 +51,8 @@ echo "   Pakè enstale."
 # ---- .env ----
 cd "$APP"
 PU="$(whoami)"
-DOMAIN="${PU}.pythonanywhere.com"
+PU_LOW="${PU,,}"          # PythonAnywhere domèn se tout miniskil
+DOMAIN="${PU_LOW}.pythonanywhere.com"
 if [ -f .env ]; then
   echo "==> .env deja egziste — n ap kenbe l."
 else
