@@ -63,6 +63,24 @@
       <div><div class="fs-3 fw-bold">{{ stats.subjects }}</div><div class="text-muted">Matières</div></div>
     </div></div>
   </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body d-flex align-items-center">
+      <i class="bi bi-house-heart icon text-danger me-3"></i>
+      <div><div class="fs-3 fw-bold">{{ stats.parents }}</div><div class="text-muted">Parents</div></div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body d-flex align-items-center">
+      <i class="bi bi-clipboard-plus icon text-secondary me-3"></i>
+      <div><div class="fs-3 fw-bold">{{ stats.students_year }}</div><div class="text-muted">Inscrits cette année</div></div>
+    </div></div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card stat-card h-100"><div class="card-body d-flex align-items-center">
+      <i class="bi bi-person-check icon text-success me-3"></i>
+      <div><div class="fs-6 fw-bold">{{ prereg_accepted }} <span class="text-success">admis</span> / {{ prereg_refused }} <span class="text-danger">rejetés</span></div><div class="text-muted">Pré-inscriptions</div></div>
+    </div></div>
+  </div>
 </div>
 
 <div class="row g-3 mb-4">
@@ -71,8 +89,10 @@
       <h5 class="card-title"><i class="bi bi-cash-coin me-2 text-success"></i>Finances</h5>
       <p class="mb-1">Total facturé : <strong>{{ finance.invoices_total }} HTG</strong></p>
       <p class="mb-1">Total encaissé : <strong class="text-success">{{ finance.payments_total }} HTG</strong></p>
-      <p class="mb-1">Reste à payer : <strong class="text-danger">{{ finance.balance }} HTG</strong></p>
+      <p class="mb-1">Dépenses : <strong class="text-danger">{{ finance.expenses_total }} HTG</strong></p>
+      <p class="mb-1">Bilan (rev. − dép.) : <strong>{{ finance.net }} HTG</strong></p>
       <p class="mb-0">Factures non soldées : <strong>{{ finance.unpaid_count }}</strong></p>
+      <a href="{% url 'finance:home' %}" class="small d-block mt-2">Gade Finans lekòl la →</a>
     </div></div>
   </div>
   <div class="col-lg-4">
@@ -140,6 +160,46 @@
         </tbody>
       </table>
       {% else %}<p class="text-muted mb-0">Aucune note saisie.</p>{% endif %}
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3 mb-2">
+  <div class="col-lg-7">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-activity me-2"></i>Aktivite resan</h5>
+      {% if recent_payments %}
+      <table class="table table-sm align-middle">
+        <thead><tr><th>Reçou</th><th>Elèv</th><th>Montan</th><th>Mòd</th></tr></thead>
+        <tbody>
+        {% for p in recent_payments %}
+        <tr>
+          <td class="small">{{ p.receipt_number }}</td>
+          <td class="small">{{ p.invoice.student.full_name }}</td>
+          <td class="small fw-bold">{{ p.amount }} HTG</td>
+          <td class="small">{{ p.get_method_display }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}<p class="text-muted mb-0">Pa gen peman resan.</p>{% endif %}
+    </div></div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-bell me-2"></i>Notifikasyon mwen</h5>
+      {% if recent_notifications %}
+      <ul class="list-unstyled mb-0">
+        {% for n in recent_notifications %}
+        <li class="border-bottom py-2 small {% if not n.is_read %}fw-bold{% endif %}">
+          <i class="bi {% if n.is_read %}bi-envelope-open text-muted{% else %}bi-envelope-fill text-danger{% endif %} me-1"></i>
+          {{ n.title }}
+          {% if n.body %}<div class="text-muted fw-normal">{{ n.body|truncatechars:80 }}</div>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'notifications:list' %}" class="small d-block mt-2">Gade tout notifikasyon →</a>
+      {% else %}<p class="text-muted mb-0">Pa gen notifikasyon.</p>{% endif %}
     </div></div>
   </div>
 </div>

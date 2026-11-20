@@ -93,3 +93,32 @@ class Payment(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.invoice.update_status()
+
+
+class Expense(models.Model):
+    CATEGORIES = [
+        ("SALAIRE", "Salaires"),
+        ("FOURNITURES", "Fournitures"),
+        ("ENTRETIEN", "Entretien / électricité"),
+        ("TRANSPORT", "Transport"),
+        ("AUTRE", "Autre"),
+    ]
+
+    label = models.CharField("Libellé", max_length=200)
+    category = models.CharField("Catégorie", max_length=20, choices=CATEGORIES, default="AUTRE")
+    amount = models.DecimalField("Montant (HTG)", max_digits=12, decimal_places=2)
+    spent_at = models.DateField("Date", null=True, blank=True)
+    note = models.CharField("Note", max_length=255, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True,
+        related_name="expenses_recorded", verbose_name="Créé par",
+    )
+    created_at = models.DateTimeField("Créé le", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Dépense"
+        verbose_name_plural = "Dépenses"
+        ordering = ["-spent_at", "-created_at"]
+
+    def __str__(self):
+        return f"{self.label} — {self.amount} HTG"

@@ -3,9 +3,11 @@ from django.shortcuts import render
 
 from academics.models import ClassRoom, Period, SchoolYear, Subject
 from attendance.models import AttendanceRecord
-from finance.models import Invoice, Payment
+from finance.models import Expense, Invoice, Payment
 from grades.models import Grade
-from students.models import Student
+from notifications.models import Notification
+from preregistration.models import PreRegistration
+from students.models import Parent, Student
 from teachers.models import Teacher
 
 from accounts.views import dashboard_required
@@ -25,13 +27,18 @@ def home(request):
         "teachers": Teacher.objects.count(),
         "classrooms": ClassRoom.objects.filter(school_year=year).count() if year else ClassRoom.objects.count(),
         "subjects": Subject.objects.count(),
+        "parents": Parent.objects.count(),
+        "students_year": Student.objects.filter(status="ACTIF", classroom__school_year=year).count() if year else 0,
     }
 
     payments_total = Payment.objects.aggregate(total=Sum("amount"))["total"] or 0
     invoices_total = Invoice.objects.aggregate(total=Sum("amount"))["total"] or 0
+    expenses_total = Expense.objects.aggregate(total=Sum("amount"))["total"] or 0
     finance = {
         "payments_total": payments_total,
         "invoices_total": invoices_total,
+        "expenses_total": expenses_total,
+        "net": payments_total - expenses_total,
         "balance": invoices_total - payments_total,
         "unpaid_count": Invoice.objects.exclude(status="PAYE").count(),
     }
@@ -62,7 +69,11 @@ def home(request):
         "finance": finance,
         "attendance_rate": attendance_rate,
         "attendance_map": attendance_map,
+        "prereg_accepted": PreRegistration.objects.filter(status="ACCEPTE").count(),
+        "prereg_refused": PreRegistration.objects.filter(status="REFUSE").count(),
         "recent_students": Student.objects.select_related("classroom").order_by("-enrolled_at")[:5],
+        "recent_notifications": Notification.objects.filter(recipient=request.user)[:5],
+        "recent_payments": Payment.objects.select_related("invoice__student")[:5],
         "recent_grades": Grade.objects.select_related(
             "student", "class_subject__subject", "period"
         ).order_by("-created_at")[:8],

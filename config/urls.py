@@ -22,6 +22,7 @@ urlpatterns = [
     path("notes/", include("grades.urls")),
     path("presens/", include("attendance.urls")),
     path("bibliotheque/", include("library.urls")),
+    path("finance/", include("finance.urls")),
     path("", include("students.urls")),
     path("cahiers/", include("cahiers.urls")),
     path("quiz/", include("quizzes.urls")),

@@ -543,3 +543,53 @@ class DashboardDataTest(TestCase):
         self._login("data_prof", "ENSEIGNANT")
         r = self.client.get("/tableau/done/klas/", HTTP_HOST="localhost")
         self.assertEqual(r.status_code, 403)
+
+
+class DashboardStatsTest(TestCase):
+    def setUp(self):
+        year = SchoolYear.objects.create(label="2025-2026", is_current=True)
+        cycle = Cycle.objects.create(name="1e Sik (1AF-3AF)", order=1)
+        level = Level.objects.create(name="1e AF", cycle=cycle, order=1)
+        self.classroom = ClassRoom.objects.create(school_year=year, level=level, section="A")
+        self.teacher_user = User.objects.create_user("prof", password="Pass1234!", role="ENSEIGNANT")
+        Teacher.objects.create(user=self.teacher_user, matricule="PRO-00001", first_name="Ani", last_name="Prof")
+        self.dir = User.objects.create_user("dir", password="Pass1234!", role="DIRECTION", is_staff=True)
+        self.eleve_user = User.objects.create_user("eleve1", password="Pass1234!", role="ELEVE")
+        self.parent_user = User.objects.create_user("parent1", password="Pass1234!", role="PARENT")
+
+    def test_direction_sees_parents_year_and_prereg_cards(self):
+        from notifications.models import Notification
+        from preregistration.models import PreRegistration
+        from students.models import Parent, ParentStudent, Student
+
+        student = Student.objects.create(
+            matricule="ELV-00777", first_name="Ani", last_name="Elève", classroom=self.classroom
+        )
+        parent = Parent.objects.create(user=self.parent_user, first_name="Papa", last_name="Elève")
+        ParentStudent.objects.create(parent=parent, student=student, is_primary=True)
+        PreRegistration.objects.create(
+            reference="PRE-TEST0001", first_name="Nouvo", last_name="Elève", status="ACCEPTE",
+            gender="M", birth_date="2012-05-10", parent_name="Papa Elève",
+        )
+        Notification.send(self.dir, "Obsans lekol", body="Ani Elève te absan le 02/02/2026.")
+
+        self.client.login(username="dir", password="Pass1234!")
+        response = self.client.get("/tableau/", **{"HTTP_HOST": "localhost"})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Parents")
+        self.assertContains(response, "Inscrits cette année")
+        self.assertContains(response, "admis")
+        self.assertContains(response, "Aktivite resan")
+        self.assertContains(response, "Notifikasyon mwen")
+        self.assertContains(response, "Obsans lekol")
+
+    def test_status_badge_cards_present_for_direction(self):
+        from students.models import Student
+
+        Student.objects.create(
+            matricule="ELV-00778", first_name="Dezyèm", last_name="Elève", classroom=self.classroom
+        )
+        self.client.login(username="dir", password="Pass1234!")
+        response = self.client.get("/tableau/", **{"HTTP_HOST": "localhost"})
+        self.assertContains(response, "Élèves actifs")
+        self.assertContains(response, "Professeurs")

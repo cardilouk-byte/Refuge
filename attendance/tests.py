@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from academics.models import ClassRoom, Cycle, Level, Period, SchoolYear, Subject, ClassSubject
-from students.models import Student
+from students.models import Parent, ParentStudent, Student
 
 from .models import AttendanceRecord
 
@@ -94,3 +94,59 @@ class AttendanceTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Absan")
         self.assertEqual(self.client.get(f"/presens/klas/{self.d['classroom'].pk}/", **HOST).status_code, 403)
+
+
+class ParentAbsenceNotificationTest(TestCase):
+    def setUp(self):
+        self.d = _setup_data()
+        self.prof = User.objects.create_user("prof", password="Pass1234!", role="ENSEIGNANT")
+        self.parent_user = User.objects.create_user("parent1", password="Pass1234!", role="PARENT")
+        self.parent = Parent.objects.create(user=self.parent_user, first_name="Papa", last_name="Baptiste")
+        ParentStudent.objects.create(parent=self.parent, student=self.d["s1"], is_primary=True)
+
+    def test_absent_creates_parent_notification(self):
+        self.client.login(username="prof", password="Pass1234!")
+        url = f"/presens/klas/{self.d['classroom'].pk}/"
+        response = self.client.post(
+            url,
+            {
+                "dat": "2026-02-02",
+                f"status_{self.d['s1'].pk}": "ABSENT",
+                f"status_{self.d['s2'].pk}": "PRESENT",
+            },
+            **HOST,
+        )
+        self.assertEqual(response.status_code, 302)
+        from notifications.models import Notification
+
+        notif = Notification.objects.get(recipient=self.parent_user)
+        self.assertIn("Jean Baptiste", notif.body)
+        self.assertIn("absan", notif.body)
+
+    def test_no_notification_when_everyone_present(self):
+        self.client.login(username="prof", password="Pass1234!")
+        url = f"/presens/klas/{self.d['classroom'].pk}/"
+        self.client.post(
+            url,
+            {
+                "dat": "2026-02-03",
+                f"status_{self.d['s1'].pk}": "PRESENT",
+                f"status_{self.d['s2'].pk}": "PRESENT",
+            },
+            **HOST,
+        )
+        from notifications.models import Notification
+
+        self.assertEqual(Notification.objects.count(), 0)
+
+    def test_parents_only_notified_once(self):
+        parent_user2 = User.objects.create_user("parent2", password="Pass1234!", role="PARENT")
+        parent2 = Parent.objects.create(user=parent_user2, first_name="Manman", last_name="Baptiste")
+        ParentStudent.objects.create(parent=parent2, student=self.d["s1"])
+        self.client.login(username="prof", password="Pass1234!")
+        url = f"/presens/klas/{self.d['classroom'].pk}/"
+        self.client.post(url, {"dat": "2026-02-04", f"status_{self.d['s1'].pk}": "ABSENT"}, **HOST)
+        from notifications.models import Notification
+
+        users = set(Notification.objects.values_list("recipient_id", flat=True))
+        self.assertEqual(users, {self.parent_user.pk, parent_user2.pk})

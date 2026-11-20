@@ -1,0 +1,33 @@
+{% extends "core/portal_base.html" %}
+{% block title %}{{ titre }} — LNFCL{% endblock %}
+{% block content %}
+<style>
+  @media print { .no-print { display:none !important } }
+  .receipt { max-width: 480px; margin: 0 auto; border: 1px solid #dee2e6; border-radius: 14px; }
+</style>
+<div class="no-print d-flex justify-content-between mb-3">
+  <h1 class="h4 mb-0"><i class="bi bi-receipt-cutoff me-2"></i>{{ titre }}</h1>
+  <div class="d-flex gap-2">
+    <button onclick="window.print()" class="btn btn-sm btn-primary"><i class="bi bi-printer me-1"></i> Enprime</button>
+    <a href="{% url 'finance:invoice_detail' payment.invoice.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Fakti a</a>
+  </div>
+</div>
+<div class="card receipt">
+  <div class="card-body p-4 text-center">
+    {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" style="height:44px" class="mb-2">{% endif %}
+    <div class="fw-bold">{{ site_settings.name|default:"LNFCL" }}</div>
+    <div class="small text-muted">REÇU DE PAIEMENT</div>
+    <hr>
+    <div class="d-flex justify-content-between py-1 small"><span class="text-muted">Reçou #</span><span class="fw-bold">{{ payment.receipt_number }}</span></div>
+    <div class="d-flex justify-content-between py-1 small"><span class="text-muted">Elèv</span><span class="fw-bold">{{ payment.invoice.student }}</span></div>
+    <div class="d-flex justify-content-between py-1 small"><span class="text-muted">Matricule</span><span>{{ payment.invoice.student.matricule }}</span></div>
+    <div class="d-flex justify-content-between py-1 small"><span class="text-muted">Peye pou</span><span>{{ payment.invoice.fee_type.name }}</span></div>
+    <div class="d-flex justify-content-between py-1 small border-top mt-2 pt-2"><span class="text-muted">Montan</span><span class="fs-5 fw-bold">{{ payment.amount }} HTG</span></div>
+    <div class="d-flex justify-content-between py-1 small"><span class="text-muted">Mòd</span><span>{{ payment.get_method_display }}</span></div>
+    {% if payment.reference %}<div class="d-flex justify-content-between py-1 small"><span class="text-muted">Réf.</span><span>{{ payment.reference }}</span></div>{% endif %}
+    <div class="d-flex justify-content-between py-1 small border-top mt-2 pt-2"><span class="text-muted">Peye le:</span><span>{{ payment.paid_at|date:"d/m/Y H:i" }}</span></div>
+    <hr>
+    <div class="small text-muted">{{ payment.invoice.student.full_name }} — Mèsi!</div>
+  </div>
+</div>
+{% endblock %}

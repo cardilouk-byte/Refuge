@@ -13,4 +13,5 @@ urlpatterns = [
     path("bulletin/cik/<int:student_pk>/", views.bulletin_cycle, name="bulletin_cycle"),
     path("bulletin/klas/<int:classroom_pk>/", views.bulletin_class, name="bulletin_class"),
     path("bulletin/klas/<int:classroom_pk>/excel/", views.bulletin_excel, name="bulletin_excel"),
+    path("tablo-done/", views.honour, name="honour"),
 ]

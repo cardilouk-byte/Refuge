@@ -209,3 +209,41 @@ class BulletinTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "DESIZYON SIK")
         self.assertContains(response, "ADMIS")
+
+
+class HonourTest(TestCase):
+    def setUp(self):
+        self.d = _setup_data()
+        self.period = self.d["period"]
+        self.classroom = self.d["classroom"]
+        self.math = self.d["cs_math"]
+        self.prof = User.objects.create_user("prof", password="Pass1234!", role="ENSEIGNANT")
+        self.parent = User.objects.create_user("parent1", password="Pass1234!", role="PARENT")
+
+    def test_anonymous_redirected(self):
+        response = self.client.get("/notes/tablo-done/", **HOST)
+        self.assertEqual(response.status_code, 302)
+
+    def test_parent_forbidden(self):
+        self.client.login(username="parent1", password="Pass1234!")
+        response = self.client.get("/notes/tablo-done/", **HOST)
+        self.assertEqual(response.status_code, 403)
+
+    def test_honour_shows_top_students_with_avg_10(self):
+        Grade.objects.create(
+            student=self.d["s1"], class_subject=self.math, period=self.period, score="16"
+        )
+        Grade.objects.create(
+            student=self.d["s2"], class_subject=self.math, period=self.period, score="9"
+        )
+        self.client.login(username="prof", password="Pass1234!")
+        response = self.client.get(f"/notes/tablo-done/?periyod={self.period.pk}", **HOST)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Jean Baptiste")
+        self.assertNotContains(response, "Marie Clerger")
+
+    def test_honour_empty_when_no_grades(self):
+        self.client.login(username="prof", password="Pass1234!")
+        response = self.client.get("/notes/tablo-done/", **HOST)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Pa gen el")

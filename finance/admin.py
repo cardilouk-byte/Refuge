@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import FeeType, Invoice, Payment
+from .models import Expense, FeeType, Invoice, Payment
+
+
+@admin.register(Expense)
+class ExpenseAdmin(admin.ModelAdmin):
+    list_display = ("label", "category", "amount", "spent_at", "created_by")
+    list_filter = ("category",)
+    search_fields = ("label", "note")
 
 
 @admin.register(FeeType)

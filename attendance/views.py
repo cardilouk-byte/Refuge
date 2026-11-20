@@ -52,7 +52,10 @@ def take(request, classroom_pk):
     statuses = AttendanceRecord.Status.choices
 
     if request.method == "POST":
+        from notifications.models import Notification
+
         saved = 0
+        absent_students = []
         for st in students:
             status = request.POST.get(f"status_{st.pk}", "").strip()
             if status not in AttendanceRecord.Status.values:
@@ -70,6 +73,25 @@ def take(request, classroom_pk):
                 },
             )
             saved += 1
+            if status == AttendanceRecord.Status.ABSENT:
+                absent_students.append(st)
+        if absent_students:
+            from django.contrib.auth import get_user_model
+
+            parent_users = list(
+                get_user_model()
+                .objects.filter(parent_profile__students__in=absent_students)
+                .distinct()
+            )
+            if parent_users:
+                Notification.send_many(
+                    parent_users,
+                    "Obsans lekol",
+                    "; ".join(st.full_name for st in absent_students[:5])
+                    + ("..." if len(absent_students) > 5 else "")
+                    + f" te absan le {day:%d/%m/%Y}.",
+                )
+                messages.info(request, f"Notifikasyon obsans voye ba {len(parent_users)} paran.")
         messages.success(request, f"Presans sove pou {saved} elèv — {day:%d/%m/%Y}.")
         return redirect(f"{request.path}?dat={day.isoformat()}")
 

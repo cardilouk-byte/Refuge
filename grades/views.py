@@ -193,6 +193,45 @@ def bulletin_home(request):
 
 
 @teaching_staff_required
+def honour(request):
+    classrooms = ClassRoom.objects.select_related("level", "school_year").order_by(
+        "school_year__label", "level__order", "section"
+    )
+    periods = Period.objects.order_by("-order")[:12]
+    classroom_id = request.GET.get("klas")
+    period_id = request.GET.get("periyod")
+
+    honoured = []
+    if period_id:
+        period = Period.objects.filter(pk=period_id).first()
+    else:
+        period = periods.first() if periods else None
+    if period:
+        targets = [c for c in classrooms if not classroom_id or str(c.pk) == classroom_id]
+        rows = []
+        for classroom in targets:
+            for rank, student, avg in Grade.class_ranking(classroom, period):
+                if avg >= 10:
+                    rows.append({"student": student, "avg": avg, "classroom": classroom})
+        rows.sort(key=lambda row: row["avg"], reverse=True)
+        for i, row in enumerate(rows[:10], start=1):
+            row["rank"] = i
+            honoured.append(row)
+    return render(
+        request,
+        "grades/honour.html",
+        {
+            "classrooms": classrooms,
+            "periods": periods,
+            "f_classroom": classroom_id or "",
+            "f_period": period_id or (str(period.pk) if period else ""),
+            "honoured": honoured,
+            "titre": "Tablo don\u00e8",
+        },
+    )
+
+
+@teaching_staff_required
 def bulletin_class(request, classroom_pk):
     classroom = get_object_or_404(ClassRoom.objects.select_related("level", "school_year"), pk=classroom_pk)
     periods = Period.objects.filter(school_year=classroom.school_year).order_by("order")
