@@ -105,6 +105,17 @@ if get_env("DB_ENGINE") == "postgres":
             "PORT": get_env("DB_PORT", "5432"),
         }
     }
+elif get_env("DB_ENGINE") == "mysql":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": get_env("DB_NAME", "lnfcl"),
+            "USER": get_env("DB_USER", "lnfcl"),
+            "PASSWORD": get_env("DB_PASSWORD", ""),
+            "HOST": get_env("DB_HOST", "localhost"),
+            "PORT": get_env("DB_PORT", "3306"),
+        }
+    }
 else:
     DATABASES = {
         "default": {
