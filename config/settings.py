@@ -24,6 +24,7 @@ def get_env(key, default=""):
 SECRET_KEY = get_env("SECRET_KEY", "django-insecure-dev-key-change-me-in-production")
 DEBUG = get_env("DEBUG", "True").lower() == "true"
 ALLOWED_HOSTS = [h.strip() for h in get_env("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
+CSRF_TRUSTED_ORIGINS = [h.strip() for h in get_env("CSRF_TRUSTED_ORIGINS", "").split(",") if h.strip()]
 ADMIN_URL = get_env("ADMIN_URL", "kontwol/").strip("/") + "/"
 
 INSTALLED_APPS = [

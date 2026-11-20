@@ -35,7 +35,7 @@ Apre li fini, **kreye kont SIPÈADMIN lan**:
 cd /opt/lnfcl && sudo -u lnfcl -E ./venv/bin/python manage.py createsuperuser
 ```
 
-Louvri `http://DOMÈN_W/` → sit la an lèn! Admin: `http://DOMÈN_W/kontwol/`.
+Louvri `http://celab.eu.org/` → sit la an lèn! Admin: `http://celab.eu.org/kontwol/`.
 
 ---
 
@@ -62,15 +62,15 @@ Renouvèlman otomatikman (test: `sudo certbot renew --dry-run`).
 
 | Opsyon | Ki jan w jwenn li | Pri |
 |---|---|---|
-| **lnfcl.eu.org** | `eu.org` — vrè domèn gratis (validasyon apeprè 1-4 semèn) | **Gratis** ✅ |
+| **celab.eu.org** | `eu.org` — vrè domèn gratis (validasyon apeprè 1-4 semèn) | **Gratis** ✅ |
 | **lnfcl.edu.ht** | `www.nic.ht` — rejis a Ayiti | peye (~30-70 USD/an) — sèl fason reyèl pou genyen **.edu.ht** |
 | Domèn peye (.com, .org...) | Namecheap, Porkbun, Cloudflare | ~10 USD/an |
 | Subdomèn Cloudflare/Vercel | ou pèsonèlman regjistre l | Gratis |
 
 ### Si ou chwazi **eu.org** (rekòmande pou gratis):
-1. Ale `https://nic.eu.org` → kreye kont → "New domain" → mande `lnfcl.eu.org`
+1. Ale `https://nic.eu.org` → kreye kont → "New domain" → mande `celab.eu.org`
 2. Ou bezwen **DNS host** gratis: kreye yon kont [Cloudflare](https://cloudflare.com) (gratis), ajoute zon
-   `lnfcl.eu.org`, pran 2 sèvè DNS Cloudflare yo, ba yo nan fòm nan eu.org
+   `celab.eu.org`, pran 2 sèvè DNS Cloudflare yo, ba yo nan fòm nan eu.org
 3. Nan Cloudflare: rekò A `@` → IP sèvè VPS w la, rekò A `www` → menm IP (mode: DNS only)
 4. Kite valdasyon eu.org pase (1-4 semèn) — script la deja pres pou l
 

@@ -2,7 +2,7 @@
 # ============================================================
 #  LNFCL SIGES — Installasyon pwodiksyon sou Ubuntu 22/24 VPS
 #  Itilizasyon:  sudo bash install_lnfcl.sh
-#  Repons kesyon yo, script la fe tout rès la.
+#  Domèn: celab.eu.org (chanje l si ou vle lòt)
 # ============================================================
 set -euo pipefail
 
@@ -11,6 +11,7 @@ if [ "$EUID" -ne 0 ]; then echo "Dwe kòmanse ak sudo: sudo bash $0"; exit 1; fi
 APP_DIR=${APP_DIR:-/opt/lnfcl}
 REPO_URL=${REPO_URL:-https://github.com/cardilouk-byte/Refuge.git}
 BRANCH=${BRANCH:-vibe/lnfcl-site-fc50d6}
+DOMAIN=${DOMAIN:-celab.eu.org}
 SERVICE=lnfcl
 
 echo "=========================================================="
@@ -18,17 +19,18 @@ echo " LNFCL SIGES — enstalasyon pwodiksyon"
 echo " Repozitwa: $REPO_URL  (branch: $BRANCH)"
 echo " Dosye app: $APP_DIR"
 echo "=========================================================="
-read -rp "Domèn ou (ex: lnfcl.eu.org) [si ou pa genyen, kite vid]: " DOMAIN
+read -rp "Domèn ou [Entrée = celab.eu.org]: " INPUT_DOMAIN
+[ -n "$INPUT_DOMAIN" ] && DOMAIN="$INPUT_DOMAIN"
 read -rp "Adrès imèl pou sètifikat / rapò [admin@lnfcl.edu]: " EMAIL
 read -rsp "Mòdpas baz done PostgreSQL nouvo: " DB_PASSWORD; echo
 
 echo "[1/9] Pakè sistèm..."
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -qq
-apt-get install -y -qq python3 python3-venv python3-pip git nginx postgresql postgresql-contrib curl
+apt-get install -y -qq python3 python3-venv python3-pip git nginx postgresql postgresql-contrib cron
 
-PYVER=$(python3 -c 'import sys; print("{}.{}".format(*sys.version_info[:2]))')
-echo "    Python $PYVER detekte"
+PYVER_NUM=$(python3 -c 'import sys; print("{}.{}".format(*sys.version_info[:2]))')
+echo "    Python $PYVER_NUM detekte"
 python3 - <<EOF || { echo "!! Django 6 bezwen Python 3.12+ — sèvi ak Ubuntu 24.04"; exit 1; }
 import sys; assert sys.version_info >= (3, 12)
 EOF
@@ -55,19 +57,18 @@ cd "$APP_DIR"
 echo "[5/9] Enviwònman Python (venv) + pakè..."
 python3 -m venv venv
 ./venv/bin/pip install --quiet --upgrade pip
-./venv/bin/pip install --quiet -r requirements.txt gunicorn psycopg[binary]
+./venv/bin/pip install --quiet -r requirements.txt gunicorn
 
 echo "[6/9] Fichye .env..."
 SECRET_KEY="$(head -c 48 /dev/urandom | base64 | tr -d '=+/' | head -c 50)"
 if [ -f .env ]; then
   echo "    .env deja egziste — nou pa manyen l."
 else
-  HOSTS="$DOMAIN"
-  [ -z "$HOSTS" ] && HOSTS="$(curl -s -4 ifconfig.me || echo _)"
   cat > .env <<EOF
 DEBUG=False
 SECRET_KEY=$SECRET_KEY
-ALLOWED_HOSTS=$HOSTS
+ALLOWED_HOSTS=$DOMAIN
+CSRF_TRUSTED_ORIGINS=http://$DOMAIN,https://$DOMAIN
 DB_ENGINE=postgres
 DB_NAME=lnfcl
 DB_USER=lnfcl
@@ -75,7 +76,7 @@ DB_PASSWORD=$DB_PASSWORD
 DB_HOST=localhost
 DB_PORT=5432
 ADMIN_URL=kontwol/
-SECURE_SSL_REDIRECT=false   # mete true apre HTTPS la fini (gesyon sètificate)
+SECURE_SSL_REDIRECT=false
 EOF
   chmod 600 .env
 fi
@@ -85,7 +86,7 @@ chown -R lnfcl:www-data "$APP_DIR"
 sudo -u lnfcl -E env DJANGO_SETTINGS_MODULE=config.settings \
   "$APP_DIR/venv/bin/python" "$APP_DIR/manage.py" migrate --noinput
 sudo -u lnfcl -E env DJANGO_SETTINGS_MODULE=config.settings \
-  "$APP_DIR/venv/bin/python" "$APP_DIR/manage.py" collectstatic --noinput 3>/dev/null
+  "$APP_DIR/venv/bin/python" "$APP_DIR/manage.py" collectstatic --noinput
 
 echo "[8/9] Sèvis Gunicorn (systemd)..."
 cat > "/etc/systemd/system/$SERVICE.service" <<EOF
@@ -109,11 +110,10 @@ systemctl daemon-reload
 systemctl enable --now "$SERVICE"
 
 echo "[9/9] Nginx + fwouwal..."
-HOST_LINE="${DOMAIN:-_}"
 cat > /etc/nginx/sites-available/lnfcl <<EOF
 server {
     listen 80;
-    server_name $HOST_LINE;
+    server_name $DOMAIN;
 
     client_max_body_size 160M;
 
@@ -135,12 +135,16 @@ ufw allow OpenSSH 2>/dev/null || true
 
 echo ""
 echo "=========================================================="
-echo " FE PA DRÈT SA YO KOUNYE A:"
+echo " Instalasyon fini pou $DOMAIN!"
+echo " FE KOUNYE A :"
 echo "=========================================================="
-echo " 1) Kreye kont admin (SIPÈADMIN):"
+echo " 1) Kont SIPÈADMIN :"
 echo "    cd $APP_DIR && sudo -u lnfcl -E ./venv/bin/python manage.py createsuperuser"
-echo " 2) Si ou gen done (db.sqlite3 / media/) soti sou Windows:"
-echo "    scp -r medya user@seyvè:/$APP_DIR/media/ ; epi enpòte done yo"
-echo " 3) Eta sèvis:  systemctl status $SERVICE"
-echo " 4) Nan navigatè:  http://${DOMAIN:-IP_SÈVÈ}/"
+echo " 2) Eta sèvis :  systemctl status $SERVICE"
+echo " 3) HTTP:  http://$DOMAIN/"
+echo " 4) HTTPS (Let's Encrypt gratis):"
+echo "    sudo apt install -y certbot python3-certbot-nginx"
+echo "    sudo certbot --nginx -d $DOMAIN -m $EMAIL --agree-tos --redirect"
+echo "    epi mete SECURE_SSL_REDIRECT=true nan $APP_DIR/.env"
+echo "    sudo systemctl restart $SERVICE"
 echo "=========================================================="
