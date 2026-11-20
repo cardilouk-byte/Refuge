@@ -51,6 +51,7 @@ Legand: **FÈT** = fonksyonèl epi opere · **PASYÈL** = pwensipal la fèt, yon
 
 ## 8. Archives & documents — FÈT
 - Backup ZIP + SHA-256 + verify + restore konplè — `/backup/` (+ `run_backups` otomatik)
+- IMPORT + RESTORE yon ZIP ki te telechaje anvan — `/backup/backup/importer/` (verify ZIP + data.json, ranplase done, rezilta nan listwa)
 - Media Library `/medias/`, Document Editor Word `/documents/` (10 templates, watermark), Excel `/excel/`
 - Bulletins/archive annyennes konservé pa SchoolYear; OCR = PLANIFIE
 
