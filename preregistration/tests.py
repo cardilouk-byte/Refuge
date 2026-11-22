@@ -88,10 +88,40 @@ class PreRegistrationAdminTest(TestCase):
 
     def test_convert_creates_student_and_parent(self):
         response = self.client.post(f"/preinscriptions/{self.pre.pk}/konveti/")
-        self.assertRedirects(response, f"/preinscriptions/{self.pre.pk}/")
+        self.assertRedirects(response, f"/preinscriptions/{self.pre.pk}/fich-inskripsyon/")
         self.pre.refresh_from_db()
         self.assertEqual(self.pre.status, "INSCRIT")
         self.assertIsNotNone(self.pre.converted_student)
         self.assertTrue(Student.objects.filter(first_name="Marie", last_name="Jean").exists())
         self.assertTrue(Parent.objects.filter(first_name="Paul").exists())
         self.assertTrue(ParentStudent.objects.filter(student=self.pre.converted_student).exists())
+
+
+class FicheInscriptionTest(TestCase):
+    def setUp(self):
+        User.objects.create_superuser("adm", "a@a.ht", "Pass1234!")
+        self.client.login(username="adm", password="Pass1234!")
+        self.pre = PreRegistration.objects.create(
+            first_name="Marie", last_name="Jean", gender="F", birth_date=date(2012, 5, 10),
+            parent_name="Paul Jean", parent_phone="+50937000000", status="ACCEPTE",
+        )
+
+    def test_fiche_after_convert_prints_matricule(self):
+        self.client.post(f"/preinscriptions/{self.pre.pk}/konveti/")
+        self.pre.refresh_from_db()
+        response = self.client.get(f"/preinscriptions/{self.pre.pk}/fich-inskripsyon/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "FICHE D'INSCRIPTION")
+        self.assertContains(response, self.pre.converted_student.matricule)
+        self.assertContains(response, "Paul Jean")
+
+    def test_fiche_forbidden_for_student_role(self):
+        User.objects.create_user("std", password="Pass1234!", role="ELEVE")
+        self.client.login(username="std", password="Pass1234!")
+        response = self.client.get(f"/preinscriptions/{self.pre.pk}/fich-inskripsyon/")
+        self.assertEqual(response.status_code, 403)
+
+    def test_admin_detail_accessible_when_accepte(self):
+        response = self.client.get(f"/preinscriptions/{self.pre.pk}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Konv\u00e8ti")

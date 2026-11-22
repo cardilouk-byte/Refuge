@@ -156,8 +156,29 @@ def convert(request, pk):
         pre.converted_student = student
         pre.reviewed_by = request.user
         pre.save()
-        messages.success(request, f"Elèv {student} kreye ak matricule {student.matricule}.")
+        messages.success(request, f"Elèv {student} kreye ak matricule {student.matricule}. Fiche d’inscription la pare — ou ka enprime l.")
+        return redirect("preregistration:fiche", pk=pk)
     return redirect("preregistration:admin_detail", pk=pk)
+
+
+@role_required("SUPERADMIN", "DIRECTION")
+def fiche(request, pk):
+    pre = get_object_or_404(
+        PreRegistration.objects.select_related("desired_level", "converted_student"), pk=pk
+    )
+    student = pre.converted_student
+    if student:
+        parent = Parent.objects.filter(parentstudent__student=student, parentstudent__is_primary=True).select_related("user").first()
+        if parent is None:
+            parent = Parent.objects.filter(parentstudent__student=student).first()
+    else:
+        parent = None
+    return render(
+        request,
+        "preregistration/fiche_inscription.html",
+        {"pre": pre, "student": student, "parent": parent,
+         "titre": "Fiche d’inscription — " + pre.full_name},
+    )
 
 
 def _next_matricule():

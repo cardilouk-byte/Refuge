@@ -14,4 +14,6 @@ urlpatterns = [
     path("bulletin/klas/<int:classroom_pk>/", views.bulletin_class, name="bulletin_class"),
     path("bulletin/klas/<int:classroom_pk>/excel/", views.bulletin_excel, name="bulletin_excel"),
     path("tablo-done/", views.honour, name="honour"),
+    path("carnet/model/", views.carnet_settings, name="carnet_settings"),
+    path("carnet/eleve/<int:student_pk>/", views.carnet_print, name="carnet_print"),
 ]

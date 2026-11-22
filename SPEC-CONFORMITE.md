@@ -17,6 +17,7 @@ Legand: **FÈT** = fonksyonèl epi opere · **PASYÈL** = pwensipal la fèt, yon
 - Status + pasaj ane `/nouvel-ane/` (vin / mantni / redouble / kite) — pa rekòmanse pou nouvo ane
 - Rechèch pa non, matricule, klas
 - Impression fich: Kat idantite (print CSS) — FÈT; fich PDF konplè = PLANIFIE
+- **Fiche d'inscription (FÈT)**: après konvèti yon pré-inscription, sistèm nan redireksyon dirèkteman sou `/preinscriptions/<pk>/fich-inskripsyon/` (FICHE D'INSCRIPTION A4 print: elèv, matricule, paran, klas, siyati) — lyen tou nan detay pré-inscription
 
 ## 3. Structure éducative MENFP — FÈT
 - SchoolYear / Cycle / Level / ClassRoom / Period: Préscolaire, 1e–9e AF, Secondaire 1–4 (seed `seed_siges`)
@@ -35,6 +36,7 @@ Legand: **FÈT** = fonksyonèl epi opere · **PASYÈL** = pwensipal la fèt, yon
 - Bulletin otomatik + impression (print CSS); PDF WeasyPrint = PLANIFIE
 - Paywall: elèv poko peye fakti a → bulletin bloke (`_bulletin_locked`)
 - Historique pa sik; grafik evolisyon dedye = PLANIFIE
+- **Karnè lekòl (FÈT)**: `/notes/carnet/model/` (modèl modifiable: kouvèti, slogan, adrès, tèl, deviz, règman entèn — tout chanjable anvan jenere) + `/notes/carnet/eleve/<pk>/` (kouvèti devan + règman + 1 pyaj pa syik: matyè×koef×nòt×total×mwayèn klas + plas + desizyon + rezim ane; NS4/9ᵉ AF: pyaj Examèn Ofisyèl pa matyè×pwofesè×nòt + graf sikilè Chart.js + desizyon fen ane; print A4)
 
 ## 6. Presans & absans — FÈT
 - Chak jou: `/presens/` → take(clas) PRESENT / ABSENT / RETARD + justifie + note

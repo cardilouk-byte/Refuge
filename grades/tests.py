@@ -4,7 +4,7 @@ from django.test import TestCase
 from academics.models import ClassRoom, ClassSubject, Cycle, Level, Period, SchoolYear, Subject
 from students.models import Student
 
-from .models import Grade
+from .models import CarnetSettings, Grade
 
 User = get_user_model()
 
@@ -247,3 +247,71 @@ class HonourTest(TestCase):
         response = self.client.get("/notes/tablo-done/", **HOST)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Pa gen el")
+
+
+class CarnetTest(TestCase):
+    def setUp(self):
+        self.d = _setup_data()
+        self.dir_user = User.objects.create_user("dir", password="Pass1234!", role="DIRECTION")
+        self.period2 = Period.objects.create(school_year=self.d["year"], name="Trimestre 2", order=2)
+        Grade.objects.create(student=self.d["s1"], class_subject=self.d["cs_math"], period=self.d["period"], score="15")
+        Grade.objects.create(student=self.d["s1"], class_subject=self.d["cs_fr"], period=self.d["period"], score="12")
+        Grade.objects.create(student=self.d["s1"], class_subject=self.d["cs_math"], period=self.period2, score="11")
+        self.s1 = self.d["s1"]
+
+    def test_settings_page_and_edit(self):
+        self.client.login(username="dir", password="Pass1234!")
+        response = self.client.get("/notes/carnet/model/", **HOST)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post("/notes/carnet/model/", {
+            "school_name": "Lycée National François Cappoix de Limonade",
+            "slogan": "VERS L'EXCELLENCE !",
+            "subtitle": "Carnet Scolaire — 2e cycle",
+            "address": "Limonade, Haïti",
+            "tel1": "+509 3700-0000", "tel2": "", "email": "contact@lnfcl.edu.ht",
+            "footer_motto": "LNFCL c'est l'excellence !",
+            "reglements_text": "1.Arrivée à 7h30\n2.Uniforme obligatoire",
+            "show_graph": "on",
+        }, **HOST)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(CarnetSettings.objects.count(), 1)
+        carnet = CarnetSettings.load()
+        self.assertEqual(carnet.subtitle, "Carnet Scolaire — 2e cycle")
+        self.assertIn("Uniforme", carnet.reglements_text)
+
+    def test_carnet_print_pages(self):
+        self.client.login(username="dir", password="Pass1234!")
+        response = self.client.get(f"/notes/carnet/eleve/{self.s1.pk}/", **HOST)
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn("ELV-00001", html)
+        self.assertIn("Matematik", html)
+        self.assertIn("PREMYE SYIK", html)
+        self.assertIn("DEZYEM SYIK", html)
+        self.assertIn("Moyenne de l'élève", html)
+        self.assertNotIn("Examen Officiels", html)
+
+    def test_carnet_print_denied_for_other_students(self):
+        User.objects.create_user("eleve2", password="Pass1234!", role="ELEVE")
+        self.client.login(username="eleve2", password="Pass1234!")
+        response = self.client.get(f"/notes/carnet/eleve/{self.s1.pk}/", **HOST)
+        self.assertEqual(response.status_code, 403)
+
+    def test_official_section_for_ns4(self):
+        from decimal import Decimal
+
+        from teachers.models import Teacher
+        level_ns4 = Level.objects.create(name="NS4", cycle=self.d["cycle2"], order=10)
+        classroom_ns4 = ClassRoom.objects.create(school_year=self.d["year"], level=level_ns4, section="A")
+        teacher = Teacher.objects.create(matricule="PROF-01", first_name="Paul", last_name="Hilaire")
+        cs_ns4 = ClassSubject.objects.create(classroom=classroom_ns4, subject=self.d["math"], coefficient=4, teacher=teacher)
+        st_ns4 = Student.objects.create(matricule="ELV-00010", first_name="Kerby", last_name="Louis", classroom=classroom_ns4)
+        Grade.objects.create(student=st_ns4, class_subject=cs_ns4, period=self.d["period"], kind="EXAMEN", score=Decimal("14.5"))
+        self.client.login(username="dir", password="Pass1234!")
+        response = self.client.get(f"/notes/carnet/eleve/{st_ns4.pk}/", **HOST)
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertIn("Examen Officiels", html)
+        self.assertIn("Paul Hilaire", html)
+        self.assertIn("examenChart", html)
+        self.assertIn("Filière", html)

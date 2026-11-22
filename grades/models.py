@@ -49,6 +49,12 @@ class Grade(models.Model):
         return round(total_points / total_coef, 2) if total_coef else None
 
     @classmethod
+    def latest_exam(cls, student, class_subject):
+        return cls.objects.filter(
+            student=student, class_subject=class_subject, kind=cls.Kind.EXAMEN
+        ).order_by("created_at").first()
+
+    @classmethod
     def class_ranking(cls, classroom, period):
         students = list(classroom.students.filter(status="ACTIF"))
         ranked = []
@@ -58,3 +64,54 @@ class Grade(models.Model):
                 ranked.append((s, avg))
         ranked.sort(key=lambda pair: pair[1], reverse=True)
         return [(i + 1, s, avg) for i, (s, avg) in enumerate(ranked)]
+
+
+class CarnetSettings(models.Model):
+    """Mod\u00e8l karn\u00e8 lek\u00f2l la \u2014 tout t\u00e8 kouv\u00e8ti a ki modifye anvan enpresyon."""
+
+    school_name = models.CharField(
+        "Nom lek\u00f2l la (kouv\u00e8ti)", max_length=200,
+        default="Lyc\u00e9e National Fran\u00e7ois Cappoix de Limonade",
+    )
+    slogan = models.CharField(
+        "Slogan", max_length=200, default="VERS L'EXCELLENCE !",
+    )
+    subtitle = models.CharField(
+        "Sous-tit kouv\u00e8ti", max_length=200, default="Carnet Scolaire",
+        help_text="Ex: Carnet Scolaire \u2014 3e cycle fond. et secondaire",
+    )
+    address = models.CharField("Adr\u00e8s", max_length=255, default="Limonade, Ha\u00efti")
+    tel1 = models.CharField("Telef\u00f2n 1", max_length=60, blank=True)
+    tel2 = models.CharField("Telef\u00f2n 2", max_length=60, blank=True)
+    email = models.EmailField("Email", blank=True)
+    footer_motto = models.CharField(
+        "Deviz anba paj", max_length=200,
+        default="LNFCL c'est l'excellence plus que la qualit\u00e9 !",
+    )
+    reglements_text = models.TextField(
+        "Ekstra r\u00e8gman ent\u00e8n", default=(
+            "1.Entr\u00e9e des \u00e9l\u00e8ves \u00e0 7h30 pr\u00e9cises.\n"
+            "2.Tout retard constitue une faute sanctionn\u00e9e.\n"
+            "3.Le port de l'uniforme est obligatoire.\n"
+            "4.Le bulletin doit \u00eatre sign\u00e9 par le parent dans les 2 jours.\n"
+            "5.Toute d\u00e9gradation du mobilier sera factur\u00e9e.\n"
+            "6.Le carnet doit \u00eatre conserv\u00e9 en bon \u00e9tat pendant toute l'ann\u00e9e.\n"
+            "7.Manquement grave : renvoi temporaire ou d\u00e9finitif."
+        ),
+    )
+    show_graph = models.BooleanField(
+        "Afiche graf (NS4 / 9e AF)", default=True,
+    )
+    updated_at = models.DateTimeField("Dènye modifikasyon", auto_now=True)
+
+    class Meta:
+        verbose_name = "Mod\u00e8l karn\u00e8"
+        verbose_name_plural = "Mod\u00e8l karn\u00e8"
+
+    def __str__(self):
+        return self.subtitle
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj

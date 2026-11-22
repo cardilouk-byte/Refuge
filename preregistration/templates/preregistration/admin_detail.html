@@ -51,14 +51,15 @@
           <button name="status" value="REFUSE" class="btn btn-sm btn-danger" {% if pre.status == 'REFUSE' %}disabled{% endif %}>Rejte</button>
         </form>
         {% if pre.status == 'ACCEPTE' and not pre.converted_student %}
-        <form method="post" action="{% url 'preregistration:konveti' pk=pre.pk %}">
+        <form method="post" action="{% url 'preregistration:convert' pk=pre.pk %}">
           {% csrf_token %}
           <button class="btn btn-primary w-100"><i class="bi bi-arrow-right-circle me-1"></i>Konvèti an elèv enskri</button>
         </form>
         {% elif pre.converted_student %}
-        <div class="alert alert-success py-2 small mb-0">
+        <div class="alert alert-success py-2 small mb-2">
           Konvèti an elèv: <strong>{{ pre.converted_student }}</strong>
         </div>
+        <a href="{% url 'preregistration:fiche' pre.pk %}" class="btn btn-outline-dark btn-sm w-100"><i class="bi bi-person-vcard me-1"></i>Gade / enprime fiche d’inscription</a>
         {% else %}
         <p class="small text-muted mb-0">Asepte pré-inscription an anvan ou konvèti l an elèv.</p>
         {% endif %}

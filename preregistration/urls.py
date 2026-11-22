@@ -12,4 +12,5 @@ urlpatterns = [
     path("preinscriptions/<int:pk>/", views.admin_detail, name="admin_detail"),
     path("preinscriptions/<int:pk>/estatut/", views.set_status, name="set_status"),
     path("preinscriptions/<int:pk>/konveti/", views.convert, name="convert"),
+    path("preinscriptions/<int:pk>/fich-inskripsyon/", views.fiche, name="fiche"),
 ]

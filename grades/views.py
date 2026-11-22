@@ -1,6 +1,8 @@
+import re
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
+from django.db.models import Avg
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -9,13 +11,16 @@ from django.shortcuts import get_object_or_404, redirect, render
 from finance.models import Invoice
 
 from accounts.models import User
-from accounts.views import staff_required, teaching_staff_required
+from accounts.views import direction_required, staff_required, teaching_staff_required
 from academics.models import ClassRoom, Period
 from students.models import Student
 
-from .models import Grade
+from .forms import CarnetSettingsForm
+from .models import CarnetSettings, Grade
 
 User = get_user_model()
+
+CYCLE_LABELS = ["PREMYE SYIK", "DEZYEM SYIK", "TWAZYEM SYIK", "KATRIYEM SYIK", "SENKYEM SYIK", "SIZYEM SYIK"]
 
 
 def _decision(avg):
@@ -190,6 +195,124 @@ def bulletin_home(request):
         return render(request, "grades/no_bulletin.html")
     students = _accessible_students(user)
     return render(request, "grades/parent_children.html", {"students": students})
+
+
+@direction_required
+def carnet_settings(request):
+    carnet = CarnetSettings.load()
+    if request.method == "POST":
+        form = CarnetSettingsForm(request.POST, instance=carnet)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Mod\u00e8l karn\u00e8 a sove. Chak nouvo karn\u00e8 pral s\u00e8vi ak t\u00e8 sa yo.")
+            return redirect("grades:carnet_settings")
+        messages.error(request, "Gen yon er\u00e8 nan f\u00f2m nan.")
+    else:
+        form = CarnetSettingsForm(instance=carnet)
+    return render(request, "grades/carnet_settings.html", {"form": form, "titre": "Mod\u00e8l Karn\u00e8"})
+
+
+def _is_official_level(level_name):
+    lvl = re.sub(r"[\s.]", "", (level_name or "").lower())
+    return "ns4" in lvl or lvl[:2] in ("9e", "9\u00e8")
+
+
+@login_required
+def carnet_print(request, student_pk):
+    student = _get_student_for_view(request, student_pk)
+    carnet = CarnetSettings.load()
+    classroom = student.classroom
+    sheets = []
+    officials = []
+    chart_labels = []
+    chart_data = []
+    is_official = False
+    annual_moy = None
+    annual_decision = "Pa gen n\u00f2t"
+    if classroom:
+        periods = list(Period.objects.filter(school_year=classroom.school_year).order_by("order"))
+        subjects = list(
+            classroom.subjects.select_related("subject", "teacher", "teacher__user").order_by("subject__name")
+        )
+        if periods:
+            points = 0
+            count = 0
+            for i, p in enumerate(periods):
+                rows = []
+                st_points = 0.0
+                st_coef = 0
+                cl_points = 0.0
+                cl_coef = 0
+                for cs in subjects:
+                    avg = Grade.subject_average(student, cs, p)
+                    cls_avg = Grade.objects.filter(class_subject=cs, period=p).aggregate(a=Avg("score"))["a"]
+                    if cls_avg is not None:
+                        cl_points += float(cls_avg) * cs.coefficient
+                        cl_coef += cs.coefficient
+                    if avg is not None:
+                        st_points += float(avg) * cs.coefficient
+                        st_coef += cs.coefficient
+                    rows.append({
+                        "cs": cs,
+                        "avg": avg,
+                        "total": round(float(avg) * cs.coefficient, 2) if avg is not None else None,
+                        "cls_avg": cls_avg,
+                    })
+                moy = round(st_points / st_coef, 2) if st_coef else None
+                cl_moy = round(cl_points / cl_coef, 2) if cl_coef else None
+                rank = None
+                out_of = 0
+                ranking = Grade.class_ranking(classroom, p)
+                out_of = len(ranking)
+                for r, s, a in ranking:
+                    if s.pk == student.pk:
+                        rank = r
+                        break
+                decision, tone = _decision(moy)
+                sheets.append({
+                    "period": p,
+                    "label": CYCLE_LABELS[i] if i < len(CYCLE_LABELS) else p.name.upper(),
+                    "rows": rows,
+                    "moy": moy,
+                    "cls_moy": cl_moy,
+                    "rank": rank,
+                    "out_of": out_of,
+                    "decision": decision,
+                    "tone": tone,
+                })
+                if moy is not None:
+                    points += moy
+                    count += 1
+            if count:
+                annual_moy = round(points / count, 2)
+                annual_decision, _tone = _decision(annual_moy)
+        is_official = _is_official_level(classroom.level.name)
+        if is_official:
+            for cs in subjects:
+                g = Grade.latest_exam(student, cs)
+                score = g.score if g else None
+                officials.append({"cs": cs, "score": score, "teacher": cs.teacher})
+                if score is not None:
+                    chart_labels.append(cs.subject.name)
+                    chart_data.append(float(score))
+    return render(
+        request,
+        "grades/carnet_print.html",
+        {
+            "carnet": carnet,
+            "student": student,
+            "classroom": classroom,
+            "sheets": sheets,
+            "annual_moy": annual_moy,
+            "annual_decision": annual_decision,
+            "is_official": is_official,
+            "officials": officials,
+            "chart_labels": chart_labels,
+            "chart_data": chart_data,
+            "show_graph": carnet.show_graph,
+            "titre": "Karn\u00e8 \u2014 " + student.full_name,
+        },
+    )
 
 
 @teaching_staff_required
