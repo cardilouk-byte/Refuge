@@ -7,283 +7,185 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <style>
-    body { font-family: 'Poppins', sans-serif; background: #e9edf5; }
-    .sheet {
-      width: 210mm; min-height: 296mm; margin: 10mm auto; background: #fff;
-      padding: 14mm 13mm; box-shadow: 0 2px 12px rgba(0,0,0,.18);
-      page-break-after: always; position: relative; color: #111;
+    :root { --bcol: {{ carnet.border_color|default:"#1f2937" }}; }
+    body { font-family: 'Poppins', sans-serif; background: #202636; color: #ccc; }
+    /* ===== PAJ A5 ===== */
+    .pg {
+      width: 148mm; height: 210mm; background: #fff; color: #111;
+      margin: 0 auto; position: relative; overflow: hidden;
+      box-shadow: 0 3px 16px rgba(0,0,0,.45);
+      padding: 9mm 8mm; box-sizing: border-box; font-size: 8.5pt;
     }
+    .pg * { line-height: 1.35; }
+    .pg-frame { position: absolute; inset: 5mm; border: 1.1pt solid var(--bcol); pointer-events: none; }
+    .pg-footer { position: absolute; bottom: 6mm; left: 8mm; right: 8mm; text-align: center;
+      font-size: 6.2pt; font-style: italic; color: #445566; border-top: .5pt solid #99a3b0; padding-top: 1.5mm; }
+    .pg-head { text-align: center; border-bottom: .6pt solid #333; padding-bottom: 1mm; margin-bottom: 2mm; }
+    .pg-head .sname { font-weight: 700; font-size: 9.5pt; }
+    .pg-head .smeta { font-size: 6.2pt; color: #445; }
+    .dotted { border-bottom: 1px dotted #333; display: inline-block; min-width: 110px; min-height: 12px; }
+    /* tab nòt yo */
+    .ctab { width: 100%; border-collapse: collapse; font-size: 6.6pt; }
+    .ctab th, .ctab td { border: .55pt solid #333; padding: 1.4pt 3pt; }
+    .ctab thead th { background: #eef1f6; text-align: center; }
+    .ctab td.num, .ctab th.num { text-align: center; }
+    .ctab .tot td { background: #f3f6fb; font-weight: 600; }
+    /* ===== MÒD LEKTI (viewer) ===== */
+    #viewer { display: flex; justify-content: center; align-items: flex-start; padding: 12px 0 90px; }
+    #book .pg { display: none; }
+    #book .pg.on { display: block; animation: fade .25s; }
+    @keyframes fade { from { opacity: .25; transform: rotateY(-6deg);} to { opacity: 1; transform: none;} }
+    #flipNav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,18,28,.92); backdrop-filter: blur(6px);
+      padding: 10px 14px; display: flex; gap: 10px; align-items: center; justify-content: center; z-index: 50; }
+    .pagedot { width: 8px; height: 8px; border-radius: 50%; background: #556; display: inline-block; }
+    .pagedot.done { background: #6ea8fe; }
+    /* ===== MÒD LIVRET (fe 2 paj A5 sou A4 landscape) ===== */
+    .share {
+      width: 290mm; max-width: 100%; margin: 0 auto 22px; background: #fff; color: #111;
+      box-shadow: 0 3px 16px rgba(0,0,0,.45); position: relative;
+      aspect-ratio: 842 / 595; display: flex;
+    }
+    .share .half { width: 50%; position: relative; border-right: 1px dashed #c66; }
+    .share .half:last-child { border-right: none; }
+    .share .half .pg { position: absolute; inset: 0; width: 100%; height: 100%; box-shadow: none; }
     @media print {
+      @page { size: A4 landscape; margin: 0; }
       body { background: #fff; }
       .no-print { display: none !important; }
-      .sheet { width: auto; min-height: auto; margin: 0; box-shadow: none; padding: 0; }
-      @page { size: A4; margin: 12mm 13mm; }
+      #viewer { display: block; padding: 0; }
+      #flipNav { display: none !important; }
+      #book .pg { display: block !important; animation: none; }
     }
-    .sheet-footer { position: absolute; bottom: 8mm; left: 13mm; right: 13mm; text-align: center;
-      font-size: .8rem; font-style: italic; color: #445; border-top: 1px solid #99a; padding-top: 2mm; }
-    .dotted { border-bottom: 1px dotted #333; display: inline-block; min-width: 220px; }
-    .carnet-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-    .carnet-table th, .carnet-table td { border: 1px solid #333; padding: 3px 6px; text-align: left; }
-    .carnet-table thead th { background: #eef1f6; text-align: center; }
-    .carnet-table td.num, .carnet-table th.num { text-align: center; }
-    .carnet-table .tot td { background: #f3f6fb; font-weight: 600; }
-    .kicker { letter-spacing: .12em; text-transform: uppercase; }
+    @media print {
+      .share { width: 100%; margin: 0; box-shadow: none; page-break-after: always; }
+      .share .half { border-right: none; }
+    }
+    .badge-side { position: absolute; top: -22px; left: 4px; color: #9fb0d0; font-size: 11px; letter-spacing: .06em; }
   </style>
-  {% if show_graph and chart_data %}
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  {% if show_graph and chart_data and mod == "lekti" %}
   {{ chart_labels|json_script:"examen-labels" }}
   {{ chart_data|json_script:"examen-data" }}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   {% endif %}
 </head>
 <body>
 
+{# ==================== BARÈ OUTIL NO-PRINT ==================== #}
 <div class="no-print d-flex justify-content-between align-items-center flex-wrap gap-2 p-3">
-  <h1 class="h5 mb-0"><i class="bi bi-journal-bookmark me-2"></i>{{ titre }}</h1>
-  <div class="d-flex gap-2">
-    <button onclick="window.print()" class="btn btn-sm btn-primary"><i class="bi bi-printer me-1"></i> Enprime karnè a</button>
-    <a href="{% url 'grades:bulletin_student' student.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Bulletins</a>
+  <div>
+    <h1 class="h6 mb-0 text-white"><i class="bi bi-journal-bookmark me-2"></i>{{ titre }}</h1>
+    <span class="small text-secondary">
+      {% if mod == 'livret' %}Mòd <span class="badge text-bg-warning">Livret</span> — 2 paj A5 sou chak A4 (retro-vèso, pare pou pli){% else %}Mòd <span class="badge text-bg-info">Lekturing</span> — paj A5 nan lòd yo{% endif %}
+    </span>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    {% if mod == 'lekti' %}
+      <a href="?mod=livret" class="btn btn-sm btn-warning"><i class="bi bi-layer-backward me-1"></i> Mòd Livret (pli A4)</a>
+    {% else %}
+      <a href="?mod=lekti" class="btn btn-sm btn-info"><i class="bi bi-book me-1"></i> Mòd Lekturing</a>
+    {% endif %}
+    <a href="{% url 'grades:carnet_pdf' student.pk %}?mod={{ mod }}" class="btn btn-sm btn-danger"><i class="bi bi-filetype-pdf me-1"></i> Telechaje PDF</a>
+    <button onclick="window.print()" class="btn btn-sm btn-light"><i class="bi bi-printer me-1"></i> Enprime</button>
+    <a href="{% url 'grades:bulletin_student' student.pk %}" class="btn btn-sm btn-outline-light"><i class="bi bi-arrow-left me-1"></i> Retou</a>
   </div>
 </div>
-
-{# ================= PAGE 1 : COUVERTURE AVANT ================= #}
-<div class="sheet text-center">
-  <div class="pt-4"></div>
-  {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" style="height:78px" class="mb-3">{% endif %}
-  <div class="fw-bold" style="font-size:1.45rem">{{ carnet.school_name }}</div>
-  <div class="kicker text-muted" style="font-size:.9rem">{{ carnet.slogan }}</div>
-  <div class="small text-muted mt-1">{{ carnet.address }}{% if carnet.tel1 %} — Téls: {{ carnet.tel1 }}{% if carnet.tel2 %} / {{ carnet.tel2 }}{% endif %}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>
-  <hr class="mx-5">
-  <div class="mt-4 fs-2 fw-bold" style="letter-spacing:.04em">{{ carnet.subtitle }}</div>
-  {% if classroom %}
-  <div class="text-muted">{{ classroom.level.cycle.name }}</div>
-  {% endif %}
-  <div class="mt-5 text-start mx-auto" style="max-width:430px">
-    <div class="mb-3"><span class="fw-semibold">Nom&nbsp;:</span> <span class="dotted">{{ student.last_name }}</span></div>
-    <div class="mb-3"><span class="fw-semibold">Prénom&nbsp;:</span> <span class="dotted">{{ student.first_name }}</span></div>
-    <div class="mb-3"><span class="fw-semibold">Classe&nbsp;:</span> <span class="dotted">{{ classroom|default:"" }}</span></div>
-    {% if is_official %}<div class="mb-3"><span class="fw-semibold">Filière&nbsp;:</span> <span class="dotted">{% if classroom %}{{ classroom.level.cycle.name }}{% endif %}</span></div>{% endif %}
-    <div class="mb-3"><span class="fw-semibold">Code (matricule)&nbsp;:</span> <span class="dotted">{{ student.matricule }}</span></div>
-    <div class="mb-3"><span class="fw-semibold">Année Académique&nbsp;:</span> <span class="dotted">{% if classroom %}{{ classroom.school_year.label }}{% endif %}</span></div>
+{% if mod == 'livret' %}
+<div class="no-print d-flex justify-content-center">
+  <div class="alert alert-warning small py-2 px-3" style="max-width:760px">
+    <strong>Enpresyon livret:</strong> enprime <em>retro-vèso</em>, papi AkBay otomatik, <em>tounen kout</em> (flip on short edge).
+    Kite tout paj yo sou menm fèy (pa gen scale). Apre sa pli chak fèy an dwat → koudajye sou pli a.
+    Paj vid yo se nòmal: yo ranpli pou total la rive yon miltip de 4.
   </div>
-  <div class="sheet-footer">{{ carnet.footer_motto }}</div>
 </div>
+{% endif %}
 
-{# ================= PAGE 2 : RÈGLEMENTS ================= #}
-<div class="sheet">
-  <h2 class="text-center kicker" style="font-size:1.1rem">Extraits des règlements internes</h2>
-  <hr>
-  <div class="mt-3" style="font-size:.95rem;line-height:1.9">
-    {{ carnet.reglements_text|linebreaksbr }}
+{# ==================== MÒD LIVRET ==================== #}
+{% if mod == 'livret' %}
+<div class="container py-4">
+  {% for side in sides %}
+  <div class="share" id="fe{% if side.no %}{{ side.no }}{% endif %}">
+<span class="badge-side">FÈY {{ side.no }}/{{ sides|length }} — {% if side.recto %}DEVAN (retro){% else %}DÈYÈ (vèso){% endif %}</span>
+    <div class="half">{% if side.left %}{% include "grades/carnet_page.html" with page=side.left %}{% endif %}</div>
+    <div class="half">{% if side.right %}{% include "grades/carnet_page.html" with page=side.right %}{% endif %}</div>
   </div>
-  <div class="mt-5 small text-muted">
-    — Elèv la ak paran responsab la siyen pou yo rekonèt epi respakte règ sa yo —
-  </div>
-  <div class="mt-5 d-flex justify-content-around small">
-    <div>Signature Direction : .......................</div>
-    <div>Signature Parent : .......................</div>
-  </div>
-  <div class="sheet-footer">{{ carnet.footer_motto }}</div>
+  {% endfor %}
 </div>
+{% else %}
 
-{% if classroom %}
-{# ================= YON PYAJ PA SYIK (PERIODE) ================= #}
-{% for sheet in sheets %}
-<div class="sheet">
-  <div class="d-flex justify-content-between align-items-start">
-    <div class="small">
-      <div><span class="fw-semibold">Nom:</span> {{ student.last_name }}</div>
-      <div><span class="fw-semibold">Prénom:</span> {{ student.first_name }}</div>
-      <div><span class="fw-semibold">Code:</span> {{ student.matricule }}</div>
+{# ==================== MÒD LEKTI ==================== #}
+<div id="viewer">
+  <div id="book">
+    {% for page in pages %}
+    <div class="pg {% if forloop.first %}on{% endif %}" data-i="{{ forloop.counter0 }}">
+      <div class="pg-frame"></div>
+      {% include "grades/carnet_page.html" with page=page %}
     </div>
-    <div class="text-center">
-      <div class="fw-bold" style="font-size:1.05rem">{{ carnet.school_name }}</div>
-      <div class="kicker text-muted" style="font-size:.85rem">{{ sheet.label }} — {{ sheet.period.name }}</div>
-      <div class="small">{{ classroom.name }} — {{ classroom.school_year.label }}</div>
-    </div>
-    <div class="small text-end">
-      <div><span class="fw-semibold">Classe:</span> {{ classroom.name }}</div>
-      {% if is_official %}<div><span class="fw-semibold">Filière:</span> {{ classroom.level.cycle.name }}</div>{% endif %}
-      <div>Année {{ classroom.school_year.label }}</div>
-    </div>
+    {% endfor %}
   </div>
-  <table class="carnet-table mt-3">
-    <thead>
-      <tr>
-        <th>MATIÈRES</th>
-        <th class="num" style="width:70px">COEF</th>
-        <th class="num" style="width:110px">Moyenne /20</th>
-        <th class="num" style="width:90px">Total</th>
-        <th class="num" style="width:110px">Moyenne classe</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in sheet.rows %}
-      <tr>
-        <td>{{ row.cs.subject.name }}{% if row.cs.teacher %} <span class="text-muted" style="font-size:.75em">({{ row.cs.teacher }})</span>{% endif %}</td>
-        <td class="num">{{ row.coef }}</td>
-        <td class="num">{% if row.avg is not None %}{{ row.avg|floatformat:2 }}{% else %}—{% endif %}</td>
-        <td class="num">{% if row.total is not None %}{{ row.total|floatformat:2 }}{% else %}—{% endif %}</td>
-        <td class="num">{% if row.cls_avg is not None %}{{ row.cls_avg|floatformat:2 }}{% else %}—{% endif %}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="5" class="text-center text-muted">Pa gen matyè ki anrejistre pou klas sa a.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <table class="carnet-table mt-2">
-    <tbody>
-      <tr class="tot">
-        <td>Moyenne de l'élève</td>
-        <td class="num">{% if sheet.moy is not None %}{{ sheet.moy|floatformat:2 }} /20{% else %}—{% endif %}</td>
-        <td>Moyenne de la classe</td>
-        <td class="num">{% if sheet.cls_moy is not None %}{{ sheet.cls_moy|floatformat:2 }} /20{% else %}—{% endif %}</td>
-      </tr>
-      <tr class="tot">
-        <td>Place sur {{ sheet.out_of }} élèves</td>
-        <td class="num">{% if sheet.rank %}<strong>{{ sheet.rank }}{% if sheet.rank == 1 %}<sup>ère</sup>{% else %}<sup>e</sup>{% endif %}</strong>{% else %}—{% endif %}</td>
-        <td>Décision du cycle</td>
-        <td class="num">{{ sheet.decision }}</td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="d-flex justify-content-around mt-5 small">
-    <div>Le Professeur titulaire : .......................</div>
-    <div>Le Directeur : .......................</div>
-  </div>
-  <div class="sheet-footer">{{ carnet.footer_motto }}</div>
 </div>
-{% endfor %}
+<div id="flipNav" class="no-print">
+  <button class="btn btn-sm btn-light" id="prevP"><i class="bi bi-chevron-left"></i></button>
+  <span class="text-light" style="min-width:110px;text-align:center" id="pcount">1 / {{ pages|length }}</span>
+  <button class="btn btn-sm btn-light" id="nextP"><i class="bi bi-chevron-right"></i></button>
+  <span class="vr mx-2"></span>
+  <span class="small text-secondary" id="dots"></span>
+</div>
+{% endif %}
 
-{# ================= PYAJ BONUS : NS4 / 9e AF — EXAMEN OFFICIELS + GRAFiK ================= #}
-{% if is_official %}
-<div class="sheet">
-  <div class="text-center">
-    <div class="fw-bold" style="font-size:1.1rem">{{ carnet.school_name }}</div>
-    <div class="kicker text-muted">Examen Officiels — {{ student.first_name }} {{ student.last_name }} ({{ student.matricule }})</div>
-  </div>
-  <table class="carnet-table mt-3">
-    <thead>
-      <tr>
-        <th>MATIÈRES</th>
-        <th>PROFESSEUR</th>
-        <th class="num" style="width:110px">NOTE EXAMEN /20</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for o in officials %}
-      <tr>
-        <td>{{ o.cs.subject.name }}</td>
-        <td>{{ o.teacher|default:"—" }}</td>
-        <td class="num">{% if o.score is not None %}{{ o.score }}{% else %}—{% endif %}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="3" class="text-center text-muted">Pa gen nòt egzamen ki anrejistre.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  {% if show_graph and chart_data %}
-  <h6 class="mt-4 text-center kicker">Représentation graphique des notes d'examen</h6>
-  <div style="max-width:560px;margin:0 auto"><canvas id="examenChart"></canvas></div>
-  {% endif %}
-  <table class="carnet-table mt-4">
-    <tbody>
-      <tr class="tot">
-        <td>Moyenne annuelle</td>
-        <td class="num">{% if annual_moy is not None %}{{ annual_moy|floatformat:2 }} /20{% else %}—{% endif %}</td>
-        <td>Décision de fin d'année</td>
-        <td class="num"><strong>{{ annual_decision }}</strong></td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="d-flex justify-content-around mt-5 small">
-    <div>Le Secrétaire d'examen : .......................</div>
-    <div>Le Directeur : .......................</div>
-  </div>
-  <div class="sheet-footer">{{ carnet.footer_motto }}</div>
-</div>
+{# ==================== PAJ PA TI (paj NS4/9AF graf) ==================== #}
+{% if chart_data and show_graph and mod == 'livret' %}
+{{ chart_labels|json_script:"examen-labels" }}
+{{ chart_data|json_script:"examen-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endif %}
 
 <script>
+  // ----- Mòd lekti: toune paj -----
+  (function () {
+    var pgs = document.querySelectorAll("#book .pg");
+    if (!pgs.length) return;   // mòd livret: pa gen viewer
+    var dots = document.getElementById("dots");
+    var count = document.getElementById("pcount");
+    var cur = 0;
+    if (dots) {
+      for (var i = 0; i < pgs.length; i++) {
+        var s = document.createElement("span");
+        s.className = "pagedot" + (i === 0 ? " done" : "");
+        dots.appendChild(s);
+      }
+    }
+    function show(i) {
+      cur = Math.max(0, Math.min(pgs.length - 1, i));
+      pgs.forEach(function (p, k) { p.classList.toggle("on", k === cur); });
+      count.textContent = (cur + 1) + " / " + pgs.length;
+      if (dots) dots.querySelectorAll(".pagedot").forEach(function (d, k) { d.classList.toggle("done", k <= cur); });
+      document.getElementById("book").scrollIntoView();
+    }
+    document.getElementById("prevP").onclick = function () { show(cur - 1); };
+    document.getElementById("nextP").onclick = function () { show(cur + 1); };
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") show(cur - 1);
+      if (e.key === "ArrowRight") show(cur + 1);
+    });
+    show(0);
+  })();
+
+  // ----- Graf sikilè NS4/9e AF -----
   (function () {
     var canvas = document.getElementById("examenChart");
     if (!canvas || typeof Chart === "undefined") return;
     var labels = JSON.parse(document.getElementById("examen-labels").textContent);
     var data = JSON.parse(document.getElementById("examen-data").textContent);
-
     var COLORS = ["#0d6efd","#6610f2","#d63384","#198754","#fd7e14","#dc3545","#20c997","#6f42c1","#ffc107","#0dcaf0"];
-
     new Chart(canvas, {
       type: "doughnut",
-      data: {
-        labels: labels,
-        datasets: [{
-          data: data,
-          backgroundColor: COLORS
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: "bottom" },
-          title: { display: true, text: "Nòt egzamen ofisyèl pa matyè" }
-        }
-      }
+      data: { labels: labels, datasets: [{ data: data, backgroundColor: COLORS }] },
+      options: { responsive: true, plugins: {
+        legend: { position: "right", labels: { boxWidth: 10, font: { size: 9 } } },
+        title: { display: true, text: "Nòt egzamen ofisyèl pa matyè", font: { size: 11 } }
+      } }
     });
   })();
 </script>
-{% endif %}
-
-{# ================= PYAJ DYE : KOUVETI DEYE = REZIME ANE ================= #}
-{% if sheets %}
-<div class="sheet text-center">
-  <div class="pt-3"></div>
-  {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" style="height:64px" class="mb-2">{% endif %}
-  <div class="fw-bold" style="font-size:1.2rem">{{ carnet.school_name }}</div>
-  <div class="kicker text-muted">{{ carnet.subtitle }} — Rezime ane {{ classroom.school_year.label }}</div>
-  <hr class="mx-5">
-  <table class="carnet-table mt-3 text-start">
-    <thead>
-      <tr>
-        <th>CYCLE</th>
-        <th class="num">Moyenne /20</th>
-        <th class="num">Moyenne classe</th>
-        <th class="num">Place</th>
-        <th>Décision</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for sheet in sheets %}
-      <tr>
-        <td>{{ sheet.label }} ({{ sheet.period.name }})</td>
-        <td class="num">{% if sheet.moy is not None %}{{ sheet.moy|floatformat:2 }}{% else %}—{% endif %}</td>
-        <td class="num">{% if sheet.cls_moy is not None %}{{ sheet.cls_moy|floatformat:2 }}{% else %}—{% endif %}</td>
-        <td class="num">{% if sheet.rank %}{{ sheet.rank }}/{{ sheet.out_of }}{% else %}—{% endif %}</td>
-        <td>{{ sheet.decision }}</td>
-      </tr>
-      {% endfor %}
-      <tr class="tot">
-        <td>MOYENNE GÉNÉRALE ANNUELLE</td>
-        <td class="num">{% if annual_moy is not None %}{{ annual_moy|floatformat:2 }} /20{% else %}—{% endif %}</td>
-        <td colspan="2" class="num">Décision de fin d'année :</td>
-        <td><strong>{{ annual_decision }}</strong></td>
-      </tr>
-    </tbody>
-  </table>
-  {% if classroom and classroom.main_teacher %}
-  <div class="mt-4 small">Professeur titulaire : {{ classroom.main_teacher }}</div>
-  {% endif %}
-  <div class="d-flex justify-content-around mt-4 small">
-    <div>Le Directeur : .......................</div>
-    <div>Signature Parent : .......................</div>
-  </div>
-  <div class="sheet-footer">{{ carnet.footer_motto }}</div>
-</div>
-{% endif %}
-{% else %}
-<div class="sheet text-center">
-  <h2 class="mt-5">{{ carnet.subtitle }}</h2>
-  <p class="mt-3">Elèv <strong>{{ student }} </strong> poko gen klas asiyen pou ane a. Yon karnè kapab jenere lese li resevwa yon klas.</p>
-  <div class="sheet-footer">{{ carnet.footer_motto }}</div>
-</div>
-{% endif %}
 </body>
 </html>

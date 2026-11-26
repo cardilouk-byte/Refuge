@@ -102,6 +102,16 @@ class CarnetSettings(models.Model):
     show_graph = models.BooleanField(
         "Afiche graf (NS4 / 9e AF)", default=True,
     )
+    directeur = models.CharField(
+        "Nom du Directeur", max_length=150, default="Le Directeur G\u00e9n\u00e9ral",
+        help_text="Ki ap siyen k\u00f2t Direksyon an nan karn\u00e8 a.",
+    )
+    border_color = models.CharField(
+        "Koul\u00e8 kadajy\u00e8 paj yo", max_length=7, default="#1f2937",
+    )
+    show_photo = models.BooleanField(
+        "Afiche foto el\u00e8v la sou kouv\u00e8ti a", default=True,
+    )
     updated_at = models.DateTimeField("Dènye modifikasyon", auto_now=True)
 
     class Meta:

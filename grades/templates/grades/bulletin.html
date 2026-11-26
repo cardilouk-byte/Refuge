@@ -7,7 +7,8 @@
     <a href="{% url 'grades:bulletin_student' student.pk %}" class="btn btn-sm btn-outline-primary active">Bulletin</a>
     <a href="{% url 'grades:bulletin_cycle' student.pk %}" class="btn btn-sm btn-outline-primary">Rele sik</a>
     {% if user.is_school_staff or user.is_staff %}
-    <a href="{% url 'grades:carnet_print' student.pk %}" class="btn btn-sm btn-outline-dark"><i class="bi bi-journal-bookmark me-1"></i>Karnè</a>
+    <a href="{% url 'grades:carnet_print' student.pk %}" class="btn btn-sm btn-outline-dark"><i class="bi bi-journal-bookmark me-1"></i>Karnè (apèsi A5)</a>
+    <a href="{% url 'grades:carnet_pdf' student.pk %}?mod=livret" class="btn btn-sm btn-outline-danger"><i class="bi bi-filetype-pdf me-1"></i>PDF Livret</a>
     {% endif %}
   </div>
 </div>

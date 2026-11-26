@@ -22,6 +22,7 @@ class CarnetSettingsForm(BootstrapMixin, forms.ModelForm):
         fields = [
             "school_name", "slogan", "subtitle", "address", "tel1", "tel2",
             "email", "footer_motto", "reglements_text", "show_graph",
+            "directeur", "border_color", "show_photo",
         ]
         widgets = {
             "reglements_text": forms.Textarea(attrs={"rows": 10}),

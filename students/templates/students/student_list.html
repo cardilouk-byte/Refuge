@@ -44,7 +44,7 @@
           {% else %}<span class="text-muted">pa gen kont</span>{% endif %}
         </td>
         <td class="text-end">
-          <a href="{% url 'students:student_account' s.pk %}" class="btn btn-sm btn-outline-dark" title="Kont & modpas elèv la"><i class="bi bi-key"></i></a>
+          <a href="{% url 'grades:carnet_print' s.pk %}" class="btn btn-sm btn-outline-primary" title="GÉNÉRER LE CARNET SCOLAIRE"><i class="bi bi-journal-bookmark"></i></a> <a href="{% url 'students:student_account' s.pk %}" class="btn btn-sm btn-outline-dark" title="Kont & modpas elèv la"><i class="bi bi-key"></i></a>
           <a href="{% url 'students:badge' s.pk %}" class="btn btn-sm btn-outline-secondary" title="Badge"><i class="bi bi-person-badge"></i></a>
           <a href="{% url 'students:student_update' s.pk %}" class="btn btn-sm btn-outline-primary" title="Modifye"><i class="bi bi-pencil"></i></a>
         </td>

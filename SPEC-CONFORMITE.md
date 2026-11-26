@@ -36,7 +36,7 @@ Legand: **FÈT** = fonksyonèl epi opere · **PASYÈL** = pwensipal la fèt, yon
 - Bulletin otomatik + impression (print CSS); PDF WeasyPrint = PLANIFIE
 - Paywall: elèv poko peye fakti a → bulletin bloke (`_bulletin_locked`)
 - Historique pa sik; grafik evolisyon dedye = PLANIFIE
-- **Karnè lekòl (FÈT)**: `/notes/carnet/model/` (modèl modifiable: kouvèti, slogan, adrès, tèl, deviz, règman entèn — tout chanjable anvan jenere) + `/notes/carnet/eleve/<pk>/` (kouvèti devan + règman + 1 pyaj pa syik: matyè×koef×nòt×total×mwayèn klas + plas + desizyon + rezim ane; NS4/9ᵉ AF: pyaj Examèn Ofisyèl pa matyè×pwofesè×nòt + graf sikilè Chart.js + desizyon fen ane; print A4)
+- **Karnè lekòl = vrè LIVRET A5 (FÈT)**: modèl modifiable (kouvèti, slogan, adrès, tèl, deviz, règman entèn, direktè, koulè kadajyè, foto) sou `/notes/carnet/model/` ; apèsi A5 2 mòd sou `/notes/carnet/eleve/<pk>/` — **lekti** (viewer kst ap vire paj: prev/next/flech) ak **livret** (2 paj A5 sou fey A4 landscape, entepozisyon otomatik [8,1][2,7][6,3][4,5], paj vid otomatik pou miltip de 4) ; **PDF ReportLab** `/notes/carnet/eleve/<pk>/pdf/?mod=livret|lekti` (nimewotasyon, tab multi-paj, graf sikilè NS4/9e AF) ; **pĭ lot** tout klas: `/notes/carnet/klas/<pk>/pdf/?mod=livret` ; paj: kouvèti devan, règman, idantifikasyon+siyati+kachèt, tab MATIÈRES×COEF×syik peryòd×Notes Globales×prof, Total koef/pwen/elèv/klas/Rang/Mention/Décision, Obsèvasyon, kouvèti dèyè.
 
 ## 6. Presans & absans — FÈT
 - Chak jou: `/presens/` → take(clas) PRESENT / ABSENT / RETARD + justifie + note

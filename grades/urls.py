@@ -16,4 +16,6 @@ urlpatterns = [
     path("tablo-done/", views.honour, name="honour"),
     path("carnet/model/", views.carnet_settings, name="carnet_settings"),
     path("carnet/eleve/<int:student_pk>/", views.carnet_print, name="carnet_print"),
+    path("carnet/eleve/<int:student_pk>/pdf/", views.carnet_pdf, name="carnet_pdf"),
+    path("carnet/klas/<int:classroom_pk>/pdf/", views.carnet_class_pdf, name="carnet_class_pdf"),
 ]

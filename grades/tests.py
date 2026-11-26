@@ -271,7 +271,8 @@ class CarnetTest(TestCase):
             "tel1": "+509 3700-0000", "tel2": "", "email": "contact@lnfcl.edu.ht",
             "footer_motto": "LNFCL c'est l'excellence !",
             "reglements_text": "1.Arrivée à 7h30\n2.Uniforme obligatoire",
-            "show_graph": "on",
+            "show_graph": "on", "show_photo": "on",
+            "directeur": "M. Le Directeur Général", "border_color": "#1f2937",
         }, **HOST)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(CarnetSettings.objects.count(), 1)
@@ -286,8 +287,10 @@ class CarnetTest(TestCase):
         html = response.content.decode()
         self.assertIn("ELV-00001", html)
         self.assertIn("Matematik", html)
-        self.assertIn("PREMYE SYIK", html)
-        self.assertIn("DEZYEM SYIK", html)
+        self.assertIn("1er cycle", html)
+        self.assertIn("2e cycle", html)
+        self.assertIn("EXTRAITS DES R\u00c8GLEMENTS", html)
+        self.assertIn("OBSERVATIONS", html)
         self.assertIn("Moyenne de l'élève", html)
         self.assertNotIn("Examen Officiels", html)
 
@@ -311,7 +314,57 @@ class CarnetTest(TestCase):
         response = self.client.get(f"/notes/carnet/eleve/{st_ns4.pk}/", **HOST)
         self.assertEqual(response.status_code, 200)
         html = response.content.decode()
-        self.assertIn("Examen Officiels", html)
+        self.assertIn("EXAMEN OFFICIELS", html)
         self.assertIn("Paul Hilaire", html)
         self.assertIn("examenChart", html)
         self.assertIn("Filière", html)
+
+
+class CarnetPDFTest(TestCase):
+    def setUp(self):
+        from decimal import Decimal
+
+        self.d = _setup_data()
+        self.dir_user = User.objects.create_user("dir2", password="Pass1234!", role="DIRECTION")
+        period = self.d["period"]
+        Grade.objects.create(student=self.d["s1"], class_subject=self.d["cs_math"], period=period, score="15")
+        Grade.objects.create(student=self.d["s1"], class_subject=self.d["cs_fr"], period=period, score="10")
+        Grade.objects.create(student=self.d["s2"], class_subject=self.d["cs_math"], period=period, score="8")
+
+    def test_pdf_lekti(self):
+        self.client.login(username="dir2", password="Pass1234!")
+        response = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/pdf/", **HOST)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertTrue(response.content.startswith(b"%PDF"))
+        self.assertGreater(len(response.content), 800)
+
+    def test_pdf_livret_imposition(self):
+        self.client.login(username="dir2", password="Pass1234!")
+        response = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/pdf/?mod=livret", **HOST)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.content.startswith(b"%PDF"))
+        # entepozisyon an ka pwodui yon fichye diferan (paj vid + paj A4)
+        base = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/pdf/", **HOST)
+        self.assertNotEqual(len(response.content), len(base.content))
+
+    def test_pdf_denied_for_other_students(self):
+        User.objects.create_user("eleve3", password="Pass1234!", role="ELEVE")
+        self.client.login(username="eleve3", password="Pass1234!")
+        response = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/pdf/", **HOST)
+        self.assertEqual(response.status_code, 403)
+
+    def test_class_pdf_batch(self):
+        self.client.login(username="dir2", password="Pass1234!")
+        response = self.client.get(f"/notes/carnet/klas/{self.d['classroom'].pk}/pdf/?mod=livret", **HOST)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.content.startswith(b"%PDF"))
+        # clas la gen 2 elèv — PDF sa a fòse pi gran pase yon sèl karnè
+        solo = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/pdf/?mod=livret", **HOST)
+        self.assertGreater(len(response.content), len(solo.content))
+
+    def test_class_pdf_denied_for_students(self):
+        User.objects.create_user("eleve4", password="Pass1234!", role="ELEVE")
+        self.client.login(username="eleve4", password="Pass1234!")
+        response = self.client.get(f"/notes/carnet/klas/{self.d['classroom'].pk}/pdf/", **HOST)
+        self.assertEqual(response.status_code, 403)

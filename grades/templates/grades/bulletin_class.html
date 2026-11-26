@@ -4,6 +4,8 @@
 <h1 class="h3 mb-3"><i class="bi bi-award"></i> Bulletins &amp; Desizyon — {{ classroom.name }}</h1>
 <div class="mb-3">
   <a href="{% url 'grades:bulletin_excel' classroom.pk %}{% if period %}?periyod={{ period.pk }}{% endif %}" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Telechaje Excel</a>
+  <a href="{% url 'grades:carnet_class_pdf' classroom.pk %}?mod=livret" class="btn btn-danger"><i class="bi bi-filetype-pdf"></i> Carnet tout klas la (PDF livret)</a>
+  <a href="{% url 'grades:carnet_class_pdf' classroom.pk %}?mod=lekti" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf"></i> Carnet tout klas la (PDF lekturing)</a>
 </div>
 
 {% if periods %}

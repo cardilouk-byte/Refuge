@@ -59,10 +59,23 @@
               {{ form.reglements_text }}
               <div class="form-text">Yon liy pa règ (rele nimewo yo anvan chak règ). Lè sa a, li pral parèt sou 2ᵉ paj kouvèti a.</div>
             </div>
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ form.directeur.label }}</label>
+              {{ form.directeur }}
+              {% if form.directeur.help_text %}<div class="form-text">{{ form.directeur.help_text }}</div>{% endif %}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small mb-1">{{ form.border_color.label }}</label>
+              {{ form.border_color }}
+            </div>
             <div class="col-12">
               <div class="form-check form-switch">
                 {{ form.show_graph }}
                 <label class="form-check-label small" for="{{ form.show_graph.id_for_label }}">{{ form.show_graph.label }}</label>
+              </div>
+              <div class="form-check form-switch">
+                {{ form.show_photo }}
+                <label class="form-check-label small" for="{{ form.show_photo.id_for_label }}">{{ form.show_photo.label }}</label>
               </div>
             </div>
           </div>

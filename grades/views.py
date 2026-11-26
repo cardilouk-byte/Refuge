@@ -1,3 +1,4 @@
+import io
 import re
 from decimal import Decimal, InvalidOperation
 
@@ -6,7 +7,10 @@ from django.db.models import Avg
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+
+from reportlab.lib.colors import Color
 
 from finance.models import Invoice
 
@@ -213,106 +217,138 @@ def carnet_settings(request):
 
 
 def _is_official_level(level_name):
-    lvl = re.sub(r"[\s.]", "", (level_name or "").lower())
-    return "ns4" in lvl or lvl[:2] in ("9e", "9\u00e8")
+    from .carnet import is_official_level
+    return is_official_level(level_name)
 
 
 @login_required
 def carnet_print(request, student_pk):
+    """Aper\u00e7u livret A5 nan navigatè a — 2 mòd: lekti (frape paj) / livret (2 paj A5 sou A4)."""
     student = _get_student_for_view(request, student_pk)
-    carnet = CarnetSettings.load()
-    classroom = student.classroom
-    sheets = []
-    officials = []
-    chart_labels = []
-    chart_data = []
-    is_official = False
-    annual_moy = None
-    annual_decision = "Pa gen n\u00f2t"
-    if classroom:
-        periods = list(Period.objects.filter(school_year=classroom.school_year).order_by("order"))
-        subjects = list(
-            classroom.subjects.select_related("subject", "teacher", "teacher__user").order_by("subject__name")
-        )
-        if periods:
-            points = 0
-            count = 0
-            for i, p in enumerate(periods):
-                rows = []
-                st_points = 0.0
-                st_coef = 0
-                cl_points = 0.0
-                cl_coef = 0
-                for cs in subjects:
-                    avg = Grade.subject_average(student, cs, p)
-                    cls_avg = Grade.objects.filter(class_subject=cs, period=p).aggregate(a=Avg("score"))["a"]
-                    if cls_avg is not None:
-                        cl_points += float(cls_avg) * cs.coefficient
-                        cl_coef += cs.coefficient
-                    if avg is not None:
-                        st_points += float(avg) * cs.coefficient
-                        st_coef += cs.coefficient
-                    rows.append({
-                        "cs": cs,
-                        "avg": avg,
-                        "total": round(float(avg) * cs.coefficient, 2) if avg is not None else None,
-                        "cls_avg": cls_avg,
-                    })
-                moy = round(st_points / st_coef, 2) if st_coef else None
-                cl_moy = round(cl_points / cl_coef, 2) if cl_coef else None
-                rank = None
-                out_of = 0
-                ranking = Grade.class_ranking(classroom, p)
-                out_of = len(ranking)
-                for r, s, a in ranking:
-                    if s.pk == student.pk:
-                        rank = r
-                        break
-                decision, tone = _decision(moy)
-                sheets.append({
-                    "period": p,
-                    "label": CYCLE_LABELS[i] if i < len(CYCLE_LABELS) else p.name.upper(),
-                    "rows": rows,
-                    "moy": moy,
-                    "cls_moy": cl_moy,
-                    "rank": rank,
-                    "out_of": out_of,
-                    "decision": decision,
-                    "tone": tone,
-                })
-                if moy is not None:
-                    points += moy
-                    count += 1
-            if count:
-                annual_moy = round(points / count, 2)
-                annual_decision, _tone = _decision(annual_moy)
-        is_official = _is_official_level(classroom.level.name)
-        if is_official:
-            for cs in subjects:
-                g = Grade.latest_exam(student, cs)
-                score = g.score if g else None
-                officials.append({"cs": cs, "score": score, "teacher": cs.teacher})
-                if score is not None:
-                    chart_labels.append(cs.subject.name)
-                    chart_data.append(float(score))
+    from .carnet import build_carnet
+    context = build_carnet(student)
+    from .carnet import build_html_pages, html_sides
+    pages = build_html_pages(context)
+    mod = request.GET.get("mod", "lekti")
+    if mod not in ("lekti", "livret"):
+        mod = "lekti"
+    sides = html_sides(pages) if mod == "livret" else None
     return render(
         request,
         "grades/carnet_print.html",
         {
-            "carnet": carnet,
-            "student": student,
-            "classroom": classroom,
-            "sheets": sheets,
-            "annual_moy": annual_moy,
-            "annual_decision": annual_decision,
-            "is_official": is_official,
-            "officials": officials,
-            "chart_labels": chart_labels,
-            "chart_data": chart_data,
-            "show_graph": carnet.show_graph,
+            "carnet": CarnetSettings.load(),
+            **context,
+            "pages": pages,
+            "sides": sides,
+            "mod": mod,
+            "show_graph": CarnetSettings.load().show_graph,
+            "id_rows": carnet_id_rows(student),
             "titre": "Karn\u00e8 \u2014 " + student.full_name,
         },
     )
+
+
+def carnet_id_rows(student):
+    classroom = student.classroom
+    return [
+        ("Nom", student.last_name),
+        ("Pr\u00e9nom", student.first_name),
+        ("Date de naissance", student.birth_date.strftime("%d/%m/%Y") if student.birth_date else "\u2014"),
+        ("Sexe", {"M": "Masculin", "F": "F\u00e9minin"}.get(student.gender, "\u2014")),
+        ("Classe", classroom.name if classroom else "\u2014"),
+        ("Niveau", classroom.level.name if classroom else "\u2014"),
+        ("Ann\u00e9e Scolaire", classroom.school_year.label if classroom else "\u2014"),
+    ]
+
+
+@login_required
+def carnet_pdf(request, student_pk):
+    student = _get_student_for_view(request, student_pk)
+    from .carnet import build_carnet
+    from .pdf import CarnetRenderer
+    from core.models import SiteSettings
+
+    mod = request.GET.get("mod", "lekti")
+    if mod not in ("lekti", "livret"):
+        mod = "lekti"
+    data = build_carnet(student)
+    renderer = CarnetRenderer(data, CarnetSettings.load(), SiteSettings.load())
+    pdf_bytes = renderer.render(mod=mod)
+    suffix = "livret" if mod == "livret" else "lekti"
+    resp = HttpResponse(pdf_bytes, content_type="application/pdf")
+    resp["Content-Disposition"] = f'inline; filename="carnet_{student.matricule}_{suffix}.pdf"'
+    return resp
+
+
+@teaching_staff_required
+def carnet_class_pdf(request, classroom_pk):
+    """Karn\u00e8 an pis pou tout el\u00e8v yon klas (yon s\u00e8l PDF, chak el\u00e8v ap gen livret li)."""
+    classroom = get_object_or_404(ClassRoom.objects.select_related("level", "school_year"), pk=classroom_pk)
+    from .carnet import build_carnet
+    from .pdf import CarnetRenderer
+    from core.models import SiteSettings
+
+    mod = request.GET.get("mod", "livret")
+    if mod not in ("lekti", "livret"):
+        mod = "livret"
+    carnet = CarnetSettings.load()
+    site = SiteSettings.load()
+    buf = io.BytesIO()
+    from reportlab.lib.pagesizes import A5, A4, landscape
+    from reportlab.pdfgen import canvas as rl_canvas
+    from grades.pdf import A5W, A5H, A4LW, A4LH
+
+    c = rl_canvas.Canvas(buf, pagesize=(A4LW, A4LH) if mod == "livret" else A5)
+    students = list(classroom.students.filter(status="ACTIF"))
+    first = True
+    for student in students:
+        data = build_carnet(student)
+        renderer = CarnetRenderer(data, carnet, site)
+        pages = renderer.build_pages()
+        if not pages:
+            continue
+        if mod == "livret":
+            from .carnet import livret_sides
+            while len(pages) % 4:
+                pages.append({"kind": "blank"})
+            sides = livret_sides(list(range(len(pages))))
+            for side in sides:
+                for half, page_no in enumerate(side):
+                    if page_no is None:
+                        continue
+                    x0 = 0 if half == 0 else (A4LW - A5W)
+                    if not first:
+                        c.showPage()
+                    first = False
+                    c.saveState()
+                    c.translate(x0, 0)
+                    c.setFillColor(Color(1, 1, 1))
+                    c.rect(0, 0, A5W, A5H, stroke=0, fill=1)
+                    c.setStrokeColor(renderer.border)
+                    c.setLineWidth(0.4)
+                    c.line(A5W, 0, A5W, A5H)
+                    renderer._draw_one(c, pages[page_no], A5W, A5H)
+                    c.restoreState()
+        else:
+            for page in pages:
+                if not first:
+                    c.showPage()
+                first = False
+                c.saveState()
+                c.setFillColor(Color(1, 1, 1))
+                c.rect(0, 0, A5W, A5H, stroke=0, fill=1)
+                renderer._draw_one(c, page, A5W, A5H)
+                c.restoreState()
+    if not first:
+        c.showPage()
+    c.save()
+    pdf_bytes = buf.getvalue()
+    suffix = "livret" if mod == "livret" else "lekti"
+    name = f"carnet_{classroom.level.name.replace(' ', '_')}{classroom.section}_{suffix}.pdf"
+    resp = HttpResponse(pdf_bytes, content_type="application/pdf")
+    resp["Content-Disposition"] = f'inline; filename="{name}"'
+    return resp
 
 
 @teaching_staff_required
