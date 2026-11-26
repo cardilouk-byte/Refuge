@@ -99,6 +99,48 @@ class CarnetRenderer:
         c.drawCentredString(x, y - 2, "Cachet de")
         c.drawCentredString(x, y - 10, "l'\u00e9tablissement")
 
+    def _stamp_unpaid(self, c, w, h):
+        """Filigran wouj sou chak paj lè elèv la poko peye."""
+        c.saveState()
+        c.translate(w / 2, h / 2)
+        c.rotate(26)
+        c.setFillColor(colors.Color(0.85, 0.12, 0.12, alpha=0.13))
+        c.setFont("Helvetica-Bold", 44)
+        c.drawCentredString(0, 10, "NON VALIDÉ")
+        c.setFont("Helvetica-Bold", 11)
+        c.drawCentredString(0, -24, "Peman poko fèt — karnè paka valide")
+        c.restoreState()
+
+    def _cycle_badge(self, c, w, h, paid):
+        """Piti badge sou chak fèy nòt — valiad syik pa syik selon peman an."""
+        txt = "SYIK VALIDE" if paid else "SYIK PAKA VALIDE"
+        col = colors.HexColor("#198754") if paid else colors.HexColor("#dc3545")
+        bw = 78 if paid else 104
+        c.saveState()
+        c.setStrokeColor(col)
+        c.setLineWidth(0.9)
+        c.setFillColor(colors.Color(col.red, col.green, col.blue, alpha=0.10))
+        c.roundRect(w - 30 - bw, 34, bw, 16, 3, stroke=1, fill=1)
+        c.setFillColor(col)
+        c.setFont("Helvetica-Bold", 7)
+        c.drawCentredString(w - 30 - bw / 2, 38, txt)
+        c.restoreState()
+
+    def _stamp_valid(self, c, x, y):
+        """Kachèt vèt VALIDE — DIRECTION (lè tout fakti yo peye)."""
+        c.saveState()
+        c.translate(x, y)
+        c.rotate(-11)
+        c.setStrokeColor(colors.HexColor("#198754"))
+        c.setLineWidth(1.4)
+        c.rect(-62, -14, 124, 30)
+        c.setFillColor(colors.HexColor("#198754"))
+        c.setFont("Helvetica-Bold", 9.5)
+        c.drawCentredString(0, 3, "VALIDÉ — DIRECTION")
+        c.setFont("Helvetica", 6)
+        c.drawCentredString(0, -7, "Tout fès yo peye — tousyik yo valide")
+        c.restoreState()
+
     def _field(self, c, x, y, label, value, width=170):
         c.setFont("Helvetica-Bold", 7.5)
         c.drawString(x, y, label + " :")
@@ -520,6 +562,7 @@ class CarnetRenderer:
 
     def _draw_one(self, c, page, w, h):
         kind = page["kind"]
+        self.paid = bool(self.d.get("paid", False)) if isinstance(self.d, dict) else False
         if kind == "cover":
             self.page_cover(c, w, h)
         elif kind == "reglement":
@@ -552,6 +595,16 @@ class CarnetRenderer:
             self.page_back(c, w, h)
         else:
             self.page_blank(c, w, h)
+        if kind != "blank":
+            if not self.paid:
+                self._stamp_unpaid(c, w, h)
+                if kind == "notes":
+                    self._cycle_badge(c, w, h, False)
+            else:
+                if kind in ("identification", "results"):
+                    self._stamp_valid(c, w - 82, h - 52)
+                if kind == "notes":
+                    self._cycle_badge(c, w, h, True)
 
     def render(self, mod="lekti"):
         buf = io.BytesIO()

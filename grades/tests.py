@@ -368,3 +368,91 @@ class CarnetPDFTest(TestCase):
         self.client.login(username="eleve4", password="Pass1234!")
         response = self.client.get(f"/notes/carnet/klas/{self.d['classroom'].pk}/pdf/", **HOST)
         self.assertEqual(response.status_code, 403)
+
+
+class CarnetPayValidationTest(TestCase):
+    """Si elèv la poko peye karnè a pa valide — syik pa syik — tout mwayen peman."""
+
+    def setUp(self):
+        from finance.models import FeeType, Invoice
+
+        self.d = _setup_data()
+        self.FeeType = FeeType
+        self.Invoice = Invoice
+        self.dir_user = User.objects.create_user("dirpay", password="Pass1234!", role="DIRECTION")
+        self.fee = FeeType.objects.create(name="Frais scolarite", amount=5000, school_year=self.d["year"])
+
+    def _invoice(self, student, status=None):
+        inv = self.Invoice.objects.create(student=student, fee_type=self.fee, amount=5000)
+        if status is not None:
+            inv.status = status
+            inv.save(update_fields=["status"])
+        return inv
+
+    def test_locked_for_own_student_unpaid(self):
+        eu = User.objects.create_user("elevp", password="Pass1234!", role="ELEVE")
+        self.d["s1"].user = eu
+        self.d["s1"].save(update_fields=["user"])
+        self._invoice(self.d["s1"])
+        self.client.login(username="elevp", password="Pass1234!")
+        r = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/", **HOST)
+        self.assertEqual(r.status_code, 200)
+        html = r.content.decode()
+        self.assertIn("Karn\u00e8 a bloke", html)
+        self.assertIn("Koperativ kredi", html)
+        self.assertIn("Vireman bank", html)
+        # PDF la tou bloke pou li — li resevwa paj HTML a, pa yon PDF
+        rp = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/pdf/", **HOST)
+        self.assertEqual(rp.status_code, 200)
+        self.assertNotEqual(rp["Content-Type"], "application/pdf")
+
+    def test_locked_for_parent_unpaid(self):
+        from students.models import Parent, ParentStudent
+
+        pu = User.objects.create_user("papay", password="Pass1234!", role="PARENT")
+        parent = Parent.objects.create(first_name="Papa", last_name="Paye", user=pu)
+        ParentStudent.objects.create(parent=parent, student=self.d["s1"], is_primary=True)
+        self._invoice(self.d["s1"])
+        self.client.login(username="papay", password="Pass1234!")
+        r = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/", **HOST)
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Karn\u00e8 a bloke")
+
+    def test_staff_sees_unpaid_watermark_not_locked(self):
+        self._invoice(self.d["s1"])
+        self.client.login(username="dirpay", password="Pass1234!")
+        r = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/", **HOST)
+        self.assertEqual(r.status_code, 200)
+        html = r.content.decode()
+        self.assertIn("NON VALID\u00c9", html)
+        self.assertIn("SYIK PAKA VALIDE", html)
+        # PDF la tou soti ak filigran an (staff ka gade preview)
+        rp = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/pdf/", **HOST)
+        self.assertEqual(rp["Content-Type"], "application/pdf")
+        self.assertTrue(rp.content.startswith(b"%PDF"))
+
+    def test_paid_shows_valid_stamp(self):
+        self._invoice(self.d["s1"], status=self.Invoice.Status.PAYE)
+        self.client.login(username="dirpay", password="Pass1234!")
+        r = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/", **HOST)
+        self.assertEqual(r.status_code, 200)
+        html = r.content.decode()
+        self.assertNotIn("NON VALID\u00c9", html)
+        self.assertIn("VALID\u00c9 \u2014 DIRECTION", html)
+        self.assertIn("SYIK VALIDE", html)
+
+    def test_no_invoice_means_paid(self):
+        self.client.login(username="dirpay", password="Pass1234!")
+        r = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/", **HOST)
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("VALID\u00c9 \u2014 DIRECTION", r.content.decode())
+
+    def test_partial_invoice_still_locked_for_student(self):
+        eu = User.objects.create_user("elevpr", password="Pass1234!", role="ELEVE")
+        self.d["s1"].user = eu
+        self.d["s1"].save(update_fields=["user"])
+        self._invoice(self.d["s1"], status=self.Invoice.Status.PARTIEL)
+        self.client.login(username="elevpr", password="Pass1234!")
+        r = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/", **HOST)
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Karn\u00e8 a bloke")

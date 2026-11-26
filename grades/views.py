@@ -225,6 +225,9 @@ def _is_official_level(level_name):
 def carnet_print(request, student_pk):
     """Aper\u00e7u livret A5 nan navigatè a — 2 mòd: lekti (frape paj) / livret (2 paj A5 sou A4)."""
     student = _get_student_for_view(request, student_pk)
+    locked = _carnet_locked(request, student)
+    if locked:
+        return locked
     from .carnet import build_carnet
     context = build_carnet(student)
     from .carnet import build_html_pages, html_sides
@@ -249,6 +252,24 @@ def carnet_print(request, student_pk):
     )
 
 
+def _carnet_locked(request, student):
+    """Karnè a bloke pou elèv/paran si fakti a poko peye (menm patwòn ke bulletin)."""
+    if request.user.is_staff or request.user.role in (User.Role.SUPERADMIN, User.Role.DIRECTION, User.Role.ENSEIGNANT):
+        return None
+    if request.user.role not in (User.Role.ELEVE, User.Role.PARENT):
+        return None
+    is_guardian = (
+        getattr(request.user, "student_profile", None) is not None
+        or Student.objects.filter(parentstudent__parent__user=request.user).exists()
+    )
+    if not is_guardian:
+        return None
+    unpaid = Invoice.objects.filter(student=student).exclude(status=Invoice.Status.PAYE).exists()
+    if unpaid:
+        return render(request, "grades/carnet_locked.html", {"student": student})
+    return None
+
+
 def carnet_id_rows(student):
     classroom = student.classroom
     return [
@@ -265,6 +286,9 @@ def carnet_id_rows(student):
 @login_required
 def carnet_pdf(request, student_pk):
     student = _get_student_for_view(request, student_pk)
+    locked = _carnet_locked(request, student)
+    if locked:
+        return locked
     from .carnet import build_carnet
     from .pdf import CarnetRenderer
     from core.models import SiteSettings

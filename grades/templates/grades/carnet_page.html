@@ -1,5 +1,10 @@
 {# ====== YON PAJ A5 KARNÈ — variab: page, student, classroom, carnet, table, per_period, annual_*, officials, chart_*, site_settings ====== #}
 {% if page.kind == "cover" %}
+  {% if paid %}
+    <div class="stamp stamp-valid"><span class="st1">VALIDÉ — DIRECTION</span><span class="st2">Tout frès yo peye — tousyik yo valide</span></div>
+  {% else %}
+    <div class="stamp stamp-invalid"><span class="st1">NON VALIDÉ</span><span class="st2">Peman poko fèt — karnè paka valide</span></div>
+  {% endif %}
   <div class="text-center mt-2">
     {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" style="height:64px" class="mb-1">{% endif %}
     <div class="fw-bold" style="font-size:11.5pt">{{ carnet.school_name }}</div>
@@ -42,6 +47,11 @@
   <div class="pg-footer">{{ carnet.footer_motto }}</div>
 
 {% elif page.kind == "identification" %}
+  {% if paid %}
+    <div class="stamp stamp-valid"><span class="st1">VALIDÉ — DIRECTION</span><span class="st2">Tout frès yo peye — tousyik yo valide</span></div>
+  {% else %}
+    <div class="stamp stamp-invalid"><span class="st1">NON VALIDÉ</span><span class="st2">Peman poko fèt — karnè paka valide</span></div>
+  {% endif %}
   <div class="pg-head">
     <div class="sname">{{ carnet.school_name }}</div>
     <div class="smeta">{{ carnet.address }}{% if carnet.tel1 %} — {{ carnet.tel1 }}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>
@@ -69,6 +79,11 @@
   <div class="pg-footer">{{ carnet.footer_motto }}</div>
 
 {% elif page.kind == "notes" %}
+  {% if paid %}
+    <div class="stamp stamp-valid"><span class="st1">VALIDÉ — DIRECTION</span><span class="st2">Tout frès yo peye — tousyik yo valide</span></div>
+  {% else %}
+    <div class="stamp stamp-invalid"><span class="st1">NON VALIDÉ</span><span class="st2">Peman poko fèt — karnè paka valide</span></div>
+  {% endif %}
   <div class="pg-head">
     <div class="sname">{{ carnet.school_name }}</div>
     <div class="smeta">{{ carnet.address }}{% if carnet.tel1 %} — {{ carnet.tel1 }}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>
@@ -135,9 +150,19 @@
     <div>Le Titulaire : .......................</div>
     <div>Le Directeur : .......................</div>
   </div>
+  {% if paid %}
+    <div class="cycle-badge cycle-ok">SYIK VALIDE ✓</div>
+  {% else %}
+    <div class="cycle-badge cycle-no">SYIK PAKA VALIDE ✗</div>
+  {% endif %}
   <div class="pg-footer">{{ carnet.footer_motto }}</div>
 
 {% elif page.kind == "results" %}
+  {% if paid %}
+    <div class="stamp stamp-valid"><span class="st1">VALIDÉ — DIRECTION</span><span class="st2">Tout frès yo peye — tousyik yo valide</span></div>
+  {% else %}
+    <div class="stamp stamp-invalid"><span class="st1">NON VALIDÉ</span><span class="st2">Peman poko fèt — karnè paka valide</span></div>
+  {% endif %}
   <div class="pg-head">
     <div class="sname">{{ carnet.school_name }}</div>
     <div class="smeta">{{ carnet.address }}{% if carnet.tel1 %} — {{ carnet.tel1 }}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>

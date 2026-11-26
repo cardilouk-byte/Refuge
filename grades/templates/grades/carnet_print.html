@@ -61,6 +61,18 @@
       .share .half { border-right: none; }
     }
     .badge-side { position: absolute; top: -22px; left: 4px; color: #9fb0d0; font-size: 11px; letter-spacing: .06em; }
+    /* ===== TAMPON VALIDASYON PEMAN ===== */
+    .stamp { position: absolute; top: 7mm; right: 7mm; transform: rotate(-11deg);
+      border: 2.2pt solid; border-radius: 4px; padding: 2pt 7pt; text-align: center;
+      pointer-events: none; z-index: 6; background: rgba(255,255,255,.85); line-height: 1.25; }
+    .stamp .st1 { display: block; font-weight: 800; font-size: 9.5pt; letter-spacing: .05em; }
+    .stamp .st2 { display: block; font-size: 5.4pt; letter-spacing: .02em; }
+    .stamp-valid { border-color: #198754; color: #198754; }
+    .stamp-invalid { border-color: #dc3545; color: #dc3545; transform: rotate(0deg); }
+    .cycle-badge { position: absolute; bottom: 11mm; right: 8mm; font-size: 6.2pt; font-weight: 700;
+      padding: 1.5pt 6pt; border-radius: 3px; border: .9pt solid; pointer-events: none; z-index: 5; }
+    .cycle-ok { color: #198754; border-color: #198754; background: rgba(25,135,84,.08); }
+    .cycle-no { color: #dc3545; border-color: #dc3545; background: rgba(220,53,69,.08); }
   </style>
   {% if show_graph and chart_data and mod == "lekti" %}
   {{ chart_labels|json_script:"examen-labels" }}
@@ -99,6 +111,15 @@
 </div>
 {% endif %}
 
+{% if not paid %}
+<div class="no-print d-flex justify-content-center">
+  <div class="alert alert-danger small py-2 px-3" style="max-width:760px">
+    <i class="bi bi-exclamation-octagon-fill me-1"></i>
+    <strong>Karnè sa PA valide.</strong> Elèv la poko peye tout fakti li — chak paj pote tampon an wouj «NON VALIDÉ».
+    Apre peman an fèt (espès, MonCash, chèk, vireman bank oswa koperativ kredi), karnè a valide otomatikman ak tampon vèt la.
+  </div>
+</div>
+{% endif %}
 {# ==================== MÒD LIVRET ==================== #}
 {% if mod == 'livret' %}
 <div class="container py-4">

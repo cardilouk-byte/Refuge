@@ -51,9 +51,13 @@ def _annual_from_periods(values):
 def build_carnet(student):
     """Retounen tout done karnè a pou yon elèv (manadjè HTML + PDF)."""
     classroom = student.classroom
+    from finance.models import Invoice
+
+    unpaid = Invoice.objects.filter(student=student).exclude(status=Invoice.Status.PAYE).exists()
     result = {
         "student": student,
         "classroom": classroom,
+        "paid": not unpaid,
         "periods": [],
         "table": {"rows": [], "total_coef": 0, "total_points": None,
                   "classe_annual": None},
