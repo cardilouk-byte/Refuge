@@ -135,7 +135,10 @@ def klas(request):
 
 
 def cr_str(teacher):
-    return teacher.full_name if teacher else None
+    """Non konplè pwofesè a (Teacher.gen first_name/last_name, pa gen full_name)."""
+    if not teacher:
+        return None
+    return f"{teacher.first_name} {teacher.last_name}"
 
 
 @require_GET
