@@ -29,6 +29,18 @@ A5W, A5H = A5  # 419.5 x 595.3 (portrait)
 A4LW, A4LH = landscape(A4)  # 841.9 x 595.3
 M = 22  # maj ak b\u00f2 an mmm (pt)
 INK = colors.HexColor("#1a1a1a")
+
+
+def _safe_hex(val, fallback="#166534"):
+    try:
+        return colors.HexColor(val or fallback)
+    except Exception:
+        return colors.HexColor(fallback)
+
+
+def _tint(col, f=0.88):
+    """Mete yon koulè klè (kole ak blan) — f = share a blan an."""
+    return colors.Color(1 - f * (1 - col.red), 1 - f * (1 - col.green), 1 - f * (1 - col.blue))
 LINE = colors.HexColor("#333333")
 HEAD_BG = colors.HexColor("#eef1f6")
 
@@ -40,6 +52,10 @@ class CarnetRenderer:
         self.carnet = carnet
         self.site = site
         self.border = colors.HexColor(getattr(carnet, "border_color", "#1f2937") or "#1f2937")
+        self.hcol = _safe_hex(getattr(carnet, "header_color", "") or "#166534")
+        self.cover_bg = _safe_hex(getattr(carnet, "cover_bg", "") or "#166534")
+        self.cover_tx = _safe_hex(getattr(carnet, "cover_text", "") or "#ffffff")
+        self.head_bg = _tint(self.hcol, 0.88)  # vèsyon klè pou liy tab yo
         self.page_no = 0
         self.logo_path = self._media_path(getattr(site, "logo", None))
         self.photo_path = (
@@ -70,6 +86,9 @@ class CarnetRenderer:
         if car.email:
             meta += "  \u2014  " + car.email
         c.drawCentredString(w / 2, h - 39, meta[:110])
+        c.setStrokeColor(self.hcol)
+        c.setLineWidth(1.3)
+        c.line(w / 2 - 74, h - 44, w / 2 + 74, h - 44)
 
     def _frame(self, c, w, h):
         c.setStrokeColor(self.border)
@@ -78,10 +97,10 @@ class CarnetRenderer:
         c.setLineWidth(0.5)
         c.rect(M - 5, M - 5, w - 2 * (M - 5), h - 2 * (M - 5))
 
-    def _footer(self, c, w):
+    def _footer(self, c, w, col=None):
         self.page_no += 1
         c.setFont("Helvetica-Oblique", 6.5)
-        c.setFillColor(colors.HexColor("#445566"))
+        c.setFillColor(col or colors.HexColor("#445566"))
         c.drawCentredString(w / 2, 24, self.carnet.footer_motto)
         c.setFont("Helvetica", 6)
         c.drawRightString(w - M, 24, f"p. {self.page_no}")
@@ -173,8 +192,15 @@ class CarnetRenderer:
 
     # ---------- paj yo ----------
     def page_cover(self, c, w, h):
-        self._frame(c, w, h)
         car = self.carnet
+        # fon plen koulè tankou modèl fizik la
+        c.setFillColor(self.cover_bg)
+        c.rect(0, 0, w, h, stroke=0, fill=1)
+        c.setStrokeColor(colors.HexColor("#ffffff"))
+        c.setLineWidth(1.1)
+        c.rect(9, 9, w - 18, h - 18, stroke=1, fill=0)
+        self._cover_accent = self.cover_tx
+        TX = self.cover_tx
         y = h - 70
         if self.logo_path:
             try:
@@ -185,7 +211,7 @@ class CarnetRenderer:
                 y -= 78
             except Exception:
                 pass
-        c.setFillColor(INK)
+        c.setFillColor(TX)
         c.setFont("Helvetica-Bold", 12.5)
         c.drawCentredString(w / 2, y, car.school_name)
         y -= 14
@@ -201,7 +227,8 @@ class CarnetRenderer:
             meta += " \u2014 " + car.email
         c.drawCentredString(w / 2, y, meta[:110])
         y -= 26
-        c.setStrokeColor(LINE)
+        c.setStrokeColor(TX)
+        c.setLineWidth(0.7)
         c.line(w / 2 - 60, y, w / 2 + 60, y)
         y -= 24
         classroom = self.d["classroom"]
@@ -225,16 +252,18 @@ class CarnetRenderer:
             ("Code (\u00e9tudiant)", student.matricule),
             ("Ann\u00e9e Acad\u00e9mique", classroom.school_year.label if classroom else ""),
         ):
+            c.setFillColor(TX)
             c.setFont("Helvetica-Bold", 8)
             c.drawString(w / 2 - 105, y, label + " :")
-            c.setStrokeColor(LINE)
+            c.setStrokeColor(TX, alpha=0.7)
             c.setLineWidth(0.5)
             c.line(w / 2 - 30, y - 3.5, w / 2 + 80, y - 3.5)
             c.setFont("Helvetica", 8)
-            c.setFont("Helvetica", 8)
             c.drawCentredString(w / 2 + 25, y, str(value or "")[:34])
             y -= 20
-        self._footer(c, w)
+        c.setFillColor(TX)
+        c.setFont("Helvetica-Oblique", 7)
+        c.drawCentredString(w / 2, 34, car.footer_motto)
 
     def page_reglement(self, c, w, h):
         self._frame(c, w, h)
@@ -315,10 +344,11 @@ class CarnetRenderer:
         tab = Table([header] + body, colWidths=[col_mat, col_coef] + [col_p] * n_p + [col_moy, col_prof], repeatRows=1)
         tab.setStyle(TableStyle([
             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("BACKGROUND", (0, 0), (-1, 0), self.hcol),
             ("FONTSIZE", (0, 0), (-1, -1), 6.3),
             ("FONTNAME", (0, 1), (0, -1), "Helvetica-Bold"),
             ("GRID", (0, 0), (-1, -1), 0.55, LINE),
-            ("BACKGROUND", (0, 0), (-1, 0), HEAD_BG),
             ("ALIGN", (1, 0), (-2, -1), "CENTER"),
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
             ("TOPPADDING", (0, 0), (-1, -1), 2.2),
@@ -417,9 +447,10 @@ class CarnetRenderer:
                   colWidths=[(w - 2 * M) * x for x in (0.30, 0.15, 0.15, 0.12, 0.28)])
         t.setStyle(TableStyle([
             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
             ("FONTSIZE", (0, 0), (-1, -1), 6.6),
             ("GRID", (0, 0), (-1, -1), 0.55, LINE),
-            ("BACKGROUND", (0, 0), (-1, 0), HEAD_BG),
+            ("BACKGROUND", (0, 0), (-1, 0), self.hcol),
             ("ALIGN", (1, 0), (-1, -1), "CENTER"),
         ]))
         t.wrapOn(c, w - 2 * M, y)
@@ -463,9 +494,10 @@ class CarnetRenderer:
         t = Table([header] + rows, colWidths=[inner * 0.36, inner * 0.42, inner * 0.22], repeatRows=1)
         t.setStyle(TableStyle([
             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
             ("FONTSIZE", (0, 0), (-1, -1), 6.5),
             ("GRID", (0, 0), (-1, -1), 0.55, LINE),
-            ("BACKGROUND", (0, 0), (-1, 0), HEAD_BG),
+            ("BACKGROUND", (0, 0), (-1, 0), self.hcol),
             ("ALIGN", (2, 0), (2, -1), "CENTER"),
         ]))
         t.wrapOn(c, inner, h)

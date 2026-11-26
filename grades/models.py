@@ -109,6 +109,16 @@ class CarnetSettings(models.Model):
     border_color = models.CharField(
         "Koul\u00e8 kadajy\u00e8 paj yo", max_length=7, default="#1f2937",
     )
+    cover_bg = models.CharField(
+        "Koul\u00e8 fon kouv\u00e8ti", max_length=7, default="#166534",
+        help_text="Koul\u00e8 tout fon kouv\u00e8ti devan an.",
+    )
+    cover_text = models.CharField(
+        "Koul\u00e8 t\u00e8ks kouv\u00e8ti", max_length=7, default="#ffffff",
+    )
+    header_color = models.CharField(
+        "Koul\u00e8 mod entery\u00e8 (bando + t\u00e8t tab)", max_length=7, default="#166534",
+    )
     show_photo = models.BooleanField(
         "Afiche foto el\u00e8v la sou kouv\u00e8ti a", default=True,
     )

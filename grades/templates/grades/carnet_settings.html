@@ -64,9 +64,15 @@
               {{ form.directeur }}
               {% if form.directeur.help_text %}<div class="form-text">{{ form.directeur.help_text }}</div>{% endif %}
             </div>
-            <div class="col-md-3">
-              <label class="form-label small mb-1">{{ form.border_color.label }}</label>
-              {{ form.border_color }}
+            <div class="col-12">
+              <label class="form-label small mb-1 fw-semibold"><i class="bi bi-palette me-1"></i>Koulè karnè a</label>
+              <div class="d-flex gap-3 flex-wrap">
+                <div><label class="form-label small mb-1">{{ form.cover_bg.label }}</label><br>{{ form.cover_bg }}</div>
+                <div><label class="form-label small mb-1">{{ form.cover_text.label }}</label><br>{{ form.cover_text }}</div>
+                <div><label class="form-label small mb-1">{{ form.header_color.label }}</label><br>{{ form.header_color }}</div>
+                <div><label class="form-label small mb-1">{{ form.border_color.label }}</label><br>{{ form.border_color }}</div>
+              </div>
+              <div class="form-text">Koulè fon + tèks kouvèti a, koulè bando/tab paj enteryè yo, ak kadajyè paj yo.</div>
             </div>
             <div class="col-12">
               <div class="form-check form-switch">
@@ -87,11 +93,11 @@
   <div class="col-lg-4">
     <div class="card shadow-sm">
       <div class="card-header fw-bold"><i class="bi bi-eye me-1"></i>Apèsi kouvèti</div>
-      <div class="card-body text-center">
+      <div class="card-body text-center" style="background:{{ form.cover_bg.value|default:"#166534" }};color:{{ form.cover_text.value|default:"#fff" }}">
         {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" style="height:52px" class="mb-2">{% endif %}
         <div class="fw-bold">{{ form.school_name.value }}</div>
-        <div class="text-uppercase small text-muted">{{ form.slogan.value }}</div>
-        <div class="small text-muted">{{ form.address.value }}{% if form.tel1.value %} — {{ form.tel1.value }}{% endif %}{% if form.tel2.value %} / {{ form.tel2.value }}{% endif %}</div>
+        <div class="text-uppercase small" style="opacity:.85">{{ form.slogan.value }}</div>
+        <div class="small" style="opacity:.85">{{ form.address.value }}{% if form.tel1.value %} — {{ form.tel1.value }}{% endif %}{% if form.tel2.value %} / {{ form.tel2.value }}{% endif %}</div>
         <hr>
         <div class="fs-5 fw-bold">{{ form.subtitle.value }}</div>
         <div class="small mt-2">Nom : ..................................</div>

@@ -1,5 +1,7 @@
 {# ====== YON PAJ A5 KARNÈ — variab: page, student, classroom, carnet, table, per_period, annual_*, officials, chart_*, site_settings ====== #}
 {% if page.kind == "cover" %}
+  <div class="cvwrap">
+
   {% if paid %}
     <div class="stamp stamp-valid"><span class="st1">VALIDÉ — DIRECTION</span><span class="st2">Tout frès yo peye — tousyik yo valide</span></div>
   {% else %}
@@ -28,7 +30,7 @@
     <div class="mb-2"><span class="fw-semibold">Année Académique&nbsp;:</span> <span class="dotted">{% if classroom %}{{ classroom.school_year.label }}{% endif %}</span></div>
   </div>
   <div class="pg-footer">{{ carnet.footer_motto }}</div>
-
+  </div>
 {% elif page.kind == "reglement" %}
   <div class="pg-head">
     <div class="sname">{{ carnet.school_name }}</div>

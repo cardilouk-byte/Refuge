@@ -22,8 +22,13 @@ class CarnetSettingsForm(BootstrapMixin, forms.ModelForm):
         fields = [
             "school_name", "slogan", "subtitle", "address", "tel1", "tel2",
             "email", "footer_motto", "reglements_text", "show_graph",
-            "directeur", "border_color", "show_photo",
+            "directeur", "border_color", "cover_bg", "cover_text",
+            "header_color", "show_photo",
         ]
         widgets = {
             "reglements_text": forms.Textarea(attrs={"rows": 10}),
+            "border_color": forms.TextInput(attrs={"type": "color", "style": "width:64px;height:38px;padding:.1rem"}),
+            "cover_bg": forms.TextInput(attrs={"type": "color", "style": "width:64px;height:38px;padding:.1rem"}),
+            "cover_text": forms.TextInput(attrs={"type": "color", "style": "width:64px;height:38px;padding:.1rem"}),
+            "header_color": forms.TextInput(attrs={"type": "color", "style": "width:64px;height:38px;padding:.1rem"}),
         }

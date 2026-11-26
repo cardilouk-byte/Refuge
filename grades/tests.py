@@ -273,12 +273,15 @@ class CarnetTest(TestCase):
             "reglements_text": "1.Arrivée à 7h30\n2.Uniforme obligatoire",
             "show_graph": "on", "show_photo": "on",
             "directeur": "M. Le Directeur Général", "border_color": "#1f2937",
+            "cover_bg": "#0b3d2e", "cover_text": "#ffffff", "header_color": "#0b3d2e",
         }, **HOST)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(CarnetSettings.objects.count(), 1)
         carnet = CarnetSettings.load()
         self.assertEqual(carnet.subtitle, "Carnet Scolaire — 2e cycle")
         self.assertIn("Uniforme", carnet.reglements_text)
+        self.assertEqual(carnet.cover_bg, "#0b3d2e")
+        self.assertEqual(carnet.header_color, "#0b3d2e")
 
     def test_carnet_print_pages(self):
         self.client.login(username="dir", password="Pass1234!")
@@ -456,3 +459,26 @@ class CarnetPayValidationTest(TestCase):
         r = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/", **HOST)
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, "Karn\u00e8 a bloke")
+
+
+class Carnet3DTest(TestCase):
+    def setUp(self):
+        self.d = _setup_data()
+        self.dir_user = User.objects.create_user("dir3d", password="Pass1234!", role="DIRECTION")
+        Grade.objects.create(student=self.d["s1"], class_subject=self.d["cs_math"], period=self.d["period"], score="15")
+
+    def test_carnet_3d_flipbook(self):
+        self.client.login(username="dir3d", password="Pass1234!")
+        r = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/?mod=3d", **HOST)
+        self.assertEqual(r.status_code, 200)
+        html = r.content.decode()
+        self.assertIn("book3d", html)
+        self.assertIn("leaf", html)
+        self.assertIn("cvwrap", html)  # kouvèti koulè
+    
+    def test_carnet_colors_css(self):
+        self.client.login(username="dir3d", password="Pass1234!")
+        r = self.client.get(f"/notes/carnet/eleve/{self.d['s1'].pk}/", **HOST)
+        html = r.content.decode()
+        self.assertIn("--coverbg", html)
+        self.assertIn("--hcol", html)

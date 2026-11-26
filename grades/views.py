@@ -233,9 +233,19 @@ def carnet_print(request, student_pk):
     from .carnet import build_html_pages, html_sides
     pages = build_html_pages(context)
     mod = request.GET.get("mod", "lekti")
-    if mod not in ("lekti", "livret"):
+    if mod not in ("lekti", "livret", "3d"):
         mod = "lekti"
     sides = html_sides(pages) if mod == "livret" else None
+    leafs = None
+    if mod == "3d":
+        # chak fèy = devan + dèyè (2 paj A5) — pad vid pou pe èvenn
+        padded = list(pages)
+        if len(padded) % 2:
+            padded.append({"kind": "blank"})
+        leafs = [
+            {"n": i, "front": padded[i], "back": padded[i + 1]}
+            for i in range(0, len(padded), 2)
+        ]
     return render(
         request,
         "grades/carnet_print.html",
@@ -244,6 +254,7 @@ def carnet_print(request, student_pk):
             **context,
             "pages": pages,
             "sides": sides,
+            "leafs": leafs,
             "mod": mod,
             "show_graph": CarnetSettings.load().show_graph,
             "id_rows": carnet_id_rows(student),
