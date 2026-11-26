@@ -182,6 +182,7 @@
           <li class="nav-item"><span class="side-head px-3">SITE WEB</span></li>
           <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'dashboard' and 'configuration' in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:config_home' %}"><i class="bi bi-sliders me-2"></i>Configuration</a></li>
           <li class="nav-item"><a class="nav-link {% if 'model-sit' in request.path %}active fw-bold{% endif %}" href="{% url 'dashboard:config_themes' %}"><i class="bi bi-palette2 me-2"></i>Modèl sit</a></li>
+          <li class="nav-item"><a class="nav-link {% if request.resolver_match.app_name == 'api' %}active fw-bold{% endif %}" href="{% url 'api:docs' %}"><i class="bi bi-braces-asterisk me-2"></i>API (deviz, gratis)</a></li>
           <li class="nav-item"><hr class="dropdown-divider"></li>
           <li class="nav-item"><a class="nav-link" href="{% url "admin:index" %}"><i class="bi bi-gear me-2"></i>Administration</a></li>
           {% endif %}

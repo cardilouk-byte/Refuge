@@ -123,7 +123,7 @@ Django 6.1 (backend), Bootstrap 5.3 + Icons (UI), Chart.js (grafik), OpenPyXL (E
 ## 19. Fonctionnalités avancées — PASYÈL
 - FÈT: multi-années (archive pa SchoolYear), import Excel intelligent (rapport d'érreurs), génération Word personalisé, examens
 - PASYÈL: méssagerie interne (Notification, interne), historique modifs (created_by)
-- PLANIFIE: multi-écoles, OCR, mode hors ligne (PWA), API, chat temps réel, journal complet
+- **API deviz SIGES (FÈT)**: `/api/` dokimantasyon paj + 7 pazone GET JSON san token (session login) — `/api/ping/` piblik; stats (elèv/pwofesè/klas/finans), nivo (syik→nivo), matye, klas (efektif+matye+pwofesè), `/api/elev/<matricule>/` (dosye + mwayen pa péryòd + fakti), `/api/bulletin/<matricule>/` (mwayen pa matyè + plas). Lèkti sèlman, pèsonèl lekòl sèlman (403 pou ELEVE/PARENT/anonim) — 7 tèt dedilye. — **PLANIFIE ki rès**: multi-écoles, OCR, PWA, chat temps réel, journal complet
 
 ---
 Dènye mize: finance-UI / presans-paran-notif / tablo-donè / dashboard-stats / spec-conformité.

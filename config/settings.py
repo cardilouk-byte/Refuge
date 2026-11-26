@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "cahiers",
     "quizzes",
     "promotion",
+    "api",
 ]
 
 MIDDLEWARE = [

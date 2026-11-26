@@ -28,6 +28,7 @@ urlpatterns = [
     path("quiz/", include("quizzes.urls")),
     path("nouvel-ane/", include("promotion.urls")),
     path("notifikasyon/", include("notifications.urls")),
+    path("api/", include("api.urls")),
     path("", include("core.urls")),
 ]
 
