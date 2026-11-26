@@ -1,0 +1,32 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Karnè bloke — {{ student.full_name }}{% endblock %}
+{% block content %}
+<div class="card shadow-sm border-top border-4 border-danger" style="max-width:680px;margin:2rem auto">
+  <div class="card-body py-5 px-4">
+    <div class="text-center">
+      <i class="bi bi-journal-x display-3 text-danger"></i>
+      <h1 class="h4 mt-3">Karnè a bloke — peman poko fèt</h1>
+      <p class="text-muted mb-1">Elèv : <strong>{{ student.full_name }}</strong> ({{ student.matricule }})</p>
+      <p class="text-muted small">
+        Gen omwen yon fakti ki poko peye (impayée oswa peye pasyèlman).
+        Jiskaske tout frè yo peye, karnè a <strong>paka valide</strong> — ni pou tout syik yo, ni syik pa syik.
+        Apre peman an fèt, karnè a prale otomatikman ak tampon <strong>VALIDÉ — DIRECTION</strong>.
+      </p>
+    </div>
+    <div class="mt-4 p-3 bg-light border rounded">
+      <div class="fw-semibold mb-2"><i class="bi bi-cash-coin me-1"></i>Mwayen peman ki resèvi:</div>
+      <ul class="small mb-2 ps-4">
+        <li>Espès nan bidjwo lekòl la</li>
+        <li>MonCash / NatCash</li>
+        <li>Chèk</li>
+        <li>Vireman bank — BNC, BHD, Sogebank, Unibank…</li>
+        <li>Koperativ kredi (kès popilè)</li>
+      </ul>
+      <div class="small text-muted">Kite resi a oswa referans vireman an nan comptabilité pou yo klase fakti a "Payée".</div>
+    </div>
+    <div class="text-center mt-4">
+      <a href="{% url 'grades:bulletin_home' %}" class="btn btn-outline-primary"><i class="bi bi-journal-text me-1"></i>Tounen nan Nòt &amp; Bulletins</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

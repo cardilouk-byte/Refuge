@@ -1,0 +1,6 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Quiz{% endblock %}
+{% block content %}
+<div class="alert alert-warning"><i class="bi bi-exclamation-triangle"></i> Quiz « {{ quiz.title }} » pa gen kesyon poko.</div>
+<a href="{% url 'quizzes:list' %}" class="btn btn-primary">Retounen</a>
+{% endblock %}

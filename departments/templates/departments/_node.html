@@ -1,0 +1,35 @@
+<li>
+  <div class="dept-node">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+      <div>
+        <strong>{{ node.dept.name }}</strong>
+        {% if node.dept.code %}<code class="ms-1">{{ node.dept.code }}</code>{% endif %}
+        <span class="badge badge-kind bg-primary-subtle text-primary ms-1">{{ node.dept.get_kind_display }}</span>
+        {% if node.dept.head_title %}<span class="text-muted small ms-1">{{ node.dept.head_title }}</span>{% endif %}
+        {% if node.dept.location %}<span class="text-muted small ms-2"><i class="bi bi-geo-alt"></i> {{ node.dept.location }}</span>{% endif %}
+        {% if node.dept.phone %}<span class="text-muted small ms-2"><i class="bi bi-telephone"></i> {{ node.dept.phone }}</span>{% endif %}
+      </div>
+      {% if user.is_superuser or user.role == 'DIRECTION' %}
+      <div class="d-flex gap-1">
+        <a href="{% url 'departments:department_update' pk=node.dept.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+        <form method="post" action="{% url 'departments:department_delete' pk=node.dept.pk %}" onsubmit="return confirm('Efase depatman {{ node.dept.name }}?')">
+          {% csrf_token %}
+          <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    {% if node.dept.positions.all %}
+    <div class="dept-people mt-1">
+      {% for position in node.dept.positions.all %}
+        <span class="me-3"><i class="bi bi-person-badge text-primary"></i> {{ position.title }}: <strong>{{ position.person_name }}</strong></span>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% if node.children %}
+  <ul>
+    {% for child in node.children %}{% include "departments/_node.html" with node=child %}{% endfor %}
+  </ul>
+  {% endif %}
+</li>

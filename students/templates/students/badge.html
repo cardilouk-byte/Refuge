@@ -1,0 +1,59 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Badge — {{ student.full_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0"><i class="bi bi-person-badge"></i> Kat idantite elèv</h1>
+  <div class="btn-group">
+    <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> Enprime</button>
+    {% if user.is_staff and user.is_school_staff %}
+    <a href="{% url 'students:student_account' student.pk %}" class="btn btn-outline-dark"><i class="bi bi-key"></i> Kont & modpas</a>
+    {% endif %}
+  </div>
+</div>
+<div class="student-badge shadow" id="badge-card">
+  <div class="badge-header">
+    {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" alt="logo">{% endif %}
+    <div>
+      <div class="badge-school">{{ site_settings.short_name|default:"LNFCL" }}</div>
+      <div class="badge-school-sub">{{ site_settings.name|default:"Lycée National François Cappoix de Limonade" }}</div>
+    </div>
+  </div>
+  <div class="badge-body">
+    <div class="badge-photo">
+      {% if student.photo %}<img src="{{ student.photo.url }}" alt="{{ student.full_name }}">{% else %}<i class="bi bi-person-fill"></i>{% endif %}
+    </div>
+    <div class="badge-info">
+      <div class="badge-name">{{ student.full_name }}</div>
+      <div class="badge-row"><span>Matricule</span><strong>{{ student.matricule }}</strong></div>
+      {% if student.classroom %}<div class="badge-row"><span>Classe</span><strong>{{ student.classroom }}</strong></div>{% endif %}
+      {% if student.birth_date %}<div class="badge-row"><span>Né(e) le</span><strong>{{ student.birth_date }}</strong></div>{% endif %}
+      {% if student.nis %}<div class="badge-row"><span>NIS</span><strong>{{ student.nis }}</strong></div>{% endif %}
+      {% if student.user and user.is_staff %}<div class="badge-row"><span>Kont</span><strong>{{ student.user.username }}</strong></div>{% endif %}
+      {% if site_settings.motto %}<div class="badge-motto">« {{ site_settings.motto }} »</div>{% endif %}
+    </div>
+    <div class="badge-qr">{{ qr_svg|safe }}</div>
+  </div>
+</div>
+<style>
+  .student-badge { max-width: 640px; border-radius: 16px; overflow: hidden; border: 1px solid #e5e7eb; }
+  .badge-header { background: var(--primary, #0d6efd); color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 12px; }
+  .badge-header img { height: 44px; width: auto; background: #fff; border-radius: 8px; padding: 4px; }
+  .badge-school { font-family: var(--font-title); font-size: 1.4rem; line-height: 1.1; }
+  .badge-school-sub { font-size: .75rem; opacity: .85; }
+  .badge-body { display: flex; gap: 20px; padding: 20px; align-items: center; background: #fff; }
+  .badge-photo { width: 110px; height: 130px; border-radius: 12px; overflow: hidden; background: #eef2ff; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #94a3b8; flex-shrink: 0; }
+  .badge-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .badge-info { flex: 1; }
+  .badge-name { font-family: var(--font-title); font-size: 1.5rem; margin-bottom: 8px; }
+  .badge-row { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed #e5e7eb; padding: 3px 0; font-size: .9rem; }
+  .badge-row span { color: #6b7280; }
+  .badge-motto { margin-top: 10px; font-style: italic; color: #6b7280; font-size: .85rem; }
+  .badge-qr { width: 120px; flex-shrink: 0; }
+  .badge-qr svg { width: 100%; height: auto; }
+  @media print {
+    body * { visibility: hidden; }
+    #badge-card, #badge-card * { visibility: visible; }
+    #badge-card { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); }
+  }
+</style>
+{% endblock %}

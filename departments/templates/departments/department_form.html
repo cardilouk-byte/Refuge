@@ -1,0 +1,102 @@
+{% extends "core/portal_base.html" %}
+
+{% block title %}{% if obj %}{{ obj.name }}{% else %}Nouvo depatman{% endif %}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'departments:tree' %}" class="small text-decoration-none">← Organigramme</a>
+  <h1 class="h3 mb-0 mt-1">{% if obj %}{{ obj.name }}{% else %}Nouvo depatman{% endif %}</h1>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+          <div class="row g-3">
+            {% for field in form %}
+            <div class="{% if field.field.widget.input_type == 'checkbox' %}col-12{% elif field.name in 'description' %}col-12{% else %}col-md-6{% endif %}">
+              {% if field.field.widget.input_type == 'checkbox' %}
+                <div class="form-check">
+                  {{ field }}
+                  <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                </div>
+              {% else %}
+                <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+              {% endif %}
+              {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+              {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+            {% endfor %}
+          </div>
+          <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Anrejistre</button>
+            <a href="{% url 'departments:tree' %}" class="btn btn-outline-secondary">Anile</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% if obj %}
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h6"><i class="bi bi-people me-1"></i>Pèsonèl depatman an</h2>
+        <ul class="list-unstyled">
+          {% for position in positions %}
+          <li class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div>
+              <strong>{{ position.title }}</strong> — {{ position.person_name }}
+              {% if position.is_head %}<span class="badge bg-primary ms-1">Responsab</span>{% endif %}
+            </div>
+            {% if user.is_superuser or user.role == 'DIRECTION' %}
+            <form method="post" action="{% url 'departments:position_delete' pk=position.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x"></i></button>
+            </form>
+            {% endif %}
+          </li>
+          {% empty %}
+          <li class="text-muted small py-2">Pa gen pèsonèl nan depatman sa a.</li>
+          {% endfor %}
+        </ul>
+        {% if user.is_superuser or user.role == 'DIRECTION' %}
+        <hr>
+        <form method="post" action="{% url 'departments:position_create' %}" novalidate>
+          {% csrf_token %}
+          <input type="hidden" name="department" value="{{ obj.pk }}">
+          <div class="mb-2">
+            <label class="form-label small fw-semibold">Fonksyon</label>
+            {{ position_form.title }}
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Itilizatè</label>
+              {{ position_form.user }}
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Pwofesè</label>
+              {{ position_form.teacher }}
+            </div>
+          </div>
+          <div class="mb-2">
+            <label class="form-label small fw-semibold">Oswa nom dirèk</label>
+            {{ position_form.external_name }}
+          </div>
+          <div class="form-check mb-3">
+            {{ position_form.is_head }}
+            <label class="form-check-label" for="{{ position_form.is_head.id_for_label }}">Responsab depatman an</label>
+          </div>
+          <button class="btn btn-outline-primary btn-sm w-100"><i class="bi bi-plus-lg me-1"></i>Ajoute post</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

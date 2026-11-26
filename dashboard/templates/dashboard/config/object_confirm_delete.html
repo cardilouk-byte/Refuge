@@ -1,0 +1,21 @@
+{% extends "core/portal_base.html" %}
+
+{% block title %}Efase — {{ cfg.label }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'dashboard:config_list' section=section %}" class="small text-decoration-none">← {{ cfg.label }}</a>
+  <h1 class="h3 mt-1 text-danger"><i class="bi bi-trash me-2"></i>Efase eleman sa a?</h1>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <p>Èske ou sèten ou vle efase <strong>{{ obj }}</strong>? Aksyon sa a pa ka defè.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></iWi, efase l</button>
+      <a href="{% url 'dashboard:config_list' section=section %}" class="btn btn-outline-secondary">Anile</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Rele sik — {{ student.full_name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+  <h1 class="h3 mb-0"><i class="bi bi-layers"></i> Rele sik — {{ student.full_name }}</h1>
+  <div class="btn-group">
+    <a href="{% url 'grades:bulletin_student' student.pk %}" class="btn btn-sm btn-outline-primary">Bulletin</a>
+    <a href="{% url 'grades:bulletin_cycle' student.pk %}" class="btn btn-sm btn-outline-primary active">Rele sik</a>
+  </div>
+</div>
+<p class="text-muted">{{ student.matricule }} — {{ student.classroom.name|default:"pa gen klas" }}</p>
+
+{% if cycle %}
+<div class="alert alert-primary">
+  <strong>Sik etidine a : {{ cycle }}</strong> — desizyon ki baze sou mwayèn tout peryòd ane a.
+</div>
+{% endif %}
+
+<div class="table-responsive card shadow-sm mb-3">
+  <table class="table table-hover mb-0 align-middle">
+    <thead class="table-light">
+      <tr><th>Peryòd</th><th class="text-center">Mwayèn /10</th><th class="text-center">Rang</th><th class="text-center">Desizyon</th></tr>
+    </thead>
+    <tbody>
+      {% for s in summary %}
+      <tr>
+        <td class="fw-semibold">{{ s.period.name }}</td>
+        <td class="text-center fw-semibold">{{ s.moy_10|floatformat:2|default:"—" }}</td>
+        <td class="text-center">{{ s.rank|default:"—" }}{% if s.out_of %} <span class="text-muted small">/ {{ s.out_of }}</span>{% endif %}</td>
+        <td class="text-center"><span class="badge text-bg-{{ s.tone }}">{{ s.decision }}</span></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="text-muted text-center py-4">Pa gen peryòd konfigire.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card shadow-sm border-top border-4 border-{{ tone|default:'secondary' }} mb-4">
+  <div class="card-body text-center">
+    <div class="text-muted">Mwayèn ane a (tout peryòd)</div>
+    <div class="display-5 fw-bold">{{ year_avg_10|floatformat:2|default:"—" }}</div>
+    <div class="h5 mt-2">
+      <span class="badge text-bg-{{ tone|default:'secondary' }}">DESIZYON SIK{% if cycle %} « {{ cycle }} »{% endif %} : {{ cycle_decision }}</span>
+    </div>
+  </div>
+</div>
+{% endblock %}

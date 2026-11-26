@@ -1,0 +1,50 @@
+<footer class="site-footer">
+  <div class="container">
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          {% if site_settings.logo %}
+            <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.short_name }}" class="footer-logo">
+          {% else %}
+            <span class="brand-logo-placeholder brand-logo-placeholder-light"><i class="bi bi-mortarboard-fill"></i></span>
+          {% endif %}
+          <span class="footer-brand">{{ site_settings.short_name }}</span>
+        </div>
+        <p class="footer-motto">&laquo; {{ site_settings.motto }} &raquo;</p>
+        {% if site_settings.footer_logo_1 or site_settings.footer_logo_2 or site_settings.footer_logo_3 %}
+        <div class="footer-logos mt-3">
+          {% if site_settings.footer_logo_1 %}<img src="{{ site_settings.footer_logo_1.url }}" alt="Logo 1">{% endif %}
+          {% if site_settings.footer_logo_2 %}<img src="{{ site_settings.footer_logo_2.url }}" alt="Logo 2">{% endif %}
+          {% if site_settings.footer_logo_3 %}<img src="{{ site_settings.footer_logo_3.url }}" alt="Logo 3">{% endif %}
+        </div>
+        {% endif %}
+        {% if site_settings.copyright_text %}
+          <p class="footer-copyright">{{ site_settings.copyright_text }}</p>
+        {% endif %}
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <h5 class="footer-title">Liens rapides</h5>
+        <ul class="footer-links">
+          {% for item in menu_items %}
+            <li><a href="{{ item.url }}">{{ item.label }}</a></li>
+          {% endfor %}
+          <li><a href="{% url 'results' %}">Résultats</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4 col-md-6">
+        <h5 class="footer-title">Contact</h5>
+        <ul class="footer-contact">
+          {% if site_settings.address %}<li><i class="bi bi-geo-alt"></i> {{ site_settings.address }}</li>{% endif %}
+          {% if site_settings.phone %}<li><i class="bi bi-telephone"></i> {{ site_settings.phone }}</li>{% endif %}
+          {% if site_settings.email %}<li><i class="bi bi-envelope"></i> {{ site_settings.email }}</li>{% endif %}
+        </ul>
+        <div class="social-icons mt-3">
+          {% if site_settings.facebook_url %}<a href="{{ site_settings.facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
+          {% if site_settings.youtube_url %}<a href="{{ site_settings.youtube_url }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="bi bi-youtube"></i></a>{% endif %}
+          {% if site_settings.whatsapp_url %}<a href="{{ site_settings.whatsapp_url }}" target="_blank" rel="noopener" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>{% endif %}
+          {% if site_settings.instagram_url %}<a href="{{ site_settings.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="bi bi-instagram"></i></a>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

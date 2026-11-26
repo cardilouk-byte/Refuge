@@ -1,0 +1,61 @@
+{% extends "core/base.html" %}
+
+{% block title %}Lavi Lekòl la - {{ site_settings.short_name }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1 class="page-title">Lavi Lekòl la</h1>
+    <p class="page-subtitle">Klib, espò ak aktivite ki fè lekòl la viv</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    {% for group in grouped %}
+      <h2 class="section-title mt-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">{{ group.label }}</h2>
+      <div class="section-underline mx-auto"></div>
+      <div class="row g-4 mt-2">
+        {% for club in group.items %}
+        <div class="col-md-6 col-lg-4" data-aos="{{ site_settings.section_animation|default:'fade-up' }}" data-aos-delay="{{ forloop.counter0 }}00">
+          <div class="life-card h-100">
+            {% if club.image %}<img src="{{ club.image.url }}" alt="{{ club.name }}" class="life-card-img">{% else %}<div class="life-card-img d-flex align-items-center justify-content-center"><i class="bi bi-trophy"></i></div>{% endif %}
+            <div class="p-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{{ club.name }}</h5>
+                <span class="badge bg-primary-subtle text-primary">{{ group.label }}</span>
+              </div>
+              <p class="text-muted small mt-2 mb-2">{{ club.description }}</p>
+              {% if club.supervisor %}<p class="mb-0 small"><i class="bi bi-person-badge"></i> {{ club.supervisor }}</p>{% endif %}
+              {% if club.schedule %}<p class="mb-0 small text-muted"><i class="bi bi-clock"></i> {{ club.schedule }}</p>{% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+    {% if not grouped %}
+      <p class="text-center text-muted">Klib yo ap vin parèt la byento.</p>
+    {% endif %}
+
+    {% if upcoming %}
+    <h2 class="section-title mt-5" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">Blòg kalandriye a</h2>
+    <div class="section-underline mx-auto"></div>
+    <div class="row g-3 mt-3">
+      {% for ev in upcoming %}
+      <div class="col-md-6" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">
+        <a href="{% url 'calendar' %}" class="event-item d-flex text-decoration-none text-reset h-100">
+          <span class="event-date-badge">{{ ev.date|date:"j" }}<small>{{ ev.date|date:"M" }}</small></span>
+          <div>
+            <h6 class="mb-0">{{ ev.title }}</h6>
+            {% if ev.location %}<p class="mb-0 text-muted small"><i class="bi bi-geo-alt"></i> {{ ev.location }}</p>{% endif %}
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "core/portal_base.html" %}
+
+{% block title %}{{ pre.reference }} — Pré-inscription{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'preregistration:admin_list' %}" class="small text-decoration-none">← Pré-inscriptions</a>
+  <h1 class="h3 mb-0 mt-1"><code>{{ pre.reference }}</code> — {{ pre.full_name }}</h1>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h5 text-primary">👤 Elèv</h2>
+        <div class="row">
+          <div class="col-md-6">
+            <p class="mb-1"><strong>Non:</strong> {{ pre.full_name }}</p>
+            <p class="mb-1"><strong>Sèks:</strong> {{ pre.get_gender_display }}</p>
+            <p class="mb-1"><strong>Dat nesans:</strong> {{ pre.birth_date|date:"d/m/Y" }}</p>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1"><strong>Kote nesans:</strong> {{ pre.birth_place|default:"—" }}</p>
+            <p class="mb-1"><strong>Adrès:</strong> {{ pre.address|default:"—" }}</p>
+            <p class="mb-1"><strong>Nivo vle:</strong> {{ pre.desired_level|default:"—" }}</p>
+          </div>
+        </div>
+        <h2 class="h5 text-primary mt-4">👪 Paran / Responsab</h2>
+        <p class="mb-1"><strong>{{ pre.get_parent_relation_display }}:</strong> {{ pre.parent_name }} — {{ pre.parent_phone }} {% if pre.parent_email %}({{ pre.parent_email }}){% endif %}</p>
+        {% if pre.parent_profession %}<p class="mb-1"><strong>Pwofesyon:</strong> {{ pre.parent_profession }}</p>{% endif %}
+        <h2 class="h5 text-primary mt-4">🏫 Eskolè & Dokiman</h2>
+        <p class="mb-1"><strong>Lekòl anvan:</strong> {{ pre.previous_school|default:"—" }} — {{ pre.last_class|default:"" }}</p>
+        {% if pre.birth_certificate %}<p class="mb-1"><strong>Akt nesans:</strong> <a href="{{ pre.birth_certificate.url }}" target="_blank">Gade fichye</a></p>{% endif %}
+        {% if pre.report_card %}<p class="mb-1"><strong>Bilten:</strong> <a href="{{ pre.report_card.url }}" target="_blank">Gade fichye</a></p>{% endif %}
+        {% if pre.notes %}<p class="mb-1"><strong>Nòt:</strong> {{ pre.notes }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h2 class="h6">Statut: <span class="badge bg-secondary">{{ pre.get_status_display }}</span></h2>
+        {% if pre.reviewed_by %}<p class="small text-muted mb-0">Traité par {{ pre.reviewed_by }} le {{ pre.created_at|date:"d/m/Y" }}</p>{% endif %}
+        <hr>
+        {% if user.is_superuser or user.role == 'DIRECTION' %}
+        <form method="post" action="{% url 'preregistration:set_status' pk=pre.pk %}" class="d-flex gap-2 flex-wrap mb-3">
+          {% csrf_token %}
+          <button name="status" value="EGZAMEN" class="btn btn-sm btn-warning" {% if pre.status == 'EGZAMEN' %}disabled{% endif %}>An egzamen</button>
+          <button name="status" value="ACCEPTE" class="btn btn-sm btn-success" {% if pre.status == 'ACCEPTE' %}disabled{% endif %}>Asepte</button>
+          <button name="status" value="REFUSE" class="btn btn-sm btn-danger" {% if pre.status == 'REFUSE' %}disabled{% endif %}>Rejte</button>
+        </form>
+        {% if pre.status == 'ACCEPTE' and not pre.converted_student %}
+        <form method="post" action="{% url 'preregistration:convert' pk=pre.pk %}">
+          {% csrf_token %}
+          <button class="btn btn-primary w-100"><i class="bi bi-arrow-right-circle me-1"></i>Konvèti an elèv enskri</button>
+        </form>
+        {% elif pre.converted_student %}
+        <div class="alert alert-success py-2 small mb-2">
+          Konvèti an elèv: <strong>{{ pre.converted_student }}</strong>
+        </div>
+        <a href="{% url 'preregistration:fiche' pre.pk %}" class="btn btn-outline-dark btn-sm w-100"><i class="bi bi-person-vcard me-1"></i>Gade / enprime fiche d’inscription</a>
+        {% else %}
+        <p class="small text-muted mb-0">Asepte pré-inscription an anvan ou konvèti l an elèv.</p>
+        {% endif %}
+        {% else %}
+        <p class="small text-muted mb-0">Sèlman Direction ak Super Admin ki ka trakte pré-inscriptions.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

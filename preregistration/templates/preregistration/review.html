@@ -1,0 +1,106 @@
+{% extends "core/base.html" %}
+
+{% block title %}Etap 4 — Rezime pré-inscription — {{ site_settings.name }}{% endblock %}
+
+{% block content %}
+<style>
+  .pre-hero { background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 55%, #000) 100%); color:#fff; border-radius: 24px; padding: 30px 24px; text-align:center; box-shadow: 0 14px 34px rgba(0,0,0,.14); }
+  .pre-hero h1 { font-family: var(--font-title); font-weight:700 }
+  .sum-card { border:none; border-radius:20px; box-shadow: 0 10px 28px rgba(13,20,50,.08); }
+  .sum-card .head { display:flex; align-items:center; gap:12px; padding:16px 22px; background: color-mix(in srgb, var(--primary) 7%, #fff); border-bottom:1px solid #eef1f6; border-radius:20px 20px 0 0; }
+  .sum-card .head .ic { width:42px; height:42px; border-radius:12px; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
+  .sum-item { display:flex; justify-content:space-between; gap:14px; padding:9px 0; border-bottom:1px dashed #e8edf3; font-size:.95rem }
+  .sum-item:last-child { border-bottom:none }
+  .sum-item .k { color:#64748b }
+  .sum-item .v { text-align:right; font-weight:600 }
+  .doc-badge { display:inline-flex; align-items:center; gap:6px; background:#f0fdf4; color:var(--success-color,#198754); border:1px solid #bbf7d0; border-radius:99px; padding:4px 12px; font-size:.85rem; }
+  .pre-steps { display:flex; align-items:center; margin: 22px 0 8px; }
+  .pre-step { text-align:center; position:relative; flex:1; min-width:0; }
+  .pre-step .dot {
+    width:52px; height:52px; border-radius:50%; margin:0 auto 8px; display:flex;
+    align-items:center; justify-content:center; font-weight:700; font-size:1.05rem;
+    background:#fff; color:#94a3b8; border:3px solid #e2e8f0; transition:all .35s ease; z-index:2; position:relative;
+  }
+  .pre-step .lbl { font-size:.8rem; color:#64748b; display:inline-block; background:#f4f6fb; padding:2px 10px; border-radius:99px; }
+  .pre-step.done .dot { background: var(--success-color, #198754); border-color: var(--success-color, #198754); color:#fff; }
+  .pre-step.done .lbl { color: var(--success-color, #198754); font-weight:600; }
+  .pre-step.active .dot { border-color: var(--primary); color: var(--primary); transform: scale(1.12); box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 14%, transparent); }
+  .pre-step.active .lbl { color: var(--primary); font-weight:700; }
+  .pre-line { flex:1 0 24px; height:3px; background:#e2e8f0; border-radius:2px; margin: 0 -12px; transform: translateY(-19px); }
+  .pre-line.done { background: var(--success-color, #198754); }
+  @media (max-width: 576px) { .pre-step .dot { width:42px;height:42px;font-size:.95rem } .pre-step .lbl{font-size:.68rem} }
+</style>
+
+<section class="container py-5" style="max-width: 980px;">
+  <div class="pre-hero" data-aos="fade-down">
+    <div class=""><i class="bi bi-eye-fill" style="font-size:2rem"></i></div>
+    <h1 class="h3 mb-1">Etap 4 — Rezime dosye a</h1>
+    <p class="mb-0 opacity-75">Verifye tout enfòmasyon yo byen anvan ou soumèt</p>
+  </div>
+
+  <div class="pre-steps" data-aos="fade-up">
+    {% for i, info in steps.items %}
+    <div class="pre-step {% if info.num < step_num %}done{% elif info.num == step_num %}active{% endif %}">
+      <div class="dot">{% if info.num < step_num %}<i class="bi bi-check-lg"></i>{% else %}{{ info.num }}{% endif %}</div>
+      <span class="lbl">{{ info.label }}</span>
+    </div>
+    {% if not forloop.last %}<div class="pre-line {% if info.num < step_num %}done{% endif %}"></div>{% endif %}
+    {% endfor %}
+  </div>
+
+  <div class="row g-3 my-4">
+    <div class="col-lg-4" data-aos="fade-up">
+      <div class="card sum-card h-100">
+        <div class="head"><span class="ic"><i class="bi bi-person-fill"></i></span><h2 class="h6 mb-0 fw-bold">Elèv</h2></div>
+        <div class="card-body">
+          <div class="sum-item"><span class="k">Non konplè</span><span class="v">{{ pre.full_name }}</span></div>
+          <div class="sum-item"><span class="k">Sèks</span><span class="v">{{ pre.get_gender_display }}</span></div>
+          <div class="sum-item"><span class="k">Dat nesans</span><span class="v">{{ pre.birth_date|date:"d/m/Y" }}</span></div>
+          {% if pre.birth_place %}<div class="sum-item"><span class="k">Kote nesans</span><span class="v">{{ pre.birth_place }}</span></div>{% endif %}
+          {% if pre.address %}<div class="sum-item"><span class="k">Adrès</span><span class="v small">{{ pre.address }}</span></div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+      <div class="card sum-card h-100">
+        <div class="head"><span class="ic"><i class="bi bi-people-fill"></i></span><h2 class="h6 mb-0 fw-bold">Paran / Responsab</h2></div>
+        <div class="card-body">
+          <div class="sum-item"><span class="k">Non</span><span class="v">{{ pre.parent_name }}</span></div>
+          <div class="sum-item"><span class="k">Relasyon</span><span class="v">{{ pre.get_parent_relation_display }}</span></div>
+          <div class="sum-item"><span class="k">Telefòn</span><span class="v">{{ pre.parent_phone }}</span></div>
+          {% if pre.parent_email %}<div class="sum-item"><span class="k">Imèl</span><span class="v small">{{ pre.parent_email }}</span></div>{% endif %}
+          {% if pre.parent_profession %}<div class="sum-item"><span class="k">Pwofesyon</span><span class="v">{{ pre.parent_profession }}</span></div>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
+      <div class="card sum-card h-100">
+        <div class="head"><span class="ic"><i class="bi bi-mortarboard-fill"></i></span><h2 class="h6 mb-0 fw-bold">Eskolè & Dokiman</h2></div>
+        <div class="card-body">
+          {% if pre.desired_level %}<div class="sum-item"><span class="k">Nivo vle</span><span class="v">{{ pre.desired_level }}</span></div>{% endif %}
+          {% if pre.previous_school %}<div class="sum-item"><span class="k">Lekòl anvan</span><span class="v">{{ pre.previous_school }}</span></div>{% endif %}
+          {% if pre.last_class %}<div class="sum-item"><span class="k">Dènye klas</span><span class="v">{{ pre.last_class }}</span></div>{% endif %}
+        </div>
+        <div class="card-body pt-0">
+          <span class="doc-badge {% if not pre.birth_certificate %}d-none{% endif %}"><i class="bi bi-check-circle-fill"></i> Akt nesans</span>
+          <span class="doc-badge {% if not pre.report_card %}d-none{% endif %}"><i class="bi bi-check-circle-fill"></i> Bilten</span>
+          {% if pre.notes %}<p class="small text-muted mt-2 mb-0">{{ pre.notes }}</p>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-warning d-flex align-items-start gap-2" style="border-radius:14px">
+    <i class="bi bi-info-circle-fill mt-1"></i>
+    <div>Si gen yon erè, klike <strong>« Modifye »</strong> pou tounen etap yo. Yon fwa soumèt, ou pral resevwa yon <strong>nimewo referans</strong> pou w ka swiv dosye a.</div>
+  </div>
+
+  <form method="post" class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3" data-aos="zoom-in">
+    {% csrf_token %}
+    <a href="{% url 'preregistration:step' num=1 %}" class="btn btn-light border rounded-pill px-4"><i class="bi bi-pencil me-1"></i> Modifye</a>
+    <button type="submit" class="btn btn-success btn-lg rounded-pill px-5"><i class="bi bi-send-fill me-2"></i>Soumèt pré-inscription an</button>
+  </form>
+</section>
+{% endblock %}

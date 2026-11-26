@@ -1,0 +1,13 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Rezilta quiz{% endblock %}
+{% block content %}
+<div class="card shadow-sm text-center p-5 mb-4 border-top border-4 border-success">
+  <i class="bi bi-check-circle text-success" style="font-size:3rem"></i>
+  <h1 class="h3 mt-3">Quiz « {{ quiz.title }} » fini.</h1>
+  <div class="display-4 fw-bold mt-2">{{ attempt.score|floatformat:"g" }}/{{ attempt.total|floatformat:"g" }}</div>
+  <div class="text-muted">{{ attempt.percent }}%</div>
+  <div class="mt-3">
+    <a href="{% url 'quizzes:list' %}" class="btn btn-primary">Retounen sou quiz yo</a>
+  </div>
+</div>
+{% endblock %}

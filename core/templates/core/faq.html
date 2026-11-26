@@ -1,0 +1,43 @@
+{% extends "core/base.html" %}
+
+{% block title %}FAQ - {{ site_settings.short_name }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <h1 class="page-title">Kesyon moun poze souvan</h1>
+    <p class="page-subtitle">FAQ</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container" style="max-width: 860px;">
+    {% if faqs %}
+    <div class="accordion" id="faqAccordion">
+      {% for faq in faqs %}
+      <div class="accordion-item faq-item" data-aos="{{ site_settings.section_animation|default:'fade-up' }}">
+        <h2 class="accordion-header" id="faq-h{{ forloop.counter }}">
+          <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#faq-{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+            <i class="bi bi-patch-question me-2 text-primary"></i>{{ faq.question }}
+          </button>
+        </h2>
+        <div id="faq-{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="faq-h{{ forloop.counter }}" data-bs-parent="#faqAccordion">
+          <div class="accordion-body">{{ faq.answer|linebreaks }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center text-muted">Pa gen kesyon ki pibliye poko — tounen byento.</p>
+    {% endif %}
+
+    <div class="text-center mt-5">
+      <p>Ou gen yon lòt kesyon?</p>
+      <div class="d-flex gap-2 justify-content-center flex-wrap">
+        <a href="{% url 'how_to_apply' %}" class="btn btn-primary rounded-pill px-4">Kijan pou enskri</a>
+        <a href="/#kontak" class="btn btn-outline-primary rounded-pill px-4">Kontakte nou</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

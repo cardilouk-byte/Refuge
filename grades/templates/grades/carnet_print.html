@@ -1,0 +1,332 @@
+{% load static %}<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ titre }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    :root {
+      --bcol: {{ carnet.border_color|default:"#1f2937" }};
+      --coverbg: {{ carnet.cover_bg|default:"#166534" }};
+      --covertx: {{ carnet.cover_text|default:"#ffffff" }};
+      --hcol: {{ carnet.header_color|default:"#166534" }};
+    }
+    body { font-family: 'Poppins', sans-serif; background: #202636; color: #ccc; }
+    /* ===== PAJ A5 ===== */
+    .pg {
+      width: 148mm; height: 210mm; background: #fff; color: #111;
+      margin: 0 auto; position: relative; overflow: hidden;
+      box-shadow: 0 3px 16px rgba(0,0,0,.45);
+      padding: 9mm 8mm; box-sizing: border-box; font-size: 8.5pt;
+    }
+    .pg * { line-height: 1.35; }
+    .pg-frame { position: absolute; inset: 5mm; border: 1.1pt solid var(--bcol); pointer-events: none; }
+    .pg-footer { position: absolute; bottom: 6mm; left: 8mm; right: 8mm; text-align: center;
+      font-size: 6.2pt; font-style: italic; color: #445566; border-top: .5pt solid #99a3b0; padding-top: 1.5mm; }
+    .pg-head { text-align: center; border-bottom: .6pt solid #333; padding-bottom: 1mm; margin-bottom: 2mm; }
+    .pg-head .sname { font-weight: 700; font-size: 9.5pt; }
+    .pg-head .smeta { font-size: 6.2pt; color: #445; }
+    .dotted { border-bottom: 1px dotted #333; display: inline-block; min-width: 110px; min-height: 12px; }
+    /* tab nòt yo */
+    .ctab { width: 100%; border-collapse: collapse; font-size: 6.6pt; }
+    .ctab th, .ctab td { border: .55pt solid #333; padding: 1.4pt 3pt; }
+    .ctab thead th { background: var(--hcol); color: #fff; text-align: center; }
+    .ctab td.num, .ctab th.num { text-align: center; }
+    .ctab .tot td { background: color-mix(in srgb, var(--hcol) 9%, white); font-weight: 600; }
+    .pg-head { border-bottom-color: var(--hcol); }
+    /* ===== KOUVÈTI PLEN KOULÈ ===== */
+    .cvwrap { background: var(--coverbg); color: var(--covertx);
+      position: absolute; inset: 5mm; padding: 8mm 7mm; }
+    .cvwrap .pg-footer { border-top-color: color-mix(in srgb, var(--covertx) 60%, transparent); color: var(--covertx); opacity: .85; }
+    .cvwrap .pg-frame { display: none; }
+    .cvwrap .text-muted { color: color-mix(in srgb, var(--covertx) 78%, transparent) !important; }
+    .cvwrap hr { border-color: var(--covertx); opacity: .45; }
+    .cvwrap .dotted { border-bottom-color: var(--covertx); }
+    /* ===== MÒD LEKTI (viewer) ===== */
+    #viewer { display: flex; justify-content: center; align-items: flex-start; padding: 12px 0 90px; }
+    #book .pg { display: none; }
+    #book .pg.on { display: block; animation: fade .25s; }
+    @keyframes fade { from { opacity: .25; transform: rotateY(-6deg);} to { opacity: 1; transform: none;} }
+    #flipNav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15,18,28,.92); backdrop-filter: blur(6px);
+      padding: 10px 14px; display: flex; gap: 10px; align-items: center; justify-content: center; z-index: 50; }
+    .pagedot { width: 8px; height: 8px; border-radius: 50%; background: #556; display: inline-block; }
+    .pagedot.done { background: #6ea8fe; }
+    /* ===== MÒD LIVRET (fe 2 paj A5 sou A4 landscape) ===== */
+    .share {
+      width: 290mm; max-width: 100%; margin: 0 auto 22px; background: #fff; color: #111;
+      box-shadow: 0 3px 16px rgba(0,0,0,.45); position: relative;
+      aspect-ratio: 842 / 595; display: flex;
+    }
+    .share .half { width: 50%; position: relative; border-right: 1px dashed #c66; }
+    .share .half:last-child { border-right: none; }
+    .share .half .pg { position: absolute; inset: 0; width: 100%; height: 100%; box-shadow: none; }
+    @media print {
+      @page { size: A4 landscape; margin: 0; }
+      body { background: #fff; }
+      .no-print { display: none !important; }
+      #viewer { display: block; padding: 0; }
+      #flipNav { display: none !important; }
+      #book .pg { display: block !important; animation: none; }
+    }
+    @media print {
+      .share { width: 100%; margin: 0; box-shadow: none; page-break-after: always; }
+      .share .half { border-right: none; }
+    }
+    .badge-side { position: absolute; top: -22px; left: 4px; color: #9fb0d0; font-size: 11px; letter-spacing: .06em; }
+    /* ===== MÒD 3D (flipbook) ===== */
+    #stage3d { display: flex; justify-content: center; align-items: center;
+      min-height: 80vh; perspective: 2200px; padding: 30px 0 90px; }
+    #book3d { position: relative; width: 148mm; height: 210mm;
+      transform-style: preserve-3d; transform: rotateY(0deg); }
+    #book3d.open { transform: translateX(-74mm); }
+    .leaf { position: absolute; top: 0; left: 0; width: 148mm; height: 210mm;
+      transform-style: preserve-3d; transform-origin: left center;
+      transition: transform .8s cubic-bezier(.4,.1,.2,1); }
+    .leaf.flipped { transform: rotateY(-180deg); }
+    .leaf .face { position: absolute; inset: 0; backface-visibility: hidden;
+      background: #fff; overflow: hidden; }
+    .leaf .face .pg { box-shadow: none; width: 100%; height: 100%; }
+    .leaf .face.back { transform: rotateY(180deg); }
+    #book3d::after { /* gwo do lwiv la */
+      content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,.18) 48%, rgba(0,0,0,.5) 50%, rgba(0,0,0,0) 52%);
+      opacity: 0; pointer-events: none; backface-visibility: hidden;
+    }
+    .leaf3d-shadow { position: absolute; top: 0; left: 0; width: 148mm; height: 210mm;
+      box-shadow: -12px 8px 28px rgba(0,0,0,.5); }
+    /* ===== TAMPON VALIDASYON PEMAN ===== */
+    .stamp { position: absolute; top: 7mm; right: 7mm; transform: rotate(-11deg);
+      border: 2.2pt solid; border-radius: 4px; padding: 2pt 7pt; text-align: center;
+      pointer-events: none; z-index: 6; background: rgba(255,255,255,.85); line-height: 1.25; }
+    .stamp .st1 { display: block; font-weight: 800; font-size: 9.5pt; letter-spacing: .05em; }
+    .stamp .st2 { display: block; font-size: 5.4pt; letter-spacing: .02em; }
+    .stamp-valid { border-color: #198754; color: #198754; }
+    .stamp-invalid { border-color: #dc3545; color: #dc3545; transform: rotate(0deg); }
+    .cycle-badge { position: absolute; bottom: 11mm; right: 8mm; font-size: 6.2pt; font-weight: 700;
+      padding: 1.5pt 6pt; border-radius: 3px; border: .9pt solid; pointer-events: none; z-index: 5; }
+    .cycle-ok { color: #198754; border-color: #198754; background: rgba(25,135,84,.08); }
+    .cycle-no { color: #dc3545; border-color: #dc3545; background: rgba(220,53,69,.08); }
+  </style>
+  {% if show_graph and chart_data and mod == "lekti" %}
+  {{ chart_labels|json_script:"examen-labels" }}
+  {{ chart_data|json_script:"examen-data" }}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  {% endif %}
+</head>
+<body>
+
+{# ==================== BARÈ OUTIL NO-PRINT ==================== #}
+<div class="no-print d-flex justify-content-between align-items-center flex-wrap gap-2 p-3">
+  <div>
+    <h1 class="h6 mb-0 text-white"><i class="bi bi-journal-bookmark me-2"></i>{{ titre }}</h1>
+    <span class="small text-secondary">
+      {% if mod == 'livret' %}Mòd <span class="badge text-bg-warning">Livret</span> — 2 paj A5 sou chak A4 (retro-vèso, pare pou pli)
+      {% elif mod == '3d' %}Mòd <span class="badge text-bg-success">3D</span> — vire paj yo tankou yon vrè liv
+      {% else %}Mòd <span class="badge text-bg-info">Lekturing</span> — paj A5 nan lòd yo{% endif %}
+    </span>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    {% if mod != 'lekti' %}<a href="?mod=lekti" class="btn btn-sm btn-info"><i class="bi bi-book me-1"></i> Lekturing</a>{% endif %}
+    {% if mod != '3d' %}<a href="?mod=3d" class="btn btn-sm btn-success"><i class="bi bi-box me-1"></i> 3D</a>{% endif %}
+    {% if mod != 'livret' %}<a href="?mod=livret" class="btn btn-sm btn-warning"><i class="bi bi-layer-backward me-1"></i> Livret (pli A4)</a>{% endif %}
+    <a href="{% url 'grades:carnet_pdf' student.pk %}?mod={{ mod }}" class="btn btn-sm btn-danger"><i class="bi bi-filetype-pdf me-1"></i> Telechaje PDF</a>
+    <button onclick="window.print()" class="btn btn-sm btn-light"><i class="bi bi-printer me-1"></i> Enprime</button>
+    <a href="{% url 'grades:bulletin_student' student.pk %}" class="btn btn-sm btn-outline-light"><i class="bi bi-arrow-left me-1"></i> Retou</a>
+  </div>
+</div>
+{% if mod == 'livret' %}
+<div class="no-print d-flex justify-content-center">
+  <div class="alert alert-warning small py-2 px-3" style="max-width:760px">
+    <strong>Enpresyon livret:</strong> enprime <em>retro-vèso</em>, papi AkBay otomatik, <em>tounen kout</em> (flip on short edge).
+    Kite tout paj yo sou menm fèy (pa gen scale). Apre sa pli chak fèy an dwat → koudajye sou pli a.
+    Paj vid yo se nòmal: yo ranpli pou total la rive yon miltip de 4.
+  </div>
+</div>
+{% endif %}
+
+{% if not paid %}
+<div class="no-print d-flex justify-content-center">
+  <div class="alert alert-danger small py-2 px-3" style="max-width:760px">
+    <i class="bi bi-exclamation-octagon-fill me-1"></i>
+    <strong>Karnè sa PA valide.</strong> Elèv la poko peye tout fakti li — chak paj pote tampon an wouj «NON VALIDÉ».
+    Apre peman an fèt (espès, MonCash, chèk, vireman bank oswa koperativ kredi), karnè a valide otomatikman ak tampon vèt la.
+  </div>
+</div>
+{% endif %}
+{# ==================== MÒD LIVRET ==================== #}
+{% if mod == 'livret' %}
+<div class="container py-4">
+  {% for side in sides %}
+  <div class="share" id="fe{% if side.no %}{{ side.no }}{% endif %}">
+<span class="badge-side">FÈY {{ side.no }}/{{ sides|length }} — {% if side.recto %}DEVAN (retro){% else %}DÈYÈ (vèso){% endif %}</span>
+    <div class="half">{% if side.left %}{% include "grades/carnet_page.html" with page=side.left %}{% endif %}</div>
+    <div class="half">{% if side.right %}{% include "grades/carnet_page.html" with page=side.right %}{% endif %}</div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+
+{# ==================== MÒD 3D (flipbook) ==================== #}
+{% if mod == '3d' %}
+<div id="stage3d">
+  <div id="book3d">
+    {% for leaf in leafs %}
+    <div class="leaf" data-n="{{ forloop.counter0 }}" style="z-index:{{ leafs|length|add:'-1' }}">
+      <div class="leaf3d-shadow"></div>
+      <div class="face front">
+        <div class="pg"><div class="pg-frame"></div>{% include "grades/carnet_page.html" with page=leaf.front %}</div>
+      </div>
+      <div class="face back">
+        <div class="pg"><div class="pg-frame"></div>{% include "grades/carnet_page.html" with page=leaf.back %}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<div id="flipNav" class="no-print">
+  <button class="btn btn-sm btn-light" id="prevThree"><i class="bi bi-chevron-left"></i></button>
+  <span class="text-light" style="min-width:120px;text-align:center" id="pcount3d"></span>
+  <button class="btn btn-sm btn-light" id="nextThree"><i class="bi bi-chevron-right"></i></button>
+  <span class="vr mx-2"></span>
+  <span class="small text-secondary">Klike sou dwat liv la pou vire paj</span>
+</div>
+{% else %}
+
+{# ==================== MÒD LEKTI ==================== #}
+<div id="viewer">
+  <div id="book">
+    {% for page in pages %}
+    <div class="pg {% if forloop.first %}on{% endif %}" data-i="{{ forloop.counter0 }}">
+      <div class="pg-frame"></div>
+      {% include "grades/carnet_page.html" with page=page %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<div id="flipNav" class="no-print">
+  <button class="btn btn-sm btn-light" id="prevP"><i class="bi bi-chevron-left"></i></button>
+  <span class="text-light" style="min-width:110px;text-align:center" id="pcount">1 / {{ pages|length }}</span>
+  <button class="btn btn-sm btn-light" id="nextP"><i class="bi bi-chevron-right"></i></button>
+  <span class="vr mx-2"></span>
+  <span class="small text-secondary" id="dots"></span>
+</div>
+{% endif %}
+
+<script>
+  // ----- Mòd 3D: vire paj 3D -----
+  (function () {
+    var book = document.getElementById("book3d");
+    if (!book) return;                       // lòt mòd: pa fè anyen
+    var leafs = Array.prototype.slice.call(book.querySelectorAll(".leaf"));
+    var n = leafs.length;
+    var turned = 0;                          // kantite fèy ke pivote
+    var cnt = document.getElementById("pcount3d");
+    function restack() {
+      var i;
+      for (i = 0; i < n; i++) {
+        var z;
+        if (i < turned) z = i + 1;                 // fèy vire (bò gòch)
+        else z = 2 * n - i;                        // fèy ki rete (bò dwat)
+        leafs[i].style.zIndex = z;
+      }
+    }
+    function label() {
+      if (!cnt) return;
+      var pname = turned === 0 ? "Kouvèti" :
+        Math.min(turned, leafs.length - 1) * 2 + 1 + " / " + (leafs.length - 1) * 2;
+      cnt.textContent = "Fèy " + turned + " / " + (leafs.length - 1) + "  (" + pname + ")";
+    }
+    function fwd() {
+      if (turned >= leafs.length - 1) return;
+      var f = leafs[turned];
+      f.classList.add("flipped");
+      book.classList.add("open");
+      turned++;
+      restack(); label();
+    }
+    function back() {
+      if (turned <= 0) return;
+      turned--;
+      var f = leafs[turned];
+      f.classList.remove("flipped");
+      if (turned === 0) book.classList.remove("open");
+      restack(); label();
+    }
+    leafs.forEach(function (lf, i) {
+      lf.addEventListener("click", function () {
+        if (i === turned && lf.classList.contains("flipped") === false) fwd();
+        else if (i === turned - 1) back();
+      });
+    });
+    var pw = document.getElementById("prevThree");
+    var nx = document.getElementById("nextThree");
+    if (pw) pw.onclick = back;
+    if (nx) nx.onclick = fwd;
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight") fwd();
+      if (e.key === "ArrowLeft") back();
+    });
+    restack(); label();
+  })();
+</script>
+
+{% endif %}
+{# ==================== PAJ PA TI (paj NS4/9AF graf) ==================== #}
+{% if chart_data and show_graph and mod == 'livret' %}
+{{ chart_labels|json_script:"examen-labels" }}
+{{ chart_data|json_script:"examen-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endif %}
+
+<script>
+  // ----- Mòd lekti: toune paj -----
+  (function () {
+    var pgs = document.querySelectorAll("#book .pg");
+    if (!pgs.length) return;   // mòd livret: pa gen viewer
+    var dots = document.getElementById("dots");
+    var count = document.getElementById("pcount");
+    var cur = 0;
+    if (dots) {
+      for (var i = 0; i < pgs.length; i++) {
+        var s = document.createElement("span");
+        s.className = "pagedot" + (i === 0 ? " done" : "");
+        dots.appendChild(s);
+      }
+    }
+    function show(i) {
+      cur = Math.max(0, Math.min(pgs.length - 1, i));
+      pgs.forEach(function (p, k) { p.classList.toggle("on", k === cur); });
+      count.textContent = (cur + 1) + " / " + pgs.length;
+      if (dots) dots.querySelectorAll(".pagedot").forEach(function (d, k) { d.classList.toggle("done", k <= cur); });
+      document.getElementById("book").scrollIntoView();
+    }
+    document.getElementById("prevP").onclick = function () { show(cur - 1); };
+    document.getElementById("nextP").onclick = function () { show(cur + 1); };
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") show(cur - 1);
+      if (e.key === "ArrowRight") show(cur + 1);
+    });
+    show(0);
+  })();
+
+  // ----- Graf sikilè NS4/9e AF -----
+  (function () {
+    var canvas = document.getElementById("examenChart");
+    if (!canvas || typeof Chart === "undefined") return;
+    var labels = JSON.parse(document.getElementById("examen-labels").textContent);
+    var data = JSON.parse(document.getElementById("examen-data").textContent);
+    var COLORS = ["#0d6efd","#6610f2","#d63384","#198754","#fd7e14","#dc3545","#20c997","#6f42c1","#ffc107","#0dcaf0"];
+    new Chart(canvas, {
+      type: "doughnut",
+      data: { labels: labels, datasets: [{ data: data, backgroundColor: COLORS }] },
+      options: { responsive: true, plugins: {
+        legend: { position: "right", labels: { boxWidth: 10, font: { size: 9 } } },
+        title: { display: true, text: "Nòt egzamen ofisyèl pa matyè", font: { size: 11 } }
+      } }
+    });
+  })();
+</script>
+</body>
+</html>

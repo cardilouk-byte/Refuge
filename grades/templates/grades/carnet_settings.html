@@ -1,0 +1,112 @@
+{% extends "core/portal_base.html" %}
+{% block title %}{{ titre }} — LNFCL{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+  <h1 class="h3 mb-0"><i class="bi bi-journal-bookmark me-2"></i>{{ titre }}</h1>
+</div>
+<p class="text-muted">
+  Modifye tout tè kouvèti, règman entèn ak deviz karnè a <strong>anvan</strong> ou jenere yon karnè pou yon elèv.
+  Apre sa, louvri karnè yon elèv depi <a href="{% url 'grades:class_list' %}">Nòt &amp; Bulletins</a> epi klike « Karnè ».
+</p>
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors.0 }}</div>{% endif %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ form.school_name.label }}</label>
+              {{ form.school_name }}
+              {% if form.school_name.errors %}<div class="text-danger small">{{ form.school_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ form.slogan.label }}</label>
+              {{ form.slogan }}
+              {% if form.slogan.errors %}<div class="text-danger small">{{ form.slogan.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ form.subtitle.label }}</label>
+              {{ form.subtitle }}
+              <div class="form-text">Egzanp: Carnet Scolaire — 3e cycle fond. et secondaire</div>
+              {% if form.subtitle.errors %}<div class="text-danger small">{{ form.subtitle.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ form.footer_motto.label }}</label>
+              {{ form.footer_motto }}
+              {% if form.footer_motto.errors %}<div class="text-danger small">{{ form.footer_motto.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ form.address.label }}</label>
+              {{ form.address }}
+              {% if form.address.errors %}<div class="text-danger small">{{ form.address.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small mb-1">{{ form.tel1.label }}</label>
+              {{ form.tel1 }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small mb-1">{{ form.tel2.label }}</label>
+              {{ form.tel2 }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ form.email.label }}</label>
+              {{ form.email }}
+            </div>
+            <div class="col-12">
+              <label class="form-label small mb-1">{{ form.reglements_text.label }}</label>
+              {{ form.reglements_text }}
+              <div class="form-text">Yon liy pa règ (rele nimewo yo anvan chak règ). Lè sa a, li pral parèt sou 2ᵉ paj kouvèti a.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small mb-1">{{ form.directeur.label }}</label>
+              {{ form.directeur }}
+              {% if form.directeur.help_text %}<div class="form-text">{{ form.directeur.help_text }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label small mb-1 fw-semibold"><i class="bi bi-palette me-1"></i>Koulè karnè a</label>
+              <div class="d-flex gap-3 flex-wrap">
+                <div><label class="form-label small mb-1">{{ form.cover_bg.label }}</label><br>{{ form.cover_bg }}</div>
+                <div><label class="form-label small mb-1">{{ form.cover_text.label }}</label><br>{{ form.cover_text }}</div>
+                <div><label class="form-label small mb-1">{{ form.header_color.label }}</label><br>{{ form.header_color }}</div>
+                <div><label class="form-label small mb-1">{{ form.border_color.label }}</label><br>{{ form.border_color }}</div>
+              </div>
+              <div class="form-text">Koulè fon + tèks kouvèti a, koulè bando/tab paj enteryè yo, ak kadajyè paj yo.</div>
+            </div>
+            <div class="col-12">
+              <div class="form-check form-switch">
+                {{ form.show_graph }}
+                <label class="form-check-label small" for="{{ form.show_graph.id_for_label }}">{{ form.show_graph.label }}</label>
+              </div>
+              <div class="form-check form-switch">
+                {{ form.show_photo }}
+                <label class="form-check-label small" for="{{ form.show_photo.id_for_label }}">{{ form.show_photo.label }}</label>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary mt-3"><i class="bi bi-save me-1"></i> Sove modèl la</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header fw-bold"><i class="bi bi-eye me-1"></i>Apèsi kouvèti</div>
+      <div class="card-body text-center" style="background:{{ form.cover_bg.value|default:"#166534" }};color:{{ form.cover_text.value|default:"#fff" }}">
+        {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" style="height:52px" class="mb-2">{% endif %}
+        <div class="fw-bold">{{ form.school_name.value }}</div>
+        <div class="text-uppercase small" style="opacity:.85">{{ form.slogan.value }}</div>
+        <div class="small" style="opacity:.85">{{ form.address.value }}{% if form.tel1.value %} — {{ form.tel1.value }}{% endif %}{% if form.tel2.value %} / {{ form.tel2.value }}{% endif %}</div>
+        <hr>
+        <div class="fs-5 fw-bold">{{ form.subtitle.value }}</div>
+        <div class="small mt-2">Nom : ..................................</div>
+        <div class="small">Prénom : ..................................</div>
+        <div class="small">Classe : ..................................</div>
+        <hr>
+        <div class="small fst-italic">{{ form.footer_motto.value }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "core/portal_base.html" %}
+{% block title %}{{ titre }}{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">{{ titre }}</h1>
+<form method="post" class="card shadow-sm p-4" style="max-width: 720px;">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+  {% for field in form %}
+  <div class="mb-3">
+    <label class="form-label">{{ field.label }}</label>
+    {{ field }}
+    {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+  </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary">Sove</button>
+  <a href="{% url 'library:list' %}" class="btn btn-outline-secondary">Anile</a>
+</form>
+{% endblock %}

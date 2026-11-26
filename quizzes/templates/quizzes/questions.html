@@ -1,0 +1,75 @@
+{% extends "core/portal_base.html" %}
+{% block title %}Kesyon — {{ quiz.title }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-1">
+  <h1 class="h3 mb-0"><i class="bi bi-list-ol"></i> Kesyon — {{ quiz.title }}</h1>
+  <form method="post" action="{% url 'quizzes:publish' quiz.pk %}" class="m-0">
+    {% csrf_token %}
+    <button class="btn {% if quiz.is_published %}btn-outline-warning{% else %}btn-success{% endif %}">
+      <i class="bi {% if quiz.is_published %}bi-cloud-slash{% else %}bi-send{% endif %}"></i>
+      {% if quiz.is_published %}Depibliye{% else %}Pibliye (voye bay elèv yo){% endif %}
+    </button>
+  </form>
+</div>
+<p class="text-muted small">{{ quiz.classroom }} · {{ questions|length }} kesyon · total {{ quiz.total_points }} pwen
+  · <a href="{% url 'quizzes:results' quiz.pk %}">Rezilta</a> · <a href="{% url 'quizzes:list' %}">Quiz yo</a></p>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card shadow-sm p-4">
+      <h2 class="h6 mb-3">Ajoute yon kesyon</h2>
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-2">
+          <label class="form-label small fw-semibold mb-1">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+        {% endfor %}
+        <div class="row g-2">
+          <div class="col-6"><label class="form-label small mb-1">Bon repons</label>
+            <select class="form-select form-select-sm" name="correct">
+              <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm mt-3"><i class="bi bi-plus-lg"></i> Ajoute kesyon</button>
+      </form>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    {% if questions %}
+    <div class="card shadow-sm">
+      <ul class="list-group list-group-flush">
+        {% for q in questions %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <div>
+              <strong>{{ forloop.counter }}.</strong> {{ q.text }}
+              <div class="small text-muted">
+                A) {{ q.option_a }} · B) {{ q.option_b }}
+                {% if q.option_c %} · C) {{ q.option_c }}{% endif %}
+                {% if q.option_d %} · D) {{ q.option_d }}{% endif %}
+                — <span class="text-success fw-semibold">Bon: {{ q.correct }}</span> ({{ q.points }} pwen)
+              </div>
+            </div>
+            <form method="post" action="{% url 'quizzes:question_delete' quiz.pk q.pk %}" class="m-0">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-outline-danger" title="Efase kesyon"><i class="bi bi-trash"></i></button>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% else %}
+    <div class="card shadow-sm"><div class="card-body text-center text-muted py-5">
+      <i class="bi bi-inbox display-5 d-block mb-2"></i>
+      Pa gen kesyen — ajoute youn sou bò goch, apre sa pibliye quiz la.
+    </div></div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

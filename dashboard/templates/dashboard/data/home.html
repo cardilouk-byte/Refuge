@@ -1,0 +1,28 @@
+{% extends "core/portal_base.html" %}
+{% block title %}{{ titre }} — LNFCL{% endblock %}
+{% block content %}
+<style>
+  .data-step .ic { width:46px;height:46px;border-radius:14px;background:color-mix(in srgb, var(--primary) 10%, #fff);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.3rem; }
+</style>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+  <h1 class="h3 mb-0"><i class="bi bi-database me-2"></i>{{ titre }}</h1>
+</div>
+<p class="text-muted mb-4">Tout done lekòl la — ou ka rantre, modifye oswa efase yo isit la, san Django admin.</p>
+<div class="row g-3">
+  {% for c in cards %}
+  <div class="col-6 col-lg-3" data-aos="fade-up">
+    <a href="{% url 'dashboard:data_list' c.key %}" class="text-decoration-none">
+      <div class="card h-100 stat-card">
+        <div class="card-body d-flex align-items-center gap-3">
+          <span class="ic"><i class="bi {{ c.icon }}"></i></span>
+          <div>
+            <div class="fs-4 fw-bold">{{ c.count }}</div>
+            <div class="text-muted">{{ c.titre }}</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

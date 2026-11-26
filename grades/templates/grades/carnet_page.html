@@ -1,0 +1,272 @@
+{# ====== YON PAJ A5 KARNÈ — variab: page, student, classroom, carnet, table, per_period, annual_*, officials, chart_*, site_settings ====== #}
+{% if page.kind == "cover" %}
+  <div class="cvwrap">
+
+  {% if paid %}
+    <div class="stamp stamp-valid"><span class="st1">VALIDÉ — DIRECTION</span><span class="st2">Tout frès yo peye — tousyik yo valide</span></div>
+  {% else %}
+    <div class="stamp stamp-invalid"><span class="st1">NON VALIDÉ</span><span class="st2">Peman poko fèt — karnè paka valide</span></div>
+  {% endif %}
+  <div class="text-center mt-2">
+    {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" style="height:64px" class="mb-1">{% endif %}
+    <div class="fw-bold" style="font-size:11.5pt">{{ carnet.school_name }}</div>
+    <div class="text-uppercase text-muted" style="font-size:7pt;letter-spacing:.1em">{{ carnet.slogan }}</div>
+    <div class="text-muted" style="font-size:6.2pt">
+      {{ carnet.address }}{% if carnet.tel1 %} — Téls: {{ carnet.tel1 }}{% if carnet.tel2 %} / {{ carnet.tel2 }}{% endif %}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}
+    </div>
+    <hr class="mx-5">
+    <div class="fw-bold mt-3" style="font-size:14pt;letter-spacing:.03em">{{ carnet.subtitle|upper }}</div>
+    {% if classroom %}<div class="text-muted" style="font-size:7pt">{{ classroom.level.cycle.name }}</div>{% endif %}
+  </div>
+  <div class="mt-4 px-4">
+    {% if carnet.show_photo and student.photo %}
+      <div class="text-end mb-2"><img src="{{ student.photo.url }}" style="width:22mm;height:27mm;object-fit:cover;border:.6pt solid #333"></div>
+    {% endif %}
+    <div class="mb-2"><span class="fw-semibold">Nom&nbsp;:</span> <span class="dotted">{{ student.last_name }}</span></div>
+    <div class="mb-2"><span class="fw-semibold">Prénom&nbsp;:</span> <span class="dotted">{{ student.first_name }}</span></div>
+    <div class="mb-2"><span class="fw-semibold">Classe&nbsp;:</span> <span class="dotted">{{ classroom.name|default:"" }}</span></div>
+    {% if is_official %}<div class="mb-2"><span class="fw-semibold">Filière&nbsp;:</span> <span class="dotted">{% if classroom %}{{ classroom.level.cycle.name }}{% endif %}</span></div>{% endif %}
+    <div class="mb-2"><span class="fw-semibold">Code (étudiant)&nbsp;:</span> <span class="dotted">{{ student.matricule }}</span></div>
+    <div class="mb-2"><span class="fw-semibold">Année Académique&nbsp;:</span> <span class="dotted">{% if classroom %}{{ classroom.school_year.label }}{% endif %}</span></div>
+  </div>
+  <div class="pg-footer">{{ carnet.footer_motto }}</div>
+  </div>
+{% elif page.kind == "reglement" %}
+  <div class="pg-head">
+    <div class="sname">{{ carnet.school_name }}</div>
+    <div class="smeta">{{ carnet.address }}{% if carnet.tel1 %} — {{ carnet.tel1 }}{% endif %}{% if carnet.tel2 %} / {{ carnet.tel2 }}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>
+  </div>
+  <div class="text-center mt-2" style="font-size:9.5pt;letter-spacing:.12em">EXTRAITS DES RÈGLEMENTS INTERNES</div>
+  <hr class="mx-4">
+  <div class="mt-2" style="font-size:8pt;line-height:1.85">
+    {{ carnet.reglements_text|linebreaksbr }}
+  </div>
+  <div class="mt-3 text-muted" style="font-size:6.8pt">— Elèv la ak paran responsab la siyen pou yo rekonèt epi respakte règ sa yo —</div>
+  <div class="mt-4 d-flex justify-content-around" style="font-size:7pt">
+    <div>Le Directeur : .......................</div>
+    <div>Le Parent : .......................</div>
+  </div>
+  <div class="pg-footer">{{ carnet.footer_motto }}</div>
+
+{% elif page.kind == "identification" %}
+  {% if paid %}
+    <div class="stamp stamp-valid"><span class="st1">VALIDÉ — DIRECTION</span><span class="st2">Tout frès yo peye — tousyik yo valide</span></div>
+  {% else %}
+    <div class="stamp stamp-invalid"><span class="st1">NON VALIDÉ</span><span class="st2">Peman poko fèt — karnè paka valide</span></div>
+  {% endif %}
+  <div class="pg-head">
+    <div class="sname">{{ carnet.school_name }}</div>
+    <div class="smeta">{{ carnet.address }}{% if carnet.tel1 %} — {{ carnet.tel1 }}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>
+  </div>
+  <div class="text-center mt-1" style="font-size:10pt;letter-spacing:.08em">{{ carnet.subtitle|upper }}</div>
+  <div class="text-center text-muted" style="font-size:6.8pt">{% if classroom %}{{ classroom.school_year.label }}{% endif %}</div>
+  <div class="border mt-3 p-3" style="border-color:#333 !important;min-height:120mm">
+    <div class="d-flex justify-content-between">
+      <div class="flex-grow-1">
+        {% for label, value in id_rows %}
+        <div class="mb-2" style="font-size:8pt"><span class="fw-semibold">{{ label }}&nbsp;:</span>
+          <span style="display:inline-block;border-bottom:.5pt dotted #333;min-width:120px;padding-left:4px">{{ value }}</span></div>
+        {% endfor %}
+      </div>
+      {% if carnet.show_photo and student.photo %}
+        <img src="{{ student.photo.url }}" style="width:21mm;height:26mm;object-fit:cover;border:.6pt solid #333">
+      {% endif %}
+    </div>
+  </div>
+  <div class="mt-2 text-muted text-center" style="font-size:6.4pt">Paj sa a se konfirmasyon enskripsyon an — priye pa dechire l.</div>
+  <div class="d-flex justify-content-around mt-4" style="font-size:7pt">
+    <div>Le Directeur : .......................</div>
+    <div style="border:1px solid #333;border-radius:50%;width:20mm;height:20mm;display:flex;align-items:center;justify-content:center;color:#677;font-size:5.4pt;text-align:center">Cachet de<br>l'établissement</div>
+  </div>
+  <div class="pg-footer">{{ carnet.footer_motto }}</div>
+
+{% elif page.kind == "notes" %}
+  {% if paid %}
+    <div class="stamp stamp-valid"><span class="st1">VALIDÉ — DIRECTION</span><span class="st2">Tout frès yo peye — tousyik yo valide</span></div>
+  {% else %}
+    <div class="stamp stamp-invalid"><span class="st1">NON VALIDÉ</span><span class="st2">Peman poko fèt — karnè paka valide</span></div>
+  {% endif %}
+  <div class="pg-head">
+    <div class="sname">{{ carnet.school_name }}</div>
+    <div class="smeta">{{ carnet.address }}{% if carnet.tel1 %} — {{ carnet.tel1 }}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>
+  </div>
+  <div class="d-flex justify-content-between align-items-end mt-1">
+    <div style="font-size:8pt"><strong>{{ student.last_name }} {{ student.first_name }}</strong> ({{ student.matricule }})</div>
+    <div class="text-end" style="font-size:7pt">{% if classroom %}{{ classroom.name }} — {{ classroom.school_year.label }}{% endif %}</div>
+  </div>
+  <table class="ctab mt-2">
+    <thead>
+      <tr>
+        <th style="width:26%">MATIÈRES</th>
+        <th class="num" style="width:7%">COEF</th>
+        {% for pp in per_period %}<th class="num">{{ pp.label }}</th>{% endfor %}
+        <th class="num" style="width:11%">Notes Globales</th>
+        <th style="width:16%">Professeurs</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in page.chunk %}
+      <tr>
+        <td>{{ row.subject_name }}</td>
+        <td class="num">{{ row.coef }}</td>
+        {% for a in row.avgs %}<td class="num">{% if a is not None %}{{ a|floatformat:2 }}{% else %}—{% endif %}</td>{% endfor %}
+        <td class="num">{% if row.moy is not None %}<strong>{{ row.moy|floatformat:2 }}</strong>{% else %}—{% endif %}</td>
+        <td style="font-size:6pt">{{ row.teacher }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" class="text-center text-muted">Pa gen matyè ki anrejistre pou klas sa a.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if page.with_totals %}
+  <table class="ctab mt-2">
+    <tbody>
+      <tr class="tot">
+        <td style="width:26%">Total des coefficients</td>
+        <td class="num">{{ table.total_coef }}</td>
+        <td style="width:26%">Total des points</td>
+        <td class="num">{% if table.total_points is not None %}{{ table.total_points|floatformat:2 }}{% else %}—{% endif %}</td>
+      </tr>
+      <tr class="tot">
+        <td>Moyenne de l'élève</td>
+        <td class="num">{% if annual_moy is not None %}{{ annual_moy|floatformat:2 }} /20{% else %}—{% endif %}</td>
+        <td>Moyenne de la classe</td>
+        <td class="num">{% if table.classe_annual is not None %}{{ table.classe_annual|floatformat:2 }} /20{% else %}—{% endif %}</td>
+      </tr>
+      <tr class="tot">
+        <td>Rang / Place</td>
+        <td class="num">{% if annual_rank %}{{ annual_rank }}{% if annual_rank == 1 %}<sup>ère</sup>{% else %}<sup>e</sup>{% endif %} sur {{ annual_out_of }}{% else %}—{% endif %}</td>
+        <td>Mention</td>
+        <td class="num">{{ annual_mention }}</td>
+      </tr>
+      <tr class="tot">
+        <td colspan="2">Décision de fin d'année</td>
+        <td colspan="2" class="num"><strong>{{ annual_decision }}</strong></td>
+      </tr>
+    </tbody>
+  </table>
+  {% elif page.nparts > 1 %}
+  <div class="text-end text-muted mt-1" style="font-size:6pt">(tabela — {{ page.part }}/{{ page.nparts }})</div>
+  {% endif %}
+  <div class="d-flex justify-content-around mt-3" style="font-size:7pt">
+    <div>Le Titulaire : .......................</div>
+    <div>Le Directeur : .......................</div>
+  </div>
+  {% if paid %}
+    <div class="cycle-badge cycle-ok">SYIK VALIDE ✓</div>
+  {% else %}
+    <div class="cycle-badge cycle-no">SYIK PAKA VALIDE ✗</div>
+  {% endif %}
+  <div class="pg-footer">{{ carnet.footer_motto }}</div>
+
+{% elif page.kind == "results" %}
+  {% if paid %}
+    <div class="stamp stamp-valid"><span class="st1">VALIDÉ — DIRECTION</span><span class="st2">Tout frès yo peye — tousyik yo valide</span></div>
+  {% else %}
+    <div class="stamp stamp-invalid"><span class="st1">NON VALIDÉ</span><span class="st2">Peman poko fèt — karnè paka valide</span></div>
+  {% endif %}
+  <div class="pg-head">
+    <div class="sname">{{ carnet.school_name }}</div>
+    <div class="smeta">{{ carnet.address }}{% if carnet.tel1 %} — {{ carnet.tel1 }}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>
+  </div>
+  <div class="text-center mt-2" style="font-size:9.5pt;letter-spacing:.1em">RÉSULTATS ET DÉCISIONS</div>
+  <hr class="mx-4">
+  <div class="mt-2" style="font-size:8pt"><strong>{{ student.last_name }} {{ student.first_name }}</strong> ({{ student.matricule }})</div>
+  <table class="ctab mt-2">
+    <tbody>
+      <tr><td style="width:40%">Moyenne annuelle de l'élève</td><td class="num"><strong>{% if annual_moy is not None %}{{ annual_moy|floatformat:2 }} /20{% else %}—{% endif %}</strong></td></tr>
+      <tr><td>Moyenne annuelle de la classe</td><td class="num">{% if table.classe_annual is not None %}{{ table.classe_annual|floatformat:2 }} /20{% else %}—{% endif %}</td></tr>
+      <tr><td>Rang sur {{ annual_out_of }} élève(s)</td><td class="num">{% if annual_rank %}{{ annual_rank }}{% if annual_rank == 1 %}<sup>ère</sup>{% else %}<sup>e</sup>{% endif %}{% else %}—{% endif %}</td></tr>
+      <tr><td>Mention</td><td class="num">{{ annual_mention }}</td></tr>
+      <tr><td>Décision de fin d'année</td><td class="num fw-bold">{{ annual_decision }}</td></tr>
+    </tbody>
+  </table>
+  <table class="ctab mt-3">
+    <thead><tr><th>Période</th><th class="num">Moyenne /20</th><th class="num">Moy. classe</th><th class="num">Place</th><th>Décision</th></tr></thead>
+    <tbody>
+      {% for pp in per_period %}
+      <tr>
+        <td>{{ pp.cycle_label }}</td>
+        <td class="num">{% if pp.moy is not None %}{{ pp.moy|floatformat:2 }}{% else %}—{% endif %}</td>
+        <td class="num">{% if pp.class_moy is not None %}{{ pp.class_moy|floatformat:2 }}{% else %}—{% endif %}</td>
+        <td class="num">{% if pp.rank %}{{ pp.rank }}/{{ pp.out_of }}{% else %}—{% endif %}</td>
+        <td>{{ pp.decision }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="d-flex justify-content-around mt-5" style="font-size:7pt">
+    <div>Le Directeur : .......................</div>
+    <div>Le Parent : .......................</div>
+  </div>
+  <div class="pg-footer">{{ carnet.footer_motto }}</div>
+
+{% elif page.kind == "officiel" %}
+  <div class="pg-head">
+    <div class="sname">{{ carnet.school_name }}</div>
+    <div class="smeta">{{ carnet.address }}{% if carnet.tel1 %} — {{ carnet.tel1 }}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>
+  </div>
+  <div class="text-center mt-2" style="font-size:9.5pt;letter-spacing:.1em">EXAMEN OFFICIELS</div>
+  <hr class="mx-4">
+  <div class="mt-2" style="font-size:8pt"><strong>{{ student.last_name }} {{ student.first_name }}</strong> ({{ student.matricule }}) — {% if classroom %}Filière: {{ classroom.level.cycle.name }}{% endif %}</div>
+  <table class="ctab mt-2">
+    <thead><tr><th style="width:34%">MATIÈRES</th><th style="width:38%">PROFESSEUR</th><th class="num" style="width:28%">NOTE /20</th></tr></thead>
+    <tbody>
+      {% for o in officials %}
+      <tr>
+        <td>{{ o.subject_name }}</td>
+        <td style="font-size:6.5pt">{{ o.teacher }}</td>
+        <td class="num">{% if o.score is not None %}<strong>{{ o.score }}</strong>{% else %}—{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3" class="text-center text-muted">Pa gen nòt egzamen ki anrejistre.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if show_graph and chart_data %}
+  <div class="mt-3 text-center" style="font-size:7.5pt;letter-spacing:.08em">REPRÉSENTATION GRAPHIQUE DES NOTES D'EXAMEN</div>
+  <div style="max-width:64mm;margin:0 auto"><canvas id="examenChart"></canvas></div>
+  {% endif %}
+  <table class="ctab mt-3">
+    <tbody>
+      <tr class="tot"><td>Décision de fin d'année</td><td class="num fw-bold">{{ annual_decision }}</td></tr>
+    </tbody>
+  </table>
+  <div class="d-flex justify-content-around mt-4" style="font-size:7pt">
+    <div>Le Secrétaire d'examen : .......................</div>
+    <div>Le Directeur : .......................</div>
+  </div>
+  <div class="pg-footer">{{ carnet.footer_motto }}</div>
+
+{% elif page.kind == "observations" %}
+  <div class="pg-head">
+    <div class="sname">{{ carnet.school_name }}</div>
+    <div class="smeta">{{ carnet.address }}{% if carnet.tel1 %} — {{ carnet.tel1 }}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>
+  </div>
+  <div class="text-center mt-2" style="font-size:9.5pt;letter-spacing:.1em">OBSERVATIONS — CONDUITE — CORRESPONDANCE</div>
+  <hr class="mx-4">
+  <div class="mt-3">
+    {% for i in "xxxxxxxxxxxxxxxxxxxx" %}
+    <div style="border-bottom:.4pt dotted #556;height:22px"></div>
+    {% endfor %}
+  </div>
+  <div class="d-flex justify-content-around mt-4" style="font-size:7pt">
+    <div>Visa des parents : .......................</div>
+    <div>Le Titulaire : .......................</div>
+  </div>
+  <div class="pg-footer">{{ carnet.footer_motto }}</div>
+
+{% elif page.kind == "back" %}
+  <div class="text-center" style="padding-top:45mm">
+    {% if site_settings.logo %}<img src="{{ site_settings.logo.url }}" style="height:56px" class="mb-2">{% endif %}
+    <div class="fw-bold" style="font-size:10.5pt">{{ carnet.school_name }}</div>
+    <div class="text-muted" style="font-size:6.6pt">{{ carnet.address }}{% if carnet.tel1 %} — {{ carnet.tel1 }}{% endif %}{% if carnet.email %} — {{ carnet.email }}{% endif %}</div>
+    <hr class="mx-5">
+    <div class="mt-3" style="font-size:7.2pt">Année Académique {% if classroom %}{{ classroom.school_year.label }}{% endif %}</div>
+    <div class="mt-4 fst-italic" style="font-size:7.4pt">Gardez ce carnet avec soin pendant toute l'année.</div>
+  </div>
+  <div class="pg-footer">{{ carnet.footer_motto }}</div>
+
+{% else %}
+  {# paj vid — pou miltip de 4 #}
+{% endif %}

@@ -1,0 +1,75 @@
+{% extends "core/portal_base.html" %}
+
+{% block title %}Excel Center — LNFCL{% endblock %}
+
+{% block content %}
+<h1 class="page-title mb-4"><i class="bi bi-file-earmark-excel me-2"></i>Excel Center</h1>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-people me-2"></i>Élèves</h5>
+      <div class="d-flex gap-2 flex-wrap mb-3">
+        <a href="{% url 'excel_manager:template_students' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-download me-1"></i>Modèle XLSX</a>
+        <a href="{% url 'excel_manager:export_students' %}" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel me-1"></i>Exporter tous les élèves</a>
+      </div>
+      <form method="post" action="{% url 'excel_manager:import_students' %}" enctype="multipart/form-data" class="border-top pt-3">
+        {% csrf_token %}
+        <label class="form-label fw-semibold">Importer des élèves (XLSX)</label>
+        <div class="input-group">
+          <input type="file" name="file" class="form-control" accept=".xlsx" required>
+          <button class="btn btn-primary">Importer</button>
+        </div>
+        <small class="text-muted">Colonnes : Matricule, Prénom, Nom, Sexe, Date naissance, NIS, NINU, Adresse, Classe. Téléchargez le modèle pour respecter le format.</small>
+      </form>
+    </div></div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card h-100"><div class="card-body">
+      <h5 class="card-title"><i class="bi bi-journal-check me-2"></i>Notes d'une classe</h5>
+      <form method="post" action="{% url 'excel_manager:import_grades' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <select name="classe" class="form-select" required>
+              <option value="">— Classe —</option>
+              {% for classroom in classrooms %}
+              <option value="{{ classroom.pk }}">{{ classroom.name }} ({{ classroom.school_year.label }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-6">
+            <select name="periode" class="form-select" required>
+              <option value="">— Période —</option>
+              {% for period in periods %}
+              <option value="{{ period.pk }}">{{ period.name }} ({{ period.school_year.label }})</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap mb-3">
+          <button type="submit" formaction="{% url 'excel_manager:template_grades' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-download me-1"></i>Modèle XLSX</button>
+          <a href="#" class="btn btn-success btn-sm" id="btnExportNotes"><i class="bi bi-file-earmark-excel me-1"></i>Exporter notes + moyennes</a>
+        </div>
+        <div class="input-group">
+          <input type="file" name="file" class="form-control" accept=".xlsx" required>
+          <button class="btn btn-primary">Importer les notes</button>
+        </div>
+        <small class="text-muted">Colonne 1 = matricule, colonne 2 = nom, colonnes suivantes = notes /20 par matière (en-têtes = noms des matières).</small>
+      </form>
+    </div></div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('btnExportNotes')?.addEventListener('click', function (e) {
+    e.preventDefault();
+    const form = this.closest('form');
+    const classe = form.querySelector('[name=classe]').value;
+    const periode = form.querySelector('[name=periode]').value;
+    if (!classe || !periode) { alert('Choisissez une classe et une période.'); return; }
+    window.location.href = "{% url 'excel_manager:export_grades' %}?classe=" + classe + "&periode=" + periode;
+  });
+</script>
+{% endblock %}
